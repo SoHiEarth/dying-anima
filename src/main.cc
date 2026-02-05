@@ -149,14 +149,14 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(shader_program);
     glGetUniformLocation(shader_program, "mvp");
-    glUniformMatrix4fv(glGetUniformLocation(shader_program, "mvp"), 1, GL_FALSE, glm::value_ptr(mvp));
+    glUniformMatrix4fv(glGetUniformLocation(shader_program, "mvp"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, banner_texture);
     glBindVertexArray(vertex_attrib);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glfwSwapBuffers(window);
     glfwPollEvents();
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
   }
 
   std::print("Entering main loop\n");

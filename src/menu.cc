@@ -113,15 +113,11 @@ GameState Menu(GameState& state, GLFWwindow* window) {
       glfwGetFramebufferSize(window, &width, &height);
       glfwPollEvents();
     }
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-    glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 mvp = projection * view * model;
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(shader_program);
     glGetUniformLocation(shader_program, "mvp");
-    glUniformMatrix4fv(glGetUniformLocation(shader_program, "mvp"), 1, GL_FALSE, glm::value_ptr(mvp));
+    glUniformMatrix4fv(glGetUniformLocation(shader_program, "mvp"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, banner_texture);
     glBindVertexArray(vertex_attrib);
