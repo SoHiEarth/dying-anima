@@ -1,0 +1,27 @@
+# Mer, the Sunken Triumph
+The name itself has degraded - scholars debate whether it was once "Mera," "Merul," or "Memoria." The citizens who remember the original name have died so many times the memory blurs with contradictory certainties. Now it's just Mer. Short, blunt, like something worn smooth.
+# Visual Degradation System
+Your first life in Mer is crystal clear. The bioluminescent fungi glow in distinct blues and greens. You can read the inscriptions on walls. NPC faces have definition - you can see the weariness in their eyes, the minute expressions that make them human.
+Each death layers fog over your perception:
+- Deaths 1-5: Colors begin to desaturate slightly. Sharp edges soften. You start noticing visual artifacts at the periphery - ghostly afterimages of your previous deaths, faint silhouettes where you once stood.
+- Deaths 6-15: Text becomes harder to read, letters swimming slightly. NPC dialogue options shorten because you can't quite remember complex conversation threads. The architecture of Mer starts feeling repetitive - did that archway always look like the other one, or are you losing the ability to distinguish?
+- Deaths 16-30: Significant color loss. The world takes on a grey-blue wash, like viewing everything through murky water. Character models blur at the edges. You sometimes forget which direction you were heading. Environmental storytelling becomes harder to parse because the details fade.
+- Deaths 31-50: Heavy vignetting. The edges of your screen darken constantly. Colors are almost entirely gone except for the sickly glow of anima - it's the only thing that stays vibrant, which becomes its own horror. You're forgetting NPC names. The subtitles show "[Forgotten Merchant]" or "[Someone You Knew]."
+- Deaths 51+: Extreme blur except for a small circle of clarity in the center of your vision. Sounds muffle and echo. Music layers become stripped away until only a single mournful melody remains. You occasionally respawn at the wrong anchor because you can't remember where you last died. Boss encounters you've completed before feel unfamiliar - did you fight this thing already?
+- Deaths 100+: The game becomes almost abstract. Mer is now just shapes and light and darkness. NPCs are silhouettes. Dialogue is fragmented. The only thing that remains perfectly clear is the combat - muscle memory, the last thing to fade. You are becoming like the Quiet Ones, going through motions you no longer understand.
+# Memory Mechanics
+The game could track specific memories tied to each area or NPC:
+
+The first time you meet someone, you get their full backstory
+The second encounter after several deaths, you remember them but not their name
+Later, you recognize them only as "familiar"
+Eventually, they're just another shape in Mer
+
+Your quest log degrades too. Early game: "The Hollow Sage requested I find three fragments of the original Binding ritual in the Archive of Echoes." After many deaths: "Find... something. Archive?" Late game: "???"
+But here's the cruel twist - the game itself remembers. If you check your actual stats screen (maybe accessed through a specific mirror item that shows truth), you can see pristine records of everything you've done, everyone you've met, every place you've been. The knowledge exists, but you can't access it anymore. It's locked behind the fog of your degraded anima.
+# Mer's Geography
+Upper Mer - "The Living Districts" - Where those with fewer deaths still maintain something like society. Markets with no customers. Performance halls where actors perform to empty seats because they've forgotten audiences were once necessary. Least degraded, still has color and life, but hollow.
+The Spirals - Massive helical staircases descending through Mer's levels. As you go deeper, you're traveling both physically downward and backward through time - the architecture grows more ancient, more grand, showing Mer at its height. But also more decayed, because the oldest districts have been abandoned the longest.
+The Wellspring Depths - Where the light comes from. But the light is wrong now, pulsing irregularly, sometimes surging bright enough to hurt, sometimes dimming to almost nothing. The closer you get, the more the blur effect actually lessens - being near pure anima temporarily sharpens your perception. This makes it both sanctuary and trap.
+The Outskirts of Forgetting - The edges of Mer where the anchors no longer function properly. If you die here, you might not come back at all, or come back wrong. The most degraded Profundi drift here, hoping for true death. It's the only place in the game where the permadeath might actually be permanent - but you can never be certain.
+The name "Mer" also evokes "mere" - as in "merely," reduced to something less. And "mer" - the sea, drowning, submersion. All fitting for a sunken city where its people drown in immortality.
