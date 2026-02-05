@@ -1,44 +1,16 @@
 #include <glad/glad.h>
+#include "menu.h"
 #include <GLFW/glfw3.h>
-#include <fstream>
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 #include <print>
+#include <fstream>
+#include <stb_image.h>
+#include <thread>
+#include <chrono>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <thread>
-#include <chrono>
-#include "state.h"
-#include "menu.h"
 
-void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
-  assert(width > 0 && height > 0);
-  glViewport(0, 0, width, height);
-}
-
-int main() {
-  GameState game_state = GameState::MENU;
-  if (!glfwInit()) {
-    std::print("Failed to initialize GLFW\n");
-    return -1;
-  }
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  GLFWwindow* window = glfwCreateWindow(800, 600, "Dying Anima", nullptr, nullptr);
-  if (!window) {
-    glfwTerminate();
-    return -1;
-  }
-  glfwMakeContextCurrent(window);
-  gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-  int width, height;
-  glfwGetFramebufferSize(window, &width, &height);
-  assert(width > 0 && height > 0);
-  glViewport(0, 0, width, height);
-  glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
-
+GameState Menu(GameState& state, GLFWwindow* window) {
   unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
   std::ifstream file("assets/shaders/simple.vert.glsl");
   std::string vertex_shader_source((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -51,7 +23,7 @@ int main() {
   if (!success) {
     glGetShaderInfoLog(vertex_shader, 512, nullptr, infoLog);
     std::print("Vertex Shader Compilation Error: {}", infoLog);
-    return -1;
+    return GameState::MENU;
   }
   unsigned int fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
   file = std::ifstream("assets/shaders/simple.frag.glsl");
@@ -63,7 +35,7 @@ int main() {
   if (!success) {
     glGetShaderInfoLog(fragment_shader, 512, nullptr, infoLog);
     std::print("Fragment Shader Compilation Error: {}", infoLog);
-    return -1;
+    return GameState::MENU;
   }
   unsigned int shader_program = glCreateProgram();
   glAttachShader(shader_program, vertex_shader);
@@ -73,7 +45,7 @@ int main() {
   if (!success) {
     glGetProgramInfoLog(shader_program, 512, nullptr, infoLog);
     std::print("Shader Program Linking Error: {}", infoLog);
-    return -1;
+    return GameState::MENU;
   }
   glDeleteShader(vertex_shader);
   glDeleteShader(fragment_shader);
@@ -126,14 +98,14 @@ int main() {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
       glGenerateMipmap(GL_TEXTURE_2D);
     } else {
-      return -1;
+      return GameState::MENU;
     }
     stbi_image_free(data);
     glBindVertexArray(vertex_attrib);
     glBindTexture(GL_TEXTURE_2D, banner_texture);
   }
-  
-  {
+
+  while (!glfwWindowShouldClose(window) && state == GameState::MENU) {
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     // Window is minimized, wait
@@ -156,36 +128,12 @@ int main() {
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glfwSwapBuffers(window);
     glfwPollEvents();
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
-
-  std::print("Entering main loop\n");
-  while (game_state != GameState::EXIT) {
-    switch (game_state) {
-      case GameState::MENU:
-        std::print("In Menu State\n");
-        game_state = Menu(game_state, window);
-        break;
-      case GameState::PLAYING:
-        std::print("In Playing State\n");
-        // Render game
-        break;
-      case GameState::PAUSED:
-        std::print("In Paused State\n");
-        // Render paused screen
-        break;
-      case GameState::EXIT:
-        std::print("Exiting Game\n");
-        break;
-    }
-  }
-
   glDeleteTextures(1, &banner_texture);
-  glDeleteProgram(shader_program);
   glDeleteBuffers(1, &vertex_buffer);
   glDeleteBuffers(1, &index_buffer);
   glDeleteVertexArrays(1, &vertex_attrib);
-  glfwDestroyWindow(window);
-  glfwTerminate();
-  return 0;
+  glDeleteProgram(shader_program);
+  state = GameState::EXIT;
+  return state;
 }
