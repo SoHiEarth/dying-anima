@@ -1,0 +1,21 @@
+{
+  "name": "dying-anima",
+  "version-string": "1.0.0",
+  "dependencies": [
+    "box2d",
+    "glad",
+    "glfw3",
+    "glm",
+    {
+      "name": "imgui",
+      "features": [
+        "freetype",
+        "glfw-binding",
+        "opengl3-binding"
+      ]
+    },
+    "opengl",
+    "pugixml",
+    "stb"
+  ]
+}

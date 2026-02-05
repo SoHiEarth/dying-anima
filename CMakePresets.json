@@ -1,0 +1,34 @@
+{
+  "version": 8,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "displayName": "Base",
+      "description": "vcpkg + cmake + ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "generator": "Ninja Multi-Config",
+      "toolchainFile": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "configurePreset": "base",
+      "displayName": "Build (Debug)",
+      "description": "Build (Debug)",
+      "configuration": "Debug"
+    },
+    {
+      "name": "release",
+      "configurePreset": "base",
+      "displayName": "Build (Release)",
+      "description": "Build (Release)",
+      "configuration": "Release"
+    }
+  ]
+}

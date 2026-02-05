@@ -1,0 +1,36 @@
+cmake_minimum_required(VERSION 3.10)
+project(DyingAnima VERSION 1.0 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(box2d REQUIRED)
+find_package(glad REQUIRED)
+find_package(glfw3 REQUIRED)
+find_package(glm REQUIRED)
+find_package(OpenGL REQUIRED)
+add_executable(DyingAnima)
+file(GLOB_RECURSE SOURCE_FILES src/*.cc src/*.h)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  add_compile_definitions(DEBUG)
+  if (MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi /Od /DEBUG /W4")
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -Wall -Wextra -g")
+  endif()
+else()
+  add_compile_definitions(NDEBUG)
+  if (MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O2 /DNDEBUG")
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNDEBUG -O3")
+  endif()
+endif()
+target_sources(DyingAnima PRIVATE ${SOURCE_FILES})
+target_include_directories(DyingAnima PRIVATE include)
+target_link_libraries(DyingAnima PRIVATE
+  box2d::box2d
+  glad::glad
+  glfw
+  glm::glm
+  OpenGL::GL
+)
+install(TARGETS DyingAnima RUNTIME DESTINATION bin)
