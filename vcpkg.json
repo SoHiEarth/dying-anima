@@ -3,6 +3,7 @@
   "version-string": "1.0.0",
   "dependencies": [
     "box2d",
+    "freetype",
     "glad",
     "glfw3",
     "glm",

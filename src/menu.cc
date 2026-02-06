@@ -9,48 +9,50 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include <map>
+#include "shader.h"
+#include "font.h"
+#include "texture.h"
+#include "calculate.h"
+
+static int menu_focus_x = 0;
+void HandleMenuInput(GameState& state, GLFWwindow* window) {
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    state = GameState::EXIT;
+  }
+  if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+    switch (menu_focus_x) {
+      case 0:
+        state = GameState::PLAYING;
+        break;
+      case 1:
+        state = GameState::EXIT;
+        break;
+    }
+  }
+  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+    menu_focus_x = 0;
+  }
+  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+    menu_focus_x = 1;
+  }
+}
 
 GameState Menu(GameState& state, GLFWwindow* window) {
-  unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-  std::ifstream file("assets/shaders/simple.vert.glsl");
-  std::string vertex_shader_source((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-  const char* vertex_shader_source_cstr = vertex_shader_source.c_str();
-  glShaderSource(vertex_shader, 1, &vertex_shader_source_cstr, nullptr);
-  glCompileShader(vertex_shader);
-  int success;
-  char infoLog[512];
-  glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    glGetShaderInfoLog(vertex_shader, 512, nullptr, infoLog);
-    std::print("Vertex Shader Compilation Error: {}", infoLog);
-    return GameState::MENU;
-  }
-  unsigned int fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-  file = std::ifstream("assets/shaders/simple.frag.glsl");
-  std::string fragment_shader_source((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-  const char* fragment_shader_source_cstr = fragment_shader_source.c_str();
-  glShaderSource(fragment_shader, 1, &fragment_shader_source_cstr, nullptr);
-  glCompileShader(fragment_shader);
-  glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    glGetShaderInfoLog(fragment_shader, 512, nullptr, infoLog);
-    std::print("Fragment Shader Compilation Error: {}", infoLog);
-    return GameState::MENU;
-  }
-  unsigned int shader_program = glCreateProgram();
-  glAttachShader(shader_program, vertex_shader);
-  glAttachShader(shader_program, fragment_shader);
-  glLinkProgram(shader_program);
-  glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
-  if (!success) {
-    glGetProgramInfoLog(shader_program, 512, nullptr, infoLog);
-    std::print("Shader Program Linking Error: {}", infoLog);
-    return GameState::MENU;
-  }
-  glDeleteShader(vertex_shader);
-  glDeleteShader(fragment_shader);
-  glUseProgram(shader_program);
-  glUniform1i(glGetUniformLocation(shader_program, "texture1"), 0);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  
+  Font font("assets/fonts/Tinos/Tinos-Regular.ttf", 56);
+
+  Shader text_shader("assets/shaders/text.vert.glsl", "assets/shaders/text.frag.glsl");
+  text_shader.Use();
+  text_shader.SetUniform("character", 0);
+
+  Shader shader("assets/shaders/simple.vert.glsl", "assets/shaders/simple.frag.glsl");
+  shader.Use();
+  shader.SetUniform("texture1", 0);
 
   unsigned int vertex_attrib, vertex_buffer, index_buffer;
   float vertices[] = {
@@ -63,6 +65,7 @@ GameState Menu(GameState& state, GLFWwindow* window) {
     0, 1, 3,
     1, 2, 3
   };
+
   glGenVertexArrays(1, &vertex_attrib);
   glGenBuffers(1, &vertex_buffer);
   glGenBuffers(1, &index_buffer);
@@ -78,58 +81,55 @@ GameState Menu(GameState& state, GLFWwindow* window) {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
-  unsigned int banner_texture;
-  {
-    glGenTextures(1, &banner_texture);
-    glBindTexture(GL_TEXTURE_2D, banner_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    int image_width, image_height, nrChannels;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load("assets/banner.png", &image_width, &image_height, &nrChannels, 0);
-    if (data) {
-      if (nrChannels == 1)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, image_width, image_height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
-      else if (nrChannels == 3)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-      else if (nrChannels == 4)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-      glGenerateMipmap(GL_TEXTURE_2D);
-    } else {
-      return GameState::MENU;
-    }
-    stbi_image_free(data);
-    glBindVertexArray(vertex_attrib);
-    glBindTexture(GL_TEXTURE_2D, banner_texture);
-  }
+  Texture banner_texture("assets/textures/banner.png");
 
   while (!glfwWindowShouldClose(window) && state == GameState::MENU) {
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-    // Window is minimized, wait
-    while (width == 0 || height == 0) {
-      glfwGetFramebufferSize(window, &width, &height);
+    int window_width, window_height;
+    glfwGetFramebufferSize(window, &window_width, &window_height);
+    while (window_width == 0 || window_height == 0) {
+      glfwGetFramebufferSize(window, &window_width, &window_height);
       glfwPollEvents();
     }
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    assert(window_width > 0 && window_height > 0);
+
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(window_width), 0.0f, static_cast<float>(window_height));
+
     glClear(GL_COLOR_BUFFER_BIT);
-    glUseProgram(shader_program);
-    glGetUniformLocation(shader_program, "mvp");
-    glUniformMatrix4fv(glGetUniformLocation(shader_program, "mvp"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, banner_texture);
+    banner_texture.Render(shader,
+      projection,
+      glm::mat4(1.0f),
+      CalculateModelMatrix(
+        glm::vec3(window_width / 2.0f, window_height / 2.0f, 0.0f),
+        glm::vec3(0.0f),
+        glm::vec3(window_width / 2.0f, window_height * 0.75f, 1.0f)
+      )
+    );
+
     glBindVertexArray(vertex_attrib);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    const float menu_y = (float)window_height / 4.0f;
+    const int padding = 50;
+
+    int text_width = font.GetWidth("Play", 1.0f) + padding + font.GetWidth("Quit", 1.0f);
+    int x_pos = (window_width - text_width) / 2;
+
+    font.Render("Play", glm::vec2(x_pos, menu_y), 1.0f, (menu_focus_x == 0) ? glm::vec3(1.0f, 1.0f, 0.0f) : glm::vec3(1.0f),
+      text_shader, projection);
+    x_pos += font.GetWidth("Play", 1.0f) + padding;
+    font.Render("Quit", glm::vec2(x_pos, menu_y), 1.0f, (menu_focus_x == 1) ? glm::vec3(1.0f, 1.0f, 0.0f) : glm::vec3(1.0f),
+      text_shader, projection);
+
     glfwSwapBuffers(window);
     glfwPollEvents();
+    HandleMenuInput(state, window);
+    if (state != GameState::MENU) {
+      break;
+    }
   }
-  glDeleteTextures(1, &banner_texture);
+
   glDeleteBuffers(1, &vertex_buffer);
   glDeleteBuffers(1, &index_buffer);
   glDeleteVertexArrays(1, &vertex_attrib);
-  glDeleteProgram(shader_program);
-  state = GameState::EXIT;
   return state;
 }
