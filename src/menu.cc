@@ -4,8 +4,6 @@
 #include <print>
 #include <fstream>
 #include <stb_image.h>
-#include <thread>
-#include <chrono>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -40,12 +38,8 @@ void HandleMenuInput(GameState& state, GLFWwindow* window) {
   }
 }
 
-GameState Menu(GameState& state, GLFWwindow* window) {
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  
+GameState Menu(GLFWwindow* window) {  
   Font font("assets/fonts/Tinos/Tinos-Regular.ttf", 56);
-
   Shader text_shader("assets/shaders/text.vert.glsl", "assets/shaders/text.frag.glsl");
   text_shader.Use();
   text_shader.SetUniform("character", 0);
@@ -83,19 +77,22 @@ GameState Menu(GameState& state, GLFWwindow* window) {
 
   Texture banner_texture("assets/textures/banner.png");
 
+  GameState state = GameState::MENU;
   while (!glfwWindowShouldClose(window) && state == GameState::MENU) {
+    glfwPollEvents();
+    HandleMenuInput(state, window);
     int window_width, window_height;
     glfwGetFramebufferSize(window, &window_width, &window_height);
-    while (window_width == 0 || window_height == 0) {
+    while (window_width <= 0 || window_height <= 0) {
       glfwGetFramebufferSize(window, &window_width, &window_height);
       glfwPollEvents();
     }
-    assert(window_width > 0 && window_height > 0);
 
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(window_width), 0.0f, static_cast<float>(window_height));
 
     glClear(GL_COLOR_BUFFER_BIT);
-    banner_texture.Render(shader,
+    banner_texture.Render(
+      shader,
       projection,
       glm::mat4(1.0f),
       CalculateModelMatrix(
@@ -119,13 +116,11 @@ GameState Menu(GameState& state, GLFWwindow* window) {
     x_pos += font.GetWidth("Play", 1.0f) + padding;
     font.Render("Quit", glm::vec2(x_pos, menu_y), 1.0f, (menu_focus_x == 1) ? glm::vec3(1.0f, 1.0f, 0.0f) : glm::vec3(1.0f),
       text_shader, projection);
-
     glfwSwapBuffers(window);
-    glfwPollEvents();
-    HandleMenuInput(state, window);
-    if (state != GameState::MENU) {
-      break;
-    }
+  }
+
+  if (state == GameState::MENU) {
+    state = GameState::EXIT;
   }
 
   glDeleteBuffers(1, &vertex_buffer);

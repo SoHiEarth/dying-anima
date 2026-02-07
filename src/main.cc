@@ -13,6 +13,9 @@
 #include "menu.h"
 #include "texture.h"
 #include "shader.h"
+#include "game.h"
+#include "pause.h"
+#include "font.h"
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
   assert(width > 0 && height > 0);
@@ -37,43 +40,21 @@ int main() {
   gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
   int width, height;
   glfwGetFramebufferSize(window, &width, &height);
+  while (width == 0 || height == 0) {
+    glfwGetFramebufferSize(window, &width, &height);
+    glfwPollEvents();
+  }
   assert(width > 0 && height > 0);
   glViewport(0, 0, width, height);
   glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 
-  Shader shader("assets/shaders/simple.vert.glsl", "assets/shaders/simple.frag.glsl");
+  Shader shader("assets/shaders/text.vert.glsl", "assets/shaders/text.frag.glsl");
   shader.Use();
-  shader.SetUniform("texture1", 0);
+  shader.SetUniform("character", 0);
+  Font opening_font("assets/fonts/Tinos/Tinos-Regular.ttf", 96);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  unsigned int vertex_attrib, vertex_buffer, index_buffer;
-  float vertices[] = {
-     1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-     1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-    -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-    -1.0f,  1.0f, 0.0f, 0.0f, 1.0f
-  };
-  unsigned int indices[] = {
-    0, 1, 3,
-    1, 2, 3
-  };
-
-  glGenVertexArrays(1, &vertex_attrib);
-  glGenBuffers(1, &vertex_buffer);
-  glGenBuffers(1, &index_buffer);
-  glBindVertexArray(vertex_attrib);
-  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-
-  Texture banner_texture("assets/textures/banner.png");
-  
   {
     int window_width, window_height;
     glfwGetFramebufferSize(window, &window_width, &window_height);
@@ -82,13 +63,9 @@ int main() {
       glfwPollEvents();
     }
 
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 100.0f);
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(window_width), 0.0f, static_cast<float>(window_height), -1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    banner_texture.Render(shader, projection, view, model);
-    glBindVertexArray(vertex_attrib);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    opening_font.Render("Dying Anima", glm::vec2(0, 0), 1.0f, glm::vec3(1.0f), shader, projection);
     glfwSwapBuffers(window);
     glfwPollEvents();
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -97,22 +74,22 @@ int main() {
   while (game_state != GameState::EXIT) {
     switch (game_state) {
       case GameState::MENU:
-        game_state = Menu(game_state, window);
+        std::print("Entering Menu\n");
+        game_state = Menu(window);
         break;
       case GameState::PLAYING:
-        // Render game
+        std::print("Starting Game\n");
+        game_state = Game(window);
         break;
       case GameState::PAUSED:
-        // Render paused screen
+        std::print("Game Paused\n");
+        game_state = Pause(window);
         break;
       case GameState::EXIT:
+        std::print("Exiting Game\n");
         break;
     }
   }
-
-  glDeleteBuffers(1, &vertex_buffer);
-  glDeleteBuffers(1, &index_buffer);
-  glDeleteVertexArrays(1, &vertex_attrib);
   glfwDestroyWindow(window);
   glfwTerminate();
   return 0;
