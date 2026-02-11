@@ -14,8 +14,8 @@
 #include "texture.h"
 #include "shader.h"
 #include "game.h"
-#include "pause.h"
 #include "font.h"
+#include "level_editor.h"
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
   assert(width > 0 && height > 0);
@@ -23,7 +23,7 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
 }
 
 int main() {
-  GameState game_state = GameState::MENU;
+  AppState game_state = AppState::MENU;
   if (!glfwInit()) {
     std::print("Failed to initialize GLFW\n");
     return -1;
@@ -51,7 +51,7 @@ int main() {
   Shader shader("assets/shaders/text.vert.glsl", "assets/shaders/text.frag.glsl");
   shader.Use();
   shader.SetUniform("character", 0);
-  Font opening_font("assets/fonts/Tinos/Tinos-Regular.ttf", 96);
+  Font opening_font("assets/fonts/Tinos/Tinos-BoldItalic.ttf", 96);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -65,27 +65,27 @@ int main() {
 
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(window_width), 0.0f, static_cast<float>(window_height), -1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    opening_font.Render("Dying Anima", glm::vec2(0, 0), 1.0f, glm::vec3(1.0f), shader, projection);
+    opening_font.Render("Dying Anima", glm::vec2((window_width - opening_font.GetWidth("Dying Anima", 1.0f)) / 2.0f, (window_height - opening_font.GetHeight("Dying Anima", 1.0f)) / 2.0f), 1.0f, glm::vec3(1.0f), shader, projection);
     glfwSwapBuffers(window);
     glfwPollEvents();
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
 
-  while (game_state != GameState::EXIT) {
+  while (game_state != AppState::EXIT) {
     switch (game_state) {
-      case GameState::MENU:
+      case AppState::MENU:
         std::print("Entering Menu\n");
         game_state = Menu(window);
         break;
-      case GameState::PLAYING:
+      case AppState::PLAYING:
         std::print("Starting Game\n");
         game_state = Game(window);
         break;
-      case GameState::PAUSED:
-        std::print("Game Paused\n");
-        game_state = Pause(window);
+      case AppState::LEVEL_EDITOR:
+        std::print("Entering Level Editor\n");
+        game_state = LevelEditor(window);
         break;
-      case GameState::EXIT:
+      case AppState::EXIT:
         std::print("Exiting Game\n");
         break;
     }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<textures>
+  <texture name="notexture" path="notexture.png"/>
+  <texture name="player" path="player.png"/>
+  <texture name="banner" path="banner.png"/>
+</textures>

@@ -10,7 +10,9 @@ find_package(Freetype CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(pugixml CONFIG REQUIRED)
 add_executable(DyingAnima)
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
   src/*.cc
@@ -40,6 +42,8 @@ target_link_libraries(DyingAnima PRIVATE
   glfw
   glm::glm
   OpenGL::GL
+  imgui::imgui
+  pugixml::pugixml
 )
 set_target_properties(DyingAnima PROPERTIES
   OUTPUT_NAME "Dying Anima"

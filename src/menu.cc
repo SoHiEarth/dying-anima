@@ -16,29 +16,43 @@
 #include "calculate.h"
 
 static int menu_focus_x = 0;
-void HandleMenuInput(GameState& state, GLFWwindow* window) {
+void HandleMenuInput(AppState& state, GLFWwindow* window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-    state = GameState::EXIT;
+    state = AppState::EXIT;
   }
   if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
     switch (menu_focus_x) {
       case 0:
-        state = GameState::PLAYING;
+        state = AppState::PLAYING;
         break;
       case 1:
-        state = GameState::EXIT;
+        state = AppState::EXIT;
+        break;
+      case 2:
+        #ifndef NDEBUG
+        state = AppState::LEVEL_EDITOR;
+        #endif
         break;
     }
   }
   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-    menu_focus_x = 0;
+    if (menu_focus_x > 0) {
+      menu_focus_x -= 1;
+    }
   }
   if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-    menu_focus_x = 1;
+    #ifdef NDEBUG
+    const int max_focus = 1;
+    #else
+    const int max_focus = 2;
+    #endif
+    if (menu_focus_x < max_focus) {
+      menu_focus_x += 1;
+    }
   }
 }
 
-GameState Menu(GLFWwindow* window) {  
+AppState Menu(GLFWwindow* window) {  
   Font font("assets/fonts/Tinos/Tinos-Regular.ttf", 56);
   Shader text_shader("assets/shaders/text.vert.glsl", "assets/shaders/text.frag.glsl");
   text_shader.Use();
@@ -77,8 +91,8 @@ GameState Menu(GLFWwindow* window) {
 
   Texture banner_texture("assets/textures/banner.png");
 
-  GameState state = GameState::MENU;
-  while (!glfwWindowShouldClose(window) && state == GameState::MENU) {
+  AppState state = AppState::MENU;
+  while (!glfwWindowShouldClose(window) && state == AppState::MENU) {
     glfwPollEvents();
     HandleMenuInput(state, window);
     int window_width, window_height;
@@ -108,7 +122,11 @@ GameState Menu(GLFWwindow* window) {
     const float menu_y = (float)window_height / 4.0f;
     const int padding = 50;
 
+    #ifdef NDEBUG
     int text_width = font.GetWidth("Play", 1.0f) + padding + font.GetWidth("Quit", 1.0f);
+    #else
+    int text_width = font.GetWidth("Play", 1.0f) + padding + font.GetWidth("Quit", 1.0f) + padding + font.GetWidth("Level Editor", 1.0f);
+    #endif
     int x_pos = (window_width - text_width) / 2;
 
     font.Render("Play", glm::vec2(x_pos, menu_y), 1.0f, (menu_focus_x == 0) ? glm::vec3(1.0f, 1.0f, 0.0f) : glm::vec3(1.0f),
@@ -116,11 +134,16 @@ GameState Menu(GLFWwindow* window) {
     x_pos += font.GetWidth("Play", 1.0f) + padding;
     font.Render("Quit", glm::vec2(x_pos, menu_y), 1.0f, (menu_focus_x == 1) ? glm::vec3(1.0f, 1.0f, 0.0f) : glm::vec3(1.0f),
       text_shader, projection);
+    #ifndef NDEBUG
+    x_pos += font.GetWidth("Quit", 1.0f) + padding;
+    font.Render("Level Editor", glm::vec2(x_pos, menu_y), 1.0f, (menu_focus_x == 2) ? glm::vec3(1.0f, 1.0f, 0.0f) : glm::vec3(1.0f),
+      text_shader, projection);
+    #endif
     glfwSwapBuffers(window);
   }
 
-  if (state == GameState::MENU) {
-    state = GameState::EXIT;
+  if (state == AppState::MENU) {
+    state = AppState::EXIT;
   }
 
   glDeleteBuffers(1, &vertex_buffer);

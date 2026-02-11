@@ -2,4 +2,4 @@
 #include "state.h"
 #include <GLFW/glfw3.h>
 
-GameState Game(GLFWwindow* window);
+AppState Game(GLFWwindow* window);

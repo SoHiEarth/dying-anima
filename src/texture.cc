@@ -9,6 +9,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 Texture::Texture(std::string_view path) {
+  this->path = std::string(path);
   stbi_set_flip_vertically_on_load(true);
   unsigned char* data = stbi_load(std::string(path).c_str(), &width, &height, &channels, 0);
   if (data) {
@@ -23,7 +24,7 @@ Texture::Texture(std::string_view path) {
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(data);
   } else {
-    std::print("Failed to load texture: {}", path);
+    std::print("Failed to load texture: {}\n", path);
     id = 0;
     width = height = channels = 0;
   }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shaders>
+  <shader name="Text" tag="Text" vertex="text.vert.glsl" fragment="text.frag.glsl"/>
+  <shader name="Simple" tag="Sprite" vertex="simple.vert.glsl" fragment="simple.frag.glsl"/>
+  <shader name="Rect" tag="Rect" vertex="rect.vert.glsl" fragment="rect.frag.glsl"/>
+</shaders>
