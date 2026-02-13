@@ -14,6 +14,7 @@
 #include "font.h"
 #include "texture.h"
 #include "calculate.h"
+#include "atlas.h"
 
 static int menu_focus_x = 0;
 void HandleMenuInput(AppState& state, GLFWwindow* window) {
@@ -35,12 +36,19 @@ void HandleMenuInput(AppState& state, GLFWwindow* window) {
         break;
     }
   }
-  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+  
+  bool left_pressed = glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS;
+  static bool last_left_pressed = false;
+  if (left_pressed && !last_left_pressed) {
     if (menu_focus_x > 0) {
       menu_focus_x -= 1;
     }
   }
-  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+  last_left_pressed = left_pressed;
+
+  bool right_pressed = glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS;
+  static bool last_right_pressed = false;
+  if (right_pressed && !last_right_pressed) {
     #ifdef NDEBUG
     const int max_focus = 1;
     #else
@@ -50,10 +58,14 @@ void HandleMenuInput(AppState& state, GLFWwindow* window) {
       menu_focus_x += 1;
     }
   }
+  last_right_pressed = right_pressed;
 }
 
-AppState Menu(GLFWwindow* window) {  
-  Font font("assets/fonts/Tinos/Tinos-Regular.ttf", 56);
+AppState Menu(GLFWwindow* window) {
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  auto font_atlas = LoadFontAtlas("assets/fonts/font.xml");
+  Font font(font_atlas.at("Special").file, 56);
   Shader text_shader("assets/shaders/text.vert.glsl", "assets/shaders/text.frag.glsl");
   text_shader.Use();
   text_shader.SetUniform("character", 0);
@@ -110,9 +122,9 @@ AppState Menu(GLFWwindow* window) {
       projection,
       glm::mat4(1.0f),
       CalculateModelMatrix(
-        glm::vec3(window_width / 2.0f, window_height / 2.0f, 0.0f),
-        glm::vec3(0.0f),
-        glm::vec3(window_width / 2.0f, window_height * 0.75f, 1.0f)
+        glm::vec2(window_width / 2.0f, window_height / 2.0f),
+        0.0f,
+        glm::vec2(window_width / 2.0f, window_height * 0.75f)
       )
     );
 

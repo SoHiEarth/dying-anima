@@ -4,10 +4,9 @@
 #include "texture.h"
 
 struct Object {
-  glm::vec3 position;
-  glm::vec3 scale;
-  glm::vec3 rotation;
-  glm::vec4 color;
+  glm::vec2 position = glm::vec2(0.0f);
+  glm::vec2 scale = glm::vec2(1.0f);
+  float rotation = 0.0f;
   std::string texture_name;
   b2BodyId body;
 };

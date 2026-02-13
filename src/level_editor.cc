@@ -13,6 +13,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include "level_utils.h"
 
 int GRID_SIZE = 5;
 static int selected_object_index = -1;
@@ -26,21 +27,6 @@ enum class GizmoAxis {
 static GizmoAxis active_axis = GizmoAxis::NONE;
 static bool dragging = false;
 glm::dvec2 mouse_position, last_mouse_position;
-
-void SaveLevel(const std::string &filename) {
-  std::ofstream file(filename);
-  if (!file.is_open()) {
-    std::print("Failed to open level file for writing: {}\n", filename);
-    return;
-  }
-  for (const auto &obj : editor_objects) {
-    file << obj.position.x << " " << obj.position.y << " " << obj.position.z << " ";
-    file << obj.scale.x << " " << obj.scale.y << " " << obj.scale.z << " ";
-    file << obj.rotation.x << " " << obj.rotation.y << " " << obj.rotation.z << " ";
-    file << "notexture" << "\n";
-  }
-  file.close();
-}
 
 void ScrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
   GRID_SIZE = std::max(5, GRID_SIZE + static_cast<int>(yoffset) * 5);
@@ -88,9 +74,8 @@ void HandleLevelEditorInput(GLFWwindow *window, AppState &app_state) {
           static_cast<float>(GRID_SIZE),
           static_cast<float>(GRID_SIZE),
           1.0f);
-      object.color = glm::vec4(1.0f);
       editor_objects.emplace_back(object);
-      SaveLevel("level.txt");
+      SaveLevel("level.txt", editor_objects);
     }
   }
   if (selected_object_index != -1){
@@ -173,7 +158,7 @@ AppState LevelEditor(GLFWwindow *window) {
       Rect box;
       box.position = glm::vec2(object.position.x + GRID_SIZE / 2.0f, object.position.y + GRID_SIZE / 2.0f);
       box.scale = glm::vec2(object.scale.x, object.scale.y);
-      box.color = object.color;
+      box.color = glm::vec4(1.0f);
       box.Render(rect_vertex_attrib, shader, projection, view);
     }
     

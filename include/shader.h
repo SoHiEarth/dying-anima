@@ -6,5 +6,5 @@ struct Shader {
   Shader(std::string_view vertex_path, std::string_view fragment_path);
   void Use() const;
   template <typename T>
-  void SetUniform(std::string_view name, T value) const;
+  void SetUniform(std::string_view name, const T& value) const;
 };

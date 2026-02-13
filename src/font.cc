@@ -91,9 +91,9 @@ int Font::GetHeight(std::string_view text, float scale) const {
 
 void Font::Render(
   std::string_view text,
-  const glm::vec2 position,
+  const glm::vec2& position,
   const float scale,
-  const glm::vec3 color,
+  const glm::vec3& color,
   const Shader& shader,
   const glm::mat4& projection
 ) const {

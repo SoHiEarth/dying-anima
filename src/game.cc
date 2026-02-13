@@ -1,4 +1,5 @@
 #include <glad/glad.h>
+// code block
 #include <GLFW/glfw3.h>
 #include "game.h"
 #include "player.h"
@@ -24,114 +25,53 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include "atlas.h"
+#include "physics.h"
+#include "level_utils.h"
+#include "input.h"
 
-// TESTING PURPOSES ONLY
-static std::vector<Object> box_positions;
+static std::vector<Object> objects;
 glm::vec3 camera_position{0.0f, 0.0f, -20.0f};
 b2WorldId physics_world;
 int frames_since_no_input = 0;
 
-void LoadLevel(std::string_view filename) {
-  std::fstream file(filename.data());
-  if (!file.is_open()) {
-    std::print("Failed to open level file: {}\n", filename);
-    return;
-  }
-  box_positions.clear();
-  std::string line;
-  while (std::getline(file, line)) {
-    std::istringstream iss(line);
-    Object obj;
-    if (!(iss >> obj.position.x >> obj.position.y >> obj.position.z)) {
-      std::print("Error reading position in level file: {}\n", line);
-      continue;
-    }
-    if (!(iss >> obj.scale.x >> obj.scale.y >> obj.scale.z)) {
-      std::print("Error reading scale in level file: {}\n", line);
-      continue;
-    }
-    if (!(iss >> obj.rotation.x >> obj.rotation.y >> obj.rotation.z)) {
-      std::print("Error reading rotation in level file: {}\n", line);
-      continue;
-    }
-    if (!(iss >> obj.texture_name)) {
-      std::print("Error reading texture name in level file: {}\n", line);
-      continue;
-    }
-    b2BodyDef box_body_def = b2DefaultBodyDef();
-    box_body_def.type = b2_staticBody;
-    box_body_def.position = b2Vec2(obj.position.x, obj.position.y);
-    obj.body = b2CreateBody(physics_world, &box_body_def);
-    b2Polygon box_shape = b2MakeBox(obj.scale.x / 2.0f, obj.scale.y / 2.0f);
-    b2ShapeDef box_shape_def = b2DefaultShapeDef();
-    box_shape_def.density = 1.0F;
-    box_shape_def.material.friction = 0.5F;
-    b2CreatePolygonShape(obj.body, &box_shape_def, &box_shape);
-    box_positions.push_back(obj);
-  }
-  file.close();
-}
-
-bool IsPlayerOnGround(b2BodyId player_body) {
-  int capacity = b2Body_GetContactCapacity(player_body);
-  if (capacity <= 0)
-    return false;
-  std::vector<b2ContactData> contacts(capacity);
-  int count = b2Body_GetContactData(player_body, contacts.data(), capacity);
-  for (int i = 0; i < count; ++i) {
-    b2ContactData &cd = contacts[i];
-    if (cd.manifold.normal.y <= -0.9f) {
-      return true;
-    }
-  }
-  return false;
-}
-
 void HandleGameInput(GameState &game_state, Player &player, b2BodyId player_body, GLFWwindow *window) {
-  static bool escape_pressed_last = false;
-  bool escape_pressed = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
-  if (escape_pressed && !escape_pressed_last) {
+  input::UpdateKeyState(window, GLFW_KEY_ESCAPE);
+  input::UpdateKeyState(window, GLFW_KEY_A);
+  input::UpdateKeyState(window, GLFW_KEY_D);
+  input::UpdateKeyState(window, GLFW_KEY_SPACE);
+  input::UpdateKeyState(window, GLFW_KEY_LEFT_SHIFT);
+
+  if (input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
     if (game_state == GameState::PAUSED)
       game_state = GameState::RUNNING;
     else if (game_state == GameState::RUNNING)
       game_state = GameState::PAUSED;
   }
-  escape_pressed_last = escape_pressed;
   if (game_state == GameState::PAUSED)
     return;
   b2Vec2 velocity = b2Body_GetLinearVelocity(player_body);
 
-  static bool space_pressed_last = false;
-  bool space_pressed = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
-  if (space_pressed && !space_pressed_last && IsPlayerOnGround(player_body)) {
+  if (input::IsKeyPressed(GLFW_KEY_SPACE) && player.IsOnGround()) {
     velocity.y = 0;
   }
-  space_pressed_last = space_pressed;
 
-  static bool left_shift_pressed_last = false;
-  bool left_shift_pressed = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
-
-  static bool left_pressed_last = false;
-  bool left_pressed = glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
-  if (left_pressed) {
-    if (velocity.x > -player.max_speed)
+  if (input::IsKeyPressed(GLFW_KEY_A)) {
+    if (velocity.x > -player.max_speed && player.IsOnGround())
       velocity.x -= player.speed;
-    if (left_shift_pressed && !left_shift_pressed_last) {
+    if (input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
       velocity.x = 0;
     }
   }
 
-  static bool right_pressed_last = false;
-  bool right_pressed = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
-  if (right_pressed) {
-    if (velocity.x < player.max_speed)
+  if (input::IsKeyPressed(GLFW_KEY_D)) {
+    if (velocity.x < player.max_speed && player.IsOnGround())
       velocity.x += player.speed;
-    if (left_shift_pressed && !left_shift_pressed_last) {
+    if (input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
       velocity.x = 0;
     }
   }
 
-  if (!left_pressed && !right_pressed) {
+  if (!input::IsKeyPressed(GLFW_KEY_A) && !input::IsKeyPressed(GLFW_KEY_D)) {
     velocity.x *= player.deceleration;
   }
 
@@ -148,33 +88,29 @@ void HandleGameInput(GameState &game_state, Player &player, b2BodyId player_body
   } else {
     camera_position.z = std::clamp(camera_position.z - 0.1f, -30.0f, -20.0f);
   }
-  b2Body_SetLinearVelocity(player_body, velocity);
-  if (space_pressed && IsPlayerOnGround(player_body)) {
+  b2Body_SetLinearVelocity(player.body, velocity);
+  if (input::IsKeyPressed(GLFW_KEY_SPACE) && player.IsOnGround()) {
     b2Body_ApplyLinearImpulse(
-        player_body,
+        player.body,
         b2Vec2(0.0f, player.jump_impulse),
-        b2Body_GetWorldCenterOfMass(player_body),
+        b2Body_GetWorldCenterOfMass(player.body),
         true);
   }
-  space_pressed_last = space_pressed;
 
-  if (left_pressed && left_shift_pressed) {
+  if (input::IsKeyPressed(GLFW_KEY_A) && input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
     b2Body_ApplyLinearImpulse(
-        player_body,
+        player.body,
         b2Vec2(-player.boost_speed, 0.0f),
-        b2Body_GetWorldCenterOfMass(player_body),
+        b2Body_GetWorldCenterOfMass(player.body),
         true);
   }
-  left_pressed_last = left_pressed;
-  if (right_pressed && left_shift_pressed) {
+  if (input::IsKeyPressed(GLFW_KEY_D) && input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
     b2Body_ApplyLinearImpulse(
-        player_body,
+        player.body,
         b2Vec2(player.boost_speed, 0.0f),
-        b2Body_GetWorldCenterOfMass(player_body),
+        b2Body_GetWorldCenterOfMass(player.body),
         true);
   }
-  right_pressed_last = right_pressed;
-  left_shift_pressed_last = left_shift_pressed;
 }
 
 AppState Game(GLFWwindow *window) {
@@ -191,19 +127,9 @@ AppState Game(GLFWwindow *window) {
   ImGui_ImplOpenGL3_Init("#version 150");
 
   Player player{};
-  player.texture = texture_atlas.find("player")->second.texture;
-  auto world_def = b2DefaultWorldDef();
-  world_def.gravity = b2Vec2(0.0f, -9.81f);
-  physics_world = b2CreateWorld(&world_def);
-  b2BodyDef body_def = b2DefaultBodyDef();
-  body_def.type = b2_dynamicBody;
-  body_def.position = b2Vec2(player.position.x, player.position.y);
-  b2BodyId player_body = b2CreateBody(physics_world, &body_def);
-  b2Polygon shape = b2MakeBox(player.scale.x / 2.0f, player.scale.y / 2.0f);
-  b2ShapeDef shape_def = b2DefaultShapeDef();
-  shape_def.density = 1.0F;
-  shape_def.material.friction = 0.3F;
-  b2CreatePolygonShape(player_body, &shape_def, &shape);
+  player.texture_name = "player";
+  physics_world = physics::CreatePhysicsWorld({0.0f, -9.81f});
+  player.body = physics::CreatePhysicsBody(physics_world, player.position, player.scale, player.rotation, true);
 
   Shader shader(shader_atlas.at("Sprite").vertex_file, shader_atlas.at("Sprite").fragment_file);
   shader.Use();
@@ -269,6 +195,7 @@ AppState Game(GLFWwindow *window) {
   AppState app_state = AppState::PLAYING;
   GameState game_state = GameState::RUNNING;
   while (!glfwWindowShouldClose(window) && app_state == AppState::PLAYING) {
+    input::NewFrame();
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -278,7 +205,7 @@ AppState Game(GLFWwindow *window) {
     assert(screen_dimensions.x > 0 && screen_dimensions.y > 0);
     float aspect = static_cast<float>(screen_dimensions.x) / static_cast<float>(screen_dimensions.y);
 
-    glm::vec3 screen_player_position = glm::vec3(-player.position - camera_position);
+    glm::vec3 screen_player_position = glm::vec3(-player.position, 0.0f) - camera_position;
     if (std::abs(screen_player_position.x) > 5.0f) {
       camera_position.x = -player.position.x - 5.0f * glm::sign(screen_player_position.x);
     }
@@ -287,19 +214,18 @@ AppState Game(GLFWwindow *window) {
     }
 
     glfwPollEvents();
-    HandleGameInput(game_state, player, player_body, window);
-    b2World_Step(physics_world, 1.0f / 60.0f, 4);
-    b2Vec2 position = b2Body_GetPosition(player_body);
-    player.position.x = position.x;
-    player.position.y = position.y;
-    b2Body_SetFixedRotation(player_body, true);
+    HandleGameInput(game_state, player, player.body, window);
+    if (game_state == GameState::RUNNING) {
+      b2World_Step(physics_world, 1.0f / 60.0f, 4);
+    }
+    physics::SyncPosition(player.body, player.position);
 
     auto view = glm::translate(glm::mat4(1.0f), camera_position);
     auto projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    player.texture->Render(
+    texture_atlas.at(player.texture_name).texture->Render(
         shader,
         projection,
         view,
@@ -310,9 +236,9 @@ AppState Game(GLFWwindow *window) {
     glBindVertexArray(vertex_attrib);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-    for (auto &obj : box_positions) {
+    for (auto &obj : objects) {
       b2Vec2 physics_position = b2Body_GetPosition(obj.body);
-      obj.position = glm::vec3(physics_position.x, physics_position.y, obj.position.z);
+      obj.position = glm::vec2(physics_position.x, physics_position.y);
       if (!texture_atlas.contains(obj.texture_name)) {
         obj.texture_name = "notexture";
       }
@@ -346,11 +272,11 @@ AppState Game(GLFWwindow *window) {
     ImGui::Begin("Debug Menu");
     ImGui::Text("FPS: %.2f", fps);
     ImGui::DragFloat3("Position", glm::value_ptr(player.position));
-    auto velocity = b2Body_GetLinearVelocity(player_body);
+    auto velocity = b2Body_GetLinearVelocity(player.body);
     ImGui::Text("Velocity: (%.2f, %.2f)", velocity.x, velocity.y);
-    ImGui::Text("On Ground: %s", IsPlayerOnGround(player_body) ? "Yes" : "No");
+    ImGui::Text("On Ground: %s", player.IsOnGround() ? "Yes" : "No");
     ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", camera_position.x, camera_position.y, camera_position.z);
-    ImGui::Text("Boxes: %zu", box_positions.size());
+    ImGui::Text("Boxes: %zu", objects.size());
     ImGui::Text("Game State: %s", game_state == GameState::RUNNING ? "Running" : "Paused");
     ImGui::End();
 
@@ -389,8 +315,9 @@ AppState Game(GLFWwindow *window) {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window);
-    if (box_positions.empty()) {
-      LoadLevel("level.txt");
+    input::UpdateLastFrameKeyStates();
+    if (objects.empty()) {
+      objects = LoadLevel("level.txt", physics_world);
     }
   }
   if (app_state == AppState::PLAYING) {
