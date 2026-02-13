@@ -17,7 +17,7 @@
 #include "font.h"
 #include "level_editor.h"
 
-void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
+void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {
   assert(width > 0 && height > 0);
   glViewport(0, 0, width, height);
 }

@@ -28,7 +28,7 @@ static GizmoAxis active_axis = GizmoAxis::NONE;
 static bool dragging = false;
 glm::dvec2 mouse_position, last_mouse_position;
 
-void ScrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
+void ScrollCallback(GLFWwindow* /* window */, double /* xoffset */ , double yoffset) {
   GRID_SIZE = std::max(5, GRID_SIZE + static_cast<int>(yoffset) * 5);
 }
 
@@ -39,7 +39,6 @@ void HandleLevelEditorInput(GLFWwindow *window, AppState &app_state) {
     app_state = AppState::PLAYING;
   }
   glfwGetCursorPos(window, &mouse_position.x, &mouse_position.y);
-  bool already_exists = false;
   glm::ivec2 mouse_world_position = glm::ivec2(
       static_cast<int>(mouse_position.x + editor_camera_position.x),
       static_cast<int>(screen_dimensions.y - mouse_position.y + editor_camera_position.y));
