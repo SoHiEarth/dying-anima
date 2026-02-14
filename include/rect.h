@@ -7,5 +7,5 @@ struct Rect {
   glm::vec2 position;
   glm::vec2 scale;
   glm::vec4 color;
-  void Render(unsigned int vertex_attrib, const Shader& shader, const glm::mat4& projection, const glm::mat4& view);
+  void Render(const Shader& shader, const glm::mat4& projection, const glm::mat4& view);
 };

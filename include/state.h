@@ -1,10 +1,10 @@
 #pragma once
 
 enum class AppState {
-  MENU,
   PLAYING,
+  EXIT,
   LEVEL_EDITOR,
-  EXIT
+  MENU
 };
 
 enum class GameState {

@@ -17,6 +17,11 @@
 #include "font.h"
 #include "window.h"
 #include "level_editor.h"
+#include "core/quad.h"
+#include "atlas.h"
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {
   auto window = GameWindow::GetGameWindow();
@@ -50,6 +55,16 @@ int main() {
   }
   glViewport(0, 0, window.width, window.height);
   glfwSetFramebufferSizeCallback(window.window, FramebufferSizeCallback);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& imgui_io = ImGui::GetIO();
+  auto font_atlas = LoadFontAtlas("assets/fonts/font.xml");
+  imgui_io.Fonts->AddFontFromFileTTF(font_atlas.at("Debug").file.c_str(), 18.5f);
+  ImGui_ImplGlfw_InitForOpenGL(window.window, true);
+  ImGui_ImplOpenGL3_Init("#version 150");
+  core::quad::Init();
   while (game_state != AppState::EXIT) {
     std::print("Current State: {}\n", static_cast<int>(game_state));
     switch (game_state) {
@@ -66,6 +81,10 @@ int main() {
         break;
     }
   }
+  core::quad::Quit();
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
   glfwDestroyWindow(window.window);
   glfwTerminate();
   return 0;

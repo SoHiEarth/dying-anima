@@ -4,9 +4,22 @@
 #include <pugixml.hpp>
 #include <format>
 #include <stdexcept>
+#include <mutex>
+#define FontAtlas std::map<std::string, FontAtlasEntry>
+#define ShaderAtlas std::map<std::string, ShaderAtlasEntry>
+#define TextureAtlas std::map<std::string, TextureAtlasEntry>
 
-std::map<std::string, FontAtlasEntry> LoadFontAtlas(std::string_view filename) {
-  std::map<std::string, FontAtlasEntry> font_atlas{};
+std::once_flag font_flag, shader_flag, texture_flag;
+
+void PrintFontResults(FontAtlas& atlas) {
+  std::print("- Font Atlas Result -\nLoaded {} fonts from atlas.\n", atlas.size());
+  for (const auto& [tag, entry] : atlas) {
+    std::print("Name: {} (Tag: {}) File: {})\n", entry.name, tag, entry.file);
+  }
+}
+
+FontAtlas LoadFontAtlas(std::string_view filename) {
+  FontAtlas font_atlas{};
   pugi::xml_document font_doc;
   pugi::xml_parse_result result = font_doc.load_file(filename.data());
   if (!result) {
@@ -21,15 +34,19 @@ std::map<std::string, FontAtlasEntry> LoadFontAtlas(std::string_view filename) {
     entry.file = (base_path / font_node.attribute("file").as_string()).string();
     font_atlas.insert({tag, entry});
   }
-  std::print("- Font Atlas Result -\nLoaded {} fonts from atlas.\n", font_atlas.size());
-  for (const auto &[tag, entry] : font_atlas) {
-    std::print("Name: {} (Tag: {}) File: {})\n", entry.name, tag, entry.file);
-  }
+  std::call_once(font_flag, [](FontAtlas atlas) { PrintFontResults(atlas); }, font_atlas);
   return font_atlas;
 }
 
-std::map<std::string, ShaderAtlasEntry> LoadShaderAtlas(std::string_view filename) {
-  std::map<std::string, ShaderAtlasEntry> shader_atlas{};
+void PrintShaderResults(ShaderAtlas& atlas) {
+  std::print("- Shader Atlas Result -\nLoaded {} shaders from atlas.\n", atlas.size());
+  for (const auto& [tag, entry] : atlas) {
+    std::print("Name: {} (Tag: {}) Vertex File: {}, Fragment File: {})\n", entry.name, tag, entry.vertex_file, entry.fragment_file);
+  }
+}
+
+ShaderAtlas LoadShaderAtlas(std::string_view filename) {
+  ShaderAtlas shader_atlas{};
   pugi::xml_document shader_doc;
   pugi::xml_parse_result shader_result = shader_doc.load_file(filename.data());
   if (!shader_result) {
@@ -45,21 +62,22 @@ std::map<std::string, ShaderAtlasEntry> LoadShaderAtlas(std::string_view filenam
     entry.fragment_file = (base_path / shader_node.attribute("fragment").as_string()).string();
     shader_atlas.insert({tag, entry});
   }
-  std::print("- Shader Atlas Result -\nLoaded {} shaders from atlas.\n", shader_atlas.size());
-  for (const auto &[tag, entry] : shader_atlas) {
-    std::print("Name: {} (Tag: {}) Vertex File: {}, Fragment File: {})\n", entry.name, tag, entry.vertex_file, entry.fragment_file);
-  }
+  std::call_once(shader_flag, [](ShaderAtlas atlas) { PrintShaderResults(atlas); }, shader_atlas);
   return shader_atlas;
 }
 
-std::map<std::string, TextureAtlasEntry> LoadTextureAtlas(std::string_view filename) {
-  std::map<std::string, TextureAtlasEntry> texture_atlas{};
+void PrintTextureResults(TextureAtlas& atlas) {
+  std::print("- Texture Atlas Result -\nLoaded {} textures from atlas.\n", atlas.size());
+  for (const auto& [name, entry] : atlas) {
+    std::print("Name: {} (File: {}, Dimensions: {}x{})\n", name, entry.path, entry.texture->width, entry.texture->height);
+  }
+}
+
+TextureAtlas LoadTextureAtlas(std::string_view filename) {
+  TextureAtlas texture_atlas{};
   pugi::xml_document texture_doc;
   pugi::xml_parse_result texture_result = texture_doc.load_file(filename.data());
    if (!texture_result) {
-    throw std::runtime_error(std::format("Failed to load texture atlas XML: {}\n", texture_result.description()));
-  }
-  if (!texture_result) {
     throw std::runtime_error(std::format("Failed to load texture atlas XML: {}\n", texture_result.description()));
   }
   pugi::xml_node textures_node = texture_doc.child("textures");
@@ -69,9 +87,6 @@ std::map<std::string, TextureAtlasEntry> LoadTextureAtlas(std::string_view filen
     std::string path = (base_path / texture_node.attribute("path").as_string()).string();
     texture_atlas.insert({name, {path, new Texture(path)}});
   }
-  std::print("- Texture Atlas Result -\nLoaded {} textures from atlas.\n", texture_atlas.size());
-  for (const auto& [name, entry] : texture_atlas) {
-    std::print("Name: {} (File: {}, Dimensions: {}x{})\n", name, entry.path, entry.texture->width, entry.texture->height);
-  }
+  std::call_once(texture_flag, [](TextureAtlas atlas) { PrintTextureResults(atlas); }, texture_atlas);
   return texture_atlas;
 }

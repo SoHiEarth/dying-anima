@@ -27,22 +27,23 @@
 #include "atlas.h"
 #include "physics.h"
 #include "level_utils.h"
-#include "input.h"
+#include "core/input.h"
 #include "window.h"
+#include "core/quad.h"
 
-static std::vector<Object> objects;
+std::vector<Object> objects;
 glm::vec3 camera_position{0.0f, 0.0f, -20.0f};
 b2WorldId physics_world;
 int frames_since_no_input = 0;
 
 void HandleGameInput(GameState &game_state, Player &player, b2BodyId player_body, GLFWwindow *window) {
-  input::UpdateKeyState(window, GLFW_KEY_ESCAPE);
-  input::UpdateKeyState(window, GLFW_KEY_A);
-  input::UpdateKeyState(window, GLFW_KEY_D);
-  input::UpdateKeyState(window, GLFW_KEY_SPACE);
-  input::UpdateKeyState(window, GLFW_KEY_LEFT_SHIFT);
+  core::input::UpdateKeyState(window, GLFW_KEY_ESCAPE);
+  core::input::UpdateKeyState(window, GLFW_KEY_A);
+  core::input::UpdateKeyState(window, GLFW_KEY_D);
+  core::input::UpdateKeyState(window, GLFW_KEY_SPACE);
+  core::input::UpdateKeyState(window, GLFW_KEY_LEFT_SHIFT);
 
-  if (input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
+  if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
     if (game_state == GameState::PAUSED)
       game_state = GameState::RUNNING;
     else if (game_state == GameState::RUNNING)
@@ -52,27 +53,27 @@ void HandleGameInput(GameState &game_state, Player &player, b2BodyId player_body
     return;
   b2Vec2 velocity = b2Body_GetLinearVelocity(player_body);
 
-  if (input::IsKeyPressed(GLFW_KEY_SPACE) && player.IsOnGround()) {
+  if (core::input::IsKeyPressed(GLFW_KEY_SPACE) && player.IsOnGround()) {
     velocity.y = 0;
   }
 
-  if (input::IsKeyPressed(GLFW_KEY_A)) {
+  if (core::input::IsKeyPressed(GLFW_KEY_A)) {
     if (velocity.x > -player.max_speed && player.IsOnGround())
       velocity.x -= player.speed;
-    if (input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
+    if (core::input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
       velocity.x = 0;
     }
   }
 
-  if (input::IsKeyPressed(GLFW_KEY_D)) {
+  if (core::input::IsKeyPressed(GLFW_KEY_D)) {
     if (velocity.x < player.max_speed && player.IsOnGround())
       velocity.x += player.speed;
-    if (input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
+    if (core::input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
       velocity.x = 0;
     }
   }
 
-  if (!input::IsKeyPressed(GLFW_KEY_A) && !input::IsKeyPressed(GLFW_KEY_D)) {
+  if (!core::input::IsKeyPressed(GLFW_KEY_A) && !core::input::IsKeyPressed(GLFW_KEY_D)) {
     velocity.x *= player.deceleration;
   }
 
@@ -90,7 +91,7 @@ void HandleGameInput(GameState &game_state, Player &player, b2BodyId player_body
     camera_position.z = std::clamp(camera_position.z - 0.1f, -30.0f, -20.0f);
   }
   b2Body_SetLinearVelocity(player.body, velocity);
-  if (input::IsKeyPressed(GLFW_KEY_SPACE) && player.IsOnGround()) {
+  if (core::input::IsKeyPressed(GLFW_KEY_SPACE) && player.IsOnGround()) {
     b2Body_ApplyLinearImpulse(
         player.body,
         b2Vec2(0.0f, player.jump_impulse),
@@ -98,14 +99,14 @@ void HandleGameInput(GameState &game_state, Player &player, b2BodyId player_body
         true);
   }
 
-  if (input::IsKeyPressed(GLFW_KEY_A) && input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
+  if (core::input::IsKeyPressed(GLFW_KEY_A) && core::input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
     b2Body_ApplyLinearImpulse(
         player.body,
         b2Vec2(-player.boost_speed, 0.0f),
         b2Body_GetWorldCenterOfMass(player.body),
         true);
   }
-  if (input::IsKeyPressed(GLFW_KEY_D) && input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
+  if (core::input::IsKeyPressed(GLFW_KEY_D) && core::input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
     b2Body_ApplyLinearImpulse(
         player.body,
         b2Vec2(player.boost_speed, 0.0f),
@@ -115,19 +116,10 @@ void HandleGameInput(GameState &game_state, Player &player, b2BodyId player_body
 }
 
 AppState Game(GameWindow window) {
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   auto shader_atlas = LoadShaderAtlas("assets/shaders/shader.xml");
   auto font_atlas = LoadFontAtlas("assets/fonts/font.xml");
   auto texture_atlas = LoadTextureAtlas("assets/textures/texture.xml");
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-  ImGuiIO &imgui_io = ImGui::GetIO();
-  imgui_io.Fonts->AddFontFromFileTTF(font_atlas.at("Debug").file.c_str(), 18.5f);
-  ImGui_ImplGlfw_InitForOpenGL(window.window, true);
-  ImGui_ImplOpenGL3_Init("#version 150");
-
-  Player player{};
+  Player player;
   player.texture_name = "player";
   physics_world = physics::CreatePhysicsWorld({0.0f, -9.81f});
   player.body = physics::CreatePhysicsBody(physics_world, player.position, player.scale, player.rotation, true);
@@ -144,59 +136,10 @@ AppState Game(GameWindow window) {
   Font title_font(font_atlas.at("Title").file, 96);
   Font ui_font(font_atlas.at("UI").file, 32);
 
-  unsigned int vertex_attrib, vertex_buffer, index_buffer;
-  const float vertices[] = {
-      0.5f, 0.5f, 0.0f, 1.0f, 1.0f,
-      0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-      -0.5f, 0.5f, 0.0f, 0.0f, 1.0f
-  };
-
-  const unsigned int indices[] = {
-      0, 1, 3,
-      1, 2, 3
-  };
-
-  unsigned int rect_vertex_attrib, rect_vertex_buffer, rect_index_buffer;
-  const float rect_vertices[] = {
-      0.5f, 0.5f,
-      0.5f, -0.5f,
-      -0.5f, -0.5f,
-      -0.5f, 0.5f
-  };
-
-  glGenVertexArrays(1, &vertex_attrib);
-  glGenBuffers(1, &vertex_buffer);
-  glGenBuffers(1, &index_buffer);
-  glBindVertexArray(vertex_attrib);
-  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-
-  glGenVertexArrays(1, &rect_vertex_attrib);
-  glGenBuffers(1, &rect_vertex_buffer);
-  glGenBuffers(1, &rect_index_buffer);
-  glBindVertexArray(rect_vertex_attrib);
-  glBindBuffer(GL_ARRAY_BUFFER, rect_vertex_buffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(rect_vertices), rect_vertices, GL_STATIC_DRAW);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rect_index_buffer);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-
   AppState app_state = AppState::PLAYING;
   GameState game_state = GameState::RUNNING;
   while (!glfwWindowShouldClose(window.window) && app_state == AppState::PLAYING) {
-    input::NewFrame();
+    core::input::NewFrame();
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -231,8 +174,7 @@ AppState Game(GameWindow window) {
             player.position,
             player.rotation,
             player.scale));
-    glBindVertexArray(vertex_attrib);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
 
     for (auto &obj : objects) {
       b2Vec2 physics_position = b2Body_GetPosition(obj.body);
@@ -249,8 +191,7 @@ AppState Game(GameWindow window) {
               obj.position,
               obj.rotation,
               obj.scale));
-      glBindVertexArray(vertex_attrib);
-      glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+      core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
     }
 
     glm::mat4 ui_projection = glm::ortho(0.0f, static_cast<float>(window.width), 0.0f, static_cast<float>(window.height));
@@ -290,7 +231,7 @@ AppState Game(GameWindow window) {
       pause_rect.position = glm::vec2(window.width / 2.0f, window.height / 2.0f);
       pause_rect.scale = { window.width, window.height };
       pause_rect.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.5f);
-      pause_rect.Render(rect_vertex_attrib, rect_shader, ui_projection, glm::mat4(1.0f));
+      pause_rect.Render(rect_shader, ui_projection, glm::mat4(1.0f));
 
       int x_pos = 30;
       int y_pos = window.height / 2 + 100;
@@ -313,7 +254,7 @@ AppState Game(GameWindow window) {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window.window);
-    input::UpdateLastFrameKeyStates();
+    core::input::UpdateLastFrameKeyStates();
     if (objects.empty()) {
       objects = LoadLevel("level.txt", physics_world);
     }
@@ -321,16 +262,10 @@ AppState Game(GameWindow window) {
   if (app_state == AppState::PLAYING) {
     app_state = AppState::EXIT;
   }
-  glDeleteVertexArrays(1, &vertex_attrib);
-  glDeleteBuffers(1, &vertex_buffer);
-  glDeleteBuffers(1, &index_buffer);
   if (b2World_IsValid(physics_world)) {
     b2DestroyWorld(physics_world);
     physics_world = b2WorldId{};
   }
-  ImGui_ImplOpenGL3_Shutdown();
-  ImGui_ImplGlfw_Shutdown();
-  ImGui::DestroyContext();
   for (auto& [name, entry] : texture_atlas) {
     delete entry.texture;
   }

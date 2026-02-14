@@ -15,8 +15,12 @@ find_package(OpenGL REQUIRED)
 find_package(pugixml CONFIG REQUIRED)
 add_executable(DyingAnima)
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
+  src/*.c
+  src/**/*.c
   src/*.cc
-  src/*.h
+  src/**/*.cc
+  include/*.cc
+  include/**/*.cc
 )
 target_sources(DyingAnima PRIVATE ${SOURCE_FILES})
 target_include_directories(DyingAnima PRIVATE include)
