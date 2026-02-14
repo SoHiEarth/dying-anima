@@ -15,6 +15,7 @@
 #include "texture.h"
 #include "calculate.h"
 #include "atlas.h"
+#include "window.h"
 
 static int menu_focus_x = 0;
 void HandleMenuInput(AppState& state, GLFWwindow* window) {
@@ -61,7 +62,7 @@ void HandleMenuInput(AppState& state, GLFWwindow* window) {
   last_right_pressed = right_pressed;
 }
 
-AppState Menu(GLFWwindow* window) {
+AppState Menu(GameWindow window) {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   auto font_atlas = LoadFontAtlas("assets/fonts/font.xml");
@@ -104,17 +105,15 @@ AppState Menu(GLFWwindow* window) {
   Texture banner_texture("assets/textures/banner.png");
 
   AppState state = AppState::MENU;
-  while (!glfwWindowShouldClose(window) && state == AppState::MENU) {
+  while (!glfwWindowShouldClose(window.window) && state == AppState::MENU) {
     glfwPollEvents();
-    HandleMenuInput(state, window);
-    int window_width, window_height;
-    glfwGetFramebufferSize(window, &window_width, &window_height);
-    while (window_width <= 0 || window_height <= 0) {
-      glfwGetFramebufferSize(window, &window_width, &window_height);
+    HandleMenuInput(state, window.window);
+    while (window.IsMinimized()) {
+      // GLFW will update the window size
       glfwPollEvents();
     }
 
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(window_width), 0.0f, static_cast<float>(window_height));
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(window.width), 0.0f, static_cast<float>(window.height));
 
     glClear(GL_COLOR_BUFFER_BIT);
     banner_texture.Render(
@@ -122,16 +121,16 @@ AppState Menu(GLFWwindow* window) {
       projection,
       glm::mat4(1.0f),
       CalculateModelMatrix(
-        glm::vec2(window_width / 2.0f, window_height / 2.0f),
+        glm::vec2(window.width / 2.0f, window.height / 2.0f),
         0.0f,
-        glm::vec2(window_width / 2.0f, window_height * 0.75f)
+        glm::vec2(window.width / 2.0f, window.height * 0.75f)
       )
     );
 
     glBindVertexArray(vertex_attrib);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-    const float menu_y = (float)window_height / 4.0f;
+    const float menu_y = (float)window.height / 4.0f;
     const int padding = 50;
 
     #ifdef NDEBUG
@@ -139,7 +138,7 @@ AppState Menu(GLFWwindow* window) {
     #else
     int text_width = font.GetWidth("Play", 1.0f) + padding + font.GetWidth("Quit", 1.0f) + padding + font.GetWidth("Level Editor", 1.0f);
     #endif
-    int x_pos = (window_width - text_width) / 2;
+    int x_pos = (window.width - text_width) / 2;
 
     font.Render("Play", glm::vec2(x_pos, menu_y), 1.0f, (menu_focus_x == 0) ? glm::vec3(1.0f, 1.0f, 0.0f) : glm::vec3(1.0f),
       text_shader, projection);
@@ -151,7 +150,7 @@ AppState Menu(GLFWwindow* window) {
     font.Render("Level Editor", glm::vec2(x_pos, menu_y), 1.0f, (menu_focus_x == 2) ? glm::vec3(1.0f, 1.0f, 0.0f) : glm::vec3(1.0f),
       text_shader, projection);
     #endif
-    glfwSwapBuffers(window);
+    glfwSwapBuffers(window.window);
   }
 
   if (state == AppState::MENU) {

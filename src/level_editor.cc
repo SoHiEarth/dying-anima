@@ -102,13 +102,13 @@ void HandleLevelEditorInput(GLFWwindow *window, AppState &app_state) {
   last_mouse_position = mouse_position;
 }
 
-AppState LevelEditor(GLFWwindow *window) {
+AppState LevelEditor(GameWindow window) {
   auto font_atlas = LoadFontAtlas("assets/fonts/font.xml");
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO &imgui_io = ImGui::GetIO();
   imgui_io.Fonts->AddFontFromFileTTF(font_atlas.at("Debug").file.c_str(), 18.5f);
-  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplGlfw_InitForOpenGL(window.window, true);
   ImGui_ImplOpenGL3_Init("#version 150");
 
   Shader shader("assets/shaders/rect.vert.glsl", "assets/shaders/rect.frag.glsl");
@@ -142,14 +142,12 @@ AppState LevelEditor(GLFWwindow *window) {
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
-  glfwSetScrollCallback(window, ScrollCallback);
+  glfwSetScrollCallback(window.window, ScrollCallback);
 
   AppState app_state = AppState::LEVEL_EDITOR;
-  while (!glfwWindowShouldClose(window) && app_state == AppState::LEVEL_EDITOR) {
-    glm::ivec2 screen_dimensions;
-    glfwGetFramebufferSize(window, &screen_dimensions.x, &screen_dimensions.y);
-    auto projection = glm::ortho(0.0f, static_cast<float>(screen_dimensions.x),
-                                 0.0f, static_cast<float>(screen_dimensions.y));
+  while (!glfwWindowShouldClose(window.window) && app_state == AppState::LEVEL_EDITOR) {
+    auto projection = glm::ortho(0.0f, static_cast<float>(window.width),
+                                 0.0f, static_cast<float>(window.height));
     auto view = glm::translate(glm::mat4(1.0f), -editor_camera_position);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -162,9 +160,9 @@ AppState LevelEditor(GLFWwindow *window) {
     }
     
     float left = editor_camera_position.x;
-    float right = editor_camera_position.x + screen_dimensions.x;
+    float right = editor_camera_position.x + window.width;
     float bottom = editor_camera_position.y;
-    float top = editor_camera_position.y + screen_dimensions.y;
+    float top = editor_camera_position.y + window.height;
     int startX = static_cast<int>(std::floor(left / GRID_SIZE)) * GRID_SIZE;
     int endX = static_cast<int>(std::ceil(right / GRID_SIZE)) * GRID_SIZE;
     int startY = static_cast<int>(std::floor(bottom / GRID_SIZE)) * GRID_SIZE;
@@ -223,13 +221,13 @@ AppState LevelEditor(GLFWwindow *window) {
       }
     }
 
-    auto ui_projection = glm::ortho(0.0f, static_cast<float>(screen_dimensions.x),
-                                    0.0f, static_cast<float>(screen_dimensions.y));
+    auto ui_projection = glm::ortho(0.0f, static_cast<float>(window.width),
+                                    0.0f, static_cast<float>(window.height));
     font.Render(std::format("Grid Size: {}", GRID_SIZE), glm::vec2(10.0f, 10.0f), 1.0f,
                 glm::vec3(1.0f), text_shader, ui_projection);
-    glfwSwapBuffers(window);
+    glfwSwapBuffers(window.window);
     glfwPollEvents();
-    HandleLevelEditorInput(window, app_state);
+    HandleLevelEditorInput(window.window, app_state);
   }
   if (app_state == AppState::LEVEL_EDITOR) {
     app_state = AppState::EXIT;

@@ -1,4 +1,5 @@
 #pragma once
 #include "state.h"
-#include <GLFW/glfw3.h>
-AppState LevelEditor(GLFWwindow* window);
+#include "window.h"
+
+AppState LevelEditor(GameWindow window);

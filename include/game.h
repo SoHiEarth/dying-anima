@@ -1,5 +1,5 @@
 #pragma once
 #include "state.h"
-#include <GLFW/glfw3.h>
+#include "window.h"
 
-AppState Game(GLFWwindow* window);
+AppState Game(GameWindow window);

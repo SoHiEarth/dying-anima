@@ -48,6 +48,12 @@ target_link_libraries(DyingAnima PRIVATE
 set_target_properties(DyingAnima PROPERTIES
   OUTPUT_NAME "Dying Anima"
 )
+add_custom_command(TARGET DyingAnima POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/assets
+    $<TARGET_FILE_DIR:DyingAnima>/assets
+  COMMENT "Copying assets folder to build directory"
+)
 install(TARGETS DyingAnima
   RUNTIME DESTINATION bin
 )

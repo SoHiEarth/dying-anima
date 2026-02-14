@@ -15,9 +15,13 @@
 #include "shader.h"
 #include "game.h"
 #include "font.h"
+#include "window.h"
 #include "level_editor.h"
 
 void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {
+  auto window = GameWindow::GetGameWindow();
+  window.width = width;
+  window.height = height;
   assert(width > 0 && height > 0);
   glViewport(0, 0, width, height);
 }
@@ -31,22 +35,21 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  GLFWwindow* window = glfwCreateWindow(800, 600, "Dying Anima", nullptr, nullptr);
-  if (!window) {
+  auto window = GameWindow::GetGameWindow();
+  window.window = glfwCreateWindow(800, 600, "Dying Anima", nullptr, nullptr);
+  if (!window.window) {
     glfwTerminate();
     return -1;
   }
-  glfwMakeContextCurrent(window);
+  glfwMakeContextCurrent(window.window);
   gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-  int width, height;
-  glfwGetFramebufferSize(window, &width, &height);
-  while (width == 0 || height == 0) {
-    glfwGetFramebufferSize(window, &width, &height);
+  glfwGetFramebufferSize(window.window, &window.width, &window.height);
+  while (window.IsMinimized()) {
+    glfwGetFramebufferSize(window.window, &window.width, &window.height);
     glfwPollEvents();
   }
-  assert(width > 0 && height > 0);
-  glViewport(0, 0, width, height);
-  glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
+  glViewport(0, 0, window.width, window.height);
+  glfwSetFramebufferSizeCallback(window.window, FramebufferSizeCallback);
   while (game_state != AppState::EXIT) {
     std::print("Current State: {}\n", static_cast<int>(game_state));
     switch (game_state) {
@@ -63,7 +66,7 @@ int main() {
         break;
     }
   }
-  glfwDestroyWindow(window);
+  glfwDestroyWindow(window.window);
   glfwTerminate();
   return 0;
 }

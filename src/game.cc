@@ -28,6 +28,7 @@
 #include "physics.h"
 #include "level_utils.h"
 #include "input.h"
+#include "window.h"
 
 static std::vector<Object> objects;
 glm::vec3 camera_position{0.0f, 0.0f, -20.0f};
@@ -113,7 +114,7 @@ void HandleGameInput(GameState &game_state, Player &player, b2BodyId player_body
   }
 }
 
-AppState Game(GLFWwindow *window) {
+AppState Game(GameWindow window) {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   auto shader_atlas = LoadShaderAtlas("assets/shaders/shader.xml");
@@ -123,7 +124,7 @@ AppState Game(GLFWwindow *window) {
   ImGui::CreateContext();
   ImGuiIO &imgui_io = ImGui::GetIO();
   imgui_io.Fonts->AddFontFromFileTTF(font_atlas.at("Debug").file.c_str(), 18.5f);
-  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplGlfw_InitForOpenGL(window.window, true);
   ImGui_ImplOpenGL3_Init("#version 150");
 
   Player player{};
@@ -194,16 +195,13 @@ AppState Game(GLFWwindow *window) {
 
   AppState app_state = AppState::PLAYING;
   GameState game_state = GameState::RUNNING;
-  while (!glfwWindowShouldClose(window) && app_state == AppState::PLAYING) {
+  while (!glfwWindowShouldClose(window.window) && app_state == AppState::PLAYING) {
     input::NewFrame();
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    glm::ivec2 screen_dimensions{0, 0};
-    glfwGetFramebufferSize(window, &screen_dimensions.x, &screen_dimensions.y);
-    assert(screen_dimensions.x > 0 && screen_dimensions.y > 0);
-    float aspect = static_cast<float>(screen_dimensions.x) / static_cast<float>(screen_dimensions.y);
+    float aspect = static_cast<float>(window.width) / static_cast<float>(window.height);
 
     glm::vec3 screen_player_position = glm::vec3(-player.position, 0.0f) - camera_position;
     if (std::abs(screen_player_position.x) > 5.0f) {
@@ -214,7 +212,7 @@ AppState Game(GLFWwindow *window) {
     }
 
     glfwPollEvents();
-    HandleGameInput(game_state, player, player.body, window);
+    HandleGameInput(game_state, player, player.body, window.window);
     if (game_state == GameState::RUNNING) {
       b2World_Step(physics_world, 1.0f / 60.0f, 4);
     }
@@ -255,7 +253,7 @@ AppState Game(GLFWwindow *window) {
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }
 
-    glm::mat4 ui_projection = glm::ortho(0.0f, static_cast<float>(screen_dimensions.x), 0.0f, static_cast<float>(screen_dimensions.y));
+    glm::mat4 ui_projection = glm::ortho(0.0f, static_cast<float>(window.width), 0.0f, static_cast<float>(window.height));
     special_font.Render(std::format("Health: {}", static_cast<int>(player.health)), glm::vec2(20.0f, 20.0f), 1.0f, glm::vec3(1.0f), text_shader, ui_projection);
 
     // debug info: fps
@@ -289,13 +287,13 @@ AppState Game(GLFWwindow *window) {
 
     if (game_state == GameState::PAUSED) {
       Rect pause_rect;
-      pause_rect.position = glm::vec2(screen_dimensions.x / 2.0f, screen_dimensions.y / 2.0f);
-      pause_rect.scale = screen_dimensions;
+      pause_rect.position = glm::vec2(window.width / 2.0f, window.height / 2.0f);
+      pause_rect.scale = { window.width, window.height };
       pause_rect.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.5f);
       pause_rect.Render(rect_vertex_attrib, rect_shader, ui_projection, glm::mat4(1.0f));
 
       int x_pos = 30;
-      int y_pos = screen_dimensions.y / 2 + 100;
+      int y_pos = window.height / 2 + 100;
       int padding = 10;
       title_font.Render("PAUSED", glm::vec2(x_pos, y_pos), 1.0f, glm::vec3(1.0f), text_shader, ui_projection);
       y_pos -= title_font.GetHeight("PAUSED", 1.0f) + padding;
@@ -314,7 +312,7 @@ AppState Game(GLFWwindow *window) {
     ImGui::EndFrame();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    glfwSwapBuffers(window);
+    glfwSwapBuffers(window.window);
     input::UpdateLastFrameKeyStates();
     if (objects.empty()) {
       objects = LoadLevel("level.txt", physics_world);
