@@ -1,10 +1,16 @@
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/gtc/matrix_transform.hpp>
+// Code block
+
 #include "rect.h"
+
+#include <GLFW/glfw3.h>
+
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "core/quad.h"
 
-void Rect::Render(const Shader& shader, const glm::mat4& projection, const glm::mat4& view) {
+void Rect::Render(const Shader &shader, const glm::mat4 &projection,
+                  const glm::mat4 &view) {
   shader.Use();
   shader.SetUniform("projection", projection);
   shader.SetUniform("view", view);

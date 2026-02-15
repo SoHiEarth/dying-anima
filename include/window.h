@@ -8,7 +8,5 @@ struct GameWindow {
     static GameWindow window;
     return window;
   }
-  bool IsMinimized() {
-    return (width <= 0 && height <= 0);
-  }
+  bool IsMinimized() { return (width <= 0 && height <= 0); }
 };

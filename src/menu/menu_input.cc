@@ -1,7 +1,10 @@
-#include <algorithm>
-#include <GLFW/glfw3.h>
-#include "core/input.h"
 #include "menu/menu_input.h"
+
+#include <GLFW/glfw3.h>
+
+#include <algorithm>
+
+#include "core/input.h"
 #include "state.h"
 
 int menu::input::focus_x = 0;
@@ -30,6 +33,6 @@ void menu::input::Update(AppState& state, GLFWwindow* window) {
 #endif
     menu::input::focus_x = std::min(menu::input::focus_x + 1, max_focus);
   }
-  
+
   core::input::UpdateLastFrameKeyStates();
 }

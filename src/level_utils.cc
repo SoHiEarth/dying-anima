@@ -1,9 +1,11 @@
 #include "level_utils.h"
-#include <fstream>
-#include <sstream>
-#include <print>
 
-std::vector<Object> LoadLevel(std::string_view filename, b2WorldId physics_world) {
+#include <fstream>
+#include <print>
+#include <sstream>
+
+std::vector<Object> LoadLevel(std::string_view filename,
+                              b2WorldId physics_world) {
   std::vector<Object> objects{};
   std::fstream file(filename.data());
   if (!file.is_open()) {
@@ -45,13 +47,13 @@ std::vector<Object> LoadLevel(std::string_view filename, b2WorldId physics_world
   return objects;
 }
 
-void SaveLevel(std::string_view filename, const std::vector<Object> &objects) {
+void SaveLevel(std::string_view filename, const std::vector<Object>& objects) {
   std::ofstream file(filename.data());
   if (!file.is_open()) {
     std::print("Failed to open level file for writing: {}\n", filename);
     return;
   }
-  for (const auto &obj : objects) {
+  for (const auto& obj : objects) {
     file << obj.position.x << " " << obj.position.y << " ";
     file << obj.scale.x << " " << obj.scale.y << " ";
     file << obj.rotation << " ";

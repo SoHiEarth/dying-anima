@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <string>
+
 #include "texture.h"
 
 struct FontAtlasEntry {
@@ -20,5 +21,7 @@ struct TextureAtlasEntry {
 };
 
 std::map<std::string, FontAtlasEntry> LoadFontAtlas(std::string_view filename);
-std::map<std::string, ShaderAtlasEntry> LoadShaderAtlas(std::string_view filename);
-std::map<std::string, TextureAtlasEntry> LoadTextureAtlas(std::string_view filename);
+std::map<std::string, ShaderAtlasEntry> LoadShaderAtlas(
+    std::string_view filename);
+std::map<std::string, TextureAtlasEntry> LoadTextureAtlas(
+    std::string_view filename);

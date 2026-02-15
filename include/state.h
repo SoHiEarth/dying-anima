@@ -1,14 +1,5 @@
 #pragma once
 
-enum class AppState {
-  PLAYING,
-  EXIT,
-  LEVEL_EDITOR,
-  MENU
-};
+enum class AppState { PLAYING, EXIT, LEVEL_EDITOR, MENU };
 
-enum class GameState {
-  RUNNING,
-  PAUSED,
-  LOADING
-};
+enum class GameState { RUNNING, PAUSED, LOADING };

@@ -1,27 +1,24 @@
 #include <glad/glad.h>
+// Code block
 #include <GLFW/glfw3.h>
-#include <fstream>
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-#include <print>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <thread>
-#include <chrono>
-#include "state.h"
-#include "menu.h"
-#include "texture.h"
-#include "shader.h"
-#include "game.h"
-#include "font.h"
-#include "window.h"
-#include "level_editor.h"
-#include "core/quad.h"
-#include "atlas.h"
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <stb_image.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <print>
+
+#include "atlas.h"
+#include "core/quad.h"
+#include "game.h"
+#include "level_editor.h"
+#include "menu.h"
+#include "state.h"
+#include "window.h"
 
 void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {
   auto window = GameWindow::GetGameWindow();
@@ -61,7 +58,8 @@ int main() {
   ImGui::CreateContext();
   ImGuiIO& imgui_io = ImGui::GetIO();
   auto font_atlas = LoadFontAtlas("assets/fonts/font.xml");
-  imgui_io.Fonts->AddFontFromFileTTF(font_atlas.at("Debug").file.c_str(), 18.5f);
+  imgui_io.Fonts->AddFontFromFileTTF(font_atlas.at("Debug").file.c_str(),
+                                     18.5f);
   ImGui_ImplGlfw_InitForOpenGL(window.window, true);
   ImGui_ImplOpenGL3_Init("#version 150");
   core::quad::Init();

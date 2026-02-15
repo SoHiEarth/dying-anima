@@ -1,6 +1,8 @@
 #pragma once
 #include <box2d/box2d.h>
+
 #include <glm/glm.hpp>
+
 #include "texture.h"
 
 struct Object {

@@ -1,6 +1,6 @@
 #pragma once
-#include <string>
 #include <glm/glm.hpp>
+#include <string>
 struct Shader;
 
 struct Texture {
@@ -11,10 +11,6 @@ struct Texture {
   int channels;
   Texture(std::string_view path);
   ~Texture();
-  void Render(
-    const Shader& shader,
-    const glm::mat4& projection,
-    const glm::mat4& view,
-    const glm::mat4& model
-  );
+  void Render(const Shader& shader, const glm::mat4& projection,
+              const glm::mat4& view, const glm::mat4& model);
 };

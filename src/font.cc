@@ -1,8 +1,10 @@
+#include <ft2build.h>
 #include <glad/glad.h>
+
+#include <glm/gtc/type_ptr.hpp>
 #include <stdexcept>
 #include <string>
-#include <ft2build.h>
-#include <glm/gtc/type_ptr.hpp>
+
 #include "shader.h"
 #include FT_FREETYPE_H
 #include "font.h"
@@ -12,11 +14,13 @@ Font::Font(std::string_view font_path, unsigned int font_size) {
   glGenBuffers(1, &vertex_buffer);
   glBindVertexArray(vertex_attrib);
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr,
+               GL_DYNAMIC_DRAW);
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
   glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
+                        (void*)(2 * sizeof(float)));
 
   FT_Library ft;
   if (FT_Init_FreeType(&ft)) {
@@ -39,28 +43,19 @@ Font::Font(std::string_view font_path, unsigned int font_size) {
     unsigned int texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(
-      GL_TEXTURE_2D,
-      0,
-      GL_RED,
-      face->glyph->bitmap.width,
-      face->glyph->bitmap.rows,
-      0,
-      GL_RED,
-      GL_UNSIGNED_BYTE,
-      face->glyph->bitmap.buffer
-    );
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width,
+                 face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE,
+                 face->glyph->bitmap.buffer);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     Character character = {
-      texture,
-      glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-      glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-      static_cast<unsigned int>(face->glyph->advance.x)
-    };
+        texture,
+        glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+        glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+        static_cast<unsigned int>(face->glyph->advance.x)};
     characters.insert(std::pair<char, Character>(c, character));
   }
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -89,14 +84,9 @@ int Font::GetHeight(std::string_view text, float scale) const {
   return height;
 }
 
-void Font::Render(
-  std::string_view text,
-  const glm::vec2& position,
-  const float scale,
-  const glm::vec3& color,
-  const Shader& shader,
-  const glm::mat4& projection
-) const {
+void Font::Render(std::string_view text, const glm::vec2& position,
+                  const float scale, const glm::vec3& color,
+                  const Shader& shader, const glm::mat4& projection) const {
   shader.Use();
   shader.SetUniform("color", color);
   shader.SetUniform("projection", projection);
@@ -113,14 +103,11 @@ void Font::Render(
     float h = ch.size.y * scale;
 
     float vertices[6][4] = {
-      { xpos,     ypos + h,   0.0f, 0.0f },
-      { xpos,     ypos,       0.0f, 1.0f },
-      { xpos + w, ypos,       1.0f, 1.0f },
+        {xpos, ypos + h, 0.0f, 0.0f},    {xpos, ypos, 0.0f, 1.0f},
+        {xpos + w, ypos, 1.0f, 1.0f},
 
-      { xpos,     ypos + h,   0.0f, 0.0f },
-      { xpos + w, ypos,       1.0f, 1.0f },
-      { xpos + w, ypos + h,   1.0f, 0.0f }
-    };
+        {xpos, ypos + h, 0.0f, 0.0f},    {xpos + w, ypos, 1.0f, 1.0f},
+        {xpos + w, ypos + h, 1.0f, 0.0f}};
     glBindTexture(GL_TEXTURE_2D, ch.texture);
     glBindVertexArray(vertex_attrib);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
