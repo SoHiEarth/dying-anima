@@ -120,7 +120,7 @@ AppState Game(GameWindow window) {
   auto font_atlas = LoadFontAtlas("assets/fonts/font.xml");
   auto texture_atlas = LoadTextureAtlas("assets/textures/texture.xml");
   Player player;
-  player.texture_name = "player";
+  player.texture_name = "game.player";
   physics_world = physics::CreatePhysicsWorld({0.0f, -9.81f});
   player.body = physics::CreatePhysicsBody(physics_world, player.position, player.scale, player.rotation, true);
 
@@ -180,7 +180,7 @@ AppState Game(GameWindow window) {
       b2Vec2 physics_position = b2Body_GetPosition(obj.body);
       obj.position = glm::vec2(physics_position.x, physics_position.y);
       if (!texture_atlas.contains(obj.texture_name)) {
-        obj.texture_name = "notexture";
+        obj.texture_name = "util.notexture";
       }
       shader.Use();
       texture_atlas.at(obj.texture_name).texture->Render(

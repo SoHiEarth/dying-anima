@@ -30,7 +30,8 @@ AppState Menu(GameWindow window) {
   Shader shader(shader_atlas.at("Sprite").vertex_file, shader_atlas.at("Sprite").fragment_file);
   shader.Use();
   shader.SetUniform("texture1", 0);
-  Texture banner_texture(texture_atlas.at("banner").path);
+  Texture banner_texture(texture_atlas.at("util.banner").path);
+  Texture selected_texture(texture_atlas.at("menu.selected").path);
 
   AppState state = AppState::MENU;
   while (!glfwWindowShouldClose(window.window) && state == AppState::MENU) {
@@ -58,6 +59,7 @@ AppState Menu(GameWindow window) {
 
     const float menu_y = (float)window.height / 4.0f;
     constexpr int padding = 50;
+    constexpr int selected_margin = 30;
 
     #ifdef NDEBUG
     int text_width = font.GetWidth("Play", 1.0f) + padding + font.GetWidth("Quit", 1.0f);
@@ -66,16 +68,39 @@ AppState Menu(GameWindow window) {
     #endif
     int x_pos = (window.width - text_width) / 2;
 
-    font.Render("Play", glm::vec2(x_pos, menu_y), 1.0f, (menu::input::focus_x == 0) ? glm::vec3(1.0f, 1.0f, 0.0f) : glm::vec3(1.0f),
-      text_shader, projection);
+    if (menu::input::focus_x == static_cast<int>(AppState::PLAYING)) {
+      float width = font.GetWidth("Play", 1.0f) + selected_margin;
+      float height = font.GetHeight("Play", 1.0f) + selected_margin;
+      glm::vec2 center_pos = { x_pos + width / 2.0f - selected_margin/2.0f, menu_y + height / 2.0f - selected_margin/2.0f };
+      selected_texture.Render(shader, projection, glm::mat4(1.0f),
+        CalculateModelMatrix(center_pos, 0.0f, { width, height }));
+      core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
+    }
+    font.Render("Play", glm::vec2(x_pos, menu_y), 1.0f, glm::vec3(1.0f), text_shader, projection);
     x_pos += font.GetWidth("Play", 1.0f) + padding;
-    font.Render("Quit", glm::vec2(x_pos, menu_y), 1.0f, (menu::input::focus_x == 1) ? glm::vec3(1.0f, 1.0f, 0.0f) : glm::vec3(1.0f),
-      text_shader, projection);
-    #ifndef NDEBUG
+
+    if (menu::input::focus_x == static_cast<int>(AppState::EXIT)) {
+      float width = font.GetWidth("Quit", 1.0f) + selected_margin;
+      float height = font.GetHeight("Quit", 1.0f) + selected_margin;
+      glm::vec2 center_pos = { x_pos + width / 2.0f - selected_margin/2.0f, menu_y + height / 2.0f - selected_margin/2.0f };
+      selected_texture.Render(shader, projection, glm::mat4(1.0f),
+        CalculateModelMatrix(center_pos, 0.0f, { width, height }));
+      core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
+    }
+    font.Render("Quit", glm::vec2(x_pos, menu_y), 1.0f, glm::vec3(1.0f), text_shader, projection);
+
+#ifndef NDEBUG
     x_pos += font.GetWidth("Quit", 1.0f) + padding;
-    font.Render("Level Editor", glm::vec2(x_pos, menu_y), 1.0f, (menu::input::focus_x == 2) ? glm::vec3(1.0f, 1.0f, 0.0f) : glm::vec3(1.0f),
-      text_shader, projection);
-    #endif
+    if (menu::input::focus_x == static_cast<int>(AppState::LEVEL_EDITOR)) {
+      float width = font.GetWidth("Level Editor", 1.0f) + selected_margin;
+      float height = font.GetHeight("Level Editor", 1.0f) + selected_margin;
+      glm::vec2 center_pos = { x_pos + width / 2.0f - selected_margin/2.0f, menu_y + height / 2.0f - selected_margin/2.0f };
+      selected_texture.Render(shader, projection, glm::mat4(1.0f),
+        CalculateModelMatrix(center_pos, 0.0f, { width, height }));
+      core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
+    }
+    font.Render("Level Editor", glm::vec2(x_pos, menu_y), 1.0f, glm::vec3(1.0f), text_shader, projection);
+#endif
     glfwSwapBuffers(window.window);
   }
 

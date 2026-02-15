@@ -55,7 +55,7 @@ void SaveLevel(std::string_view filename, const std::vector<Object> &objects) {
     file << obj.position.x << " " << obj.position.y << " ";
     file << obj.scale.x << " " << obj.scale.y << " ";
     file << obj.rotation << " ";
-    file << "notexture" << "\n";
+    file << "util.notexture" << "\n";
   }
   file.close();
 }

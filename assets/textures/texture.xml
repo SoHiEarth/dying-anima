@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <textures>
-  <texture name="notexture" path="notexture.png"/>
-  <texture name="player" path="player.png"/>
-  <texture name="banner" path="banner.png"/>
+  <texture name="util.notexture" path="notexture.png"/>
+  <texture name="game.player" path="player.png"/>
+  <texture name="util.banner" path="banner.png"/>
+	<texture name="menu.selected" path="selected.png"/>
 </textures>
