@@ -37,8 +37,9 @@ b2WorldId physics_world;
 void HandleGameInput(GameState &game_state,
     entt::registry& registry,
     entt::entity player,
-    GLFWwindow *window) {
-  static int frames_since_no_input = 0;
+    GLFWwindow *window,
+    double dt = 0.016) {
+  static double time_since_no_input = 0;
   auto &player_speed = registry.get<PlayerSpeed>(player);
   auto &player_transform = registry.get<Transform>(player);
   auto &player_body = registry.get<PhysicsBody>(player).body;
@@ -82,13 +83,15 @@ void HandleGameInput(GameState &game_state,
     b2Body_ApplyForceToCenter(player_body, b2Vec2(player_speed.boost_speed, 0.0f), true);
   }
 
-  if (velocity.x == 0 && velocity.y == 0) {
-    frames_since_no_input++;
-    if (frames_since_no_input > 120) {
-      camera_position = glm::mix(camera_position, glm::vec3(player_transform.position, 20.0f), 0.02f);
+  if (std::abs(velocity.x) < 0.01f && std::abs(velocity.y) < 0.01f) {
+    time_since_no_input += dt;
+    if (time_since_no_input > 2.0f) {
+      float speed = 1.0f - std::pow(0.2f, dt);
+      camera_position = glm::mix(camera_position, glm::vec3(player_transform.position, 20.0f), speed);
     }
   } else {
-    frames_since_no_input = 0;
+    time_since_no_input = 0;
+    camera_position.z = std::min(30.0f, camera_position.z * 1.002f);
   }
 }
 
@@ -137,6 +140,11 @@ AppState Game(GameWindow window) {
   GameState game_state = GameState::RUNNING;
   while (!glfwWindowShouldClose(window.window) &&
          app_state == AppState::PLAYING) {
+    static double previous_frame_time = glfwGetTime();
+    double current_time = glfwGetTime();
+    double frame_time = current_time - previous_frame_time;
+    previous_frame_time = current_time;
+
     core::input::NewFrame();
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -151,7 +159,7 @@ AppState Game(GameWindow window) {
     }
 
     glfwPollEvents();
-    HandleGameInput(game_state, registry, player, window.window);
+    HandleGameInput(game_state, registry, player, window.window, frame_time);
     if (game_state == GameState::RUNNING) {
       b2World_Step(physics_world, 1.0f / 60.0f, 4);
     }
