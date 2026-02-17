@@ -32,6 +32,7 @@
 #include "shader.h"
 #include "state.h"
 #include "window.h"
+#include "saves.h"
 
 std::vector<Object> objects;
 glm::vec3 camera_position{0.0f, 0.0f, -20.0f};
@@ -271,6 +272,7 @@ AppState Game(GameWindow window) {
       objects = LoadLevel("level.txt", physics_world);
     }
   }
+  SaveManager::SaveGame(player);
   if (app_state == AppState::PLAYING) {
     app_state = AppState::EXIT;
   }

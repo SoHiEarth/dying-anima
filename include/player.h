@@ -2,7 +2,6 @@
 #include <glm/glm.hpp>
 
 #include "object.h"
-#include "texture.h"
 
 struct Player : public Object {
   float max_speed = 2.0f;

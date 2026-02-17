@@ -2,8 +2,7 @@
 #include <box2d/box2d.h>
 
 #include <glm/glm.hpp>
-
-#include "texture.h"
+#include <string>
 
 struct Object {
   glm::vec2 position = glm::vec2(0.0f);
