@@ -1,5 +1,5 @@
 # dying-anima
-![Banner](assets/banner.png)
+![Banner](assets/textures/banner.png)
 **A story about Death and Immortality**
 # Story
 Check out [the story](docs/story.md)
