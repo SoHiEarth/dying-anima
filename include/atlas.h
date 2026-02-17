@@ -17,11 +17,11 @@ struct ShaderAtlasEntry {
 
 struct TextureAtlasEntry {
   std::string path;
-  Texture* texture = nullptr;
+  Texture *texture = nullptr;
 };
 
 std::map<std::string, FontAtlasEntry> LoadFontAtlas(std::string_view filename);
-std::map<std::string, ShaderAtlasEntry> LoadShaderAtlas(
-    std::string_view filename);
-std::map<std::string, TextureAtlasEntry> LoadTextureAtlas(
-    std::string_view filename);
+std::map<std::string, ShaderAtlasEntry>
+LoadShaderAtlas(std::string_view filename);
+std::map<std::string, TextureAtlasEntry>
+LoadTextureAtlas(std::string_view filename);

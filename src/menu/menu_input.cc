@@ -2,14 +2,12 @@
 
 #include <GLFW/glfw3.h>
 
-#include <algorithm>
-
 #include "core/input.h"
 #include "state.h"
 
-int menu::input::focus_x = 0;
+int menu::input::focus_index = 0;
 
-void menu::input::Update(AppState& state, GLFWwindow* window) {
+void menu::input::Update(AppState &state, GLFWwindow *window) {
   core::input::NewFrame();
   core::input::UpdateKeyState(window, GLFW_KEY_ESCAPE);
   core::input::UpdateKeyState(window, GLFW_KEY_ENTER);
@@ -20,10 +18,10 @@ void menu::input::Update(AppState& state, GLFWwindow* window) {
     state = AppState::EXIT;
   }
   if (core::input::IsKeyPressed(GLFW_KEY_ENTER)) {
-    state = static_cast<AppState>(menu::input::focus_x);
+    state = static_cast<AppState>(menu::input::focus_index);
   }
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_LEFT)) {
-    menu::input::focus_x = std::max(menu::input::focus_x - 1, 0);
+    menu::input::focus_index = std::max(menu::input::focus_index - 1, 0);
   }
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_RIGHT)) {
 #ifdef NDEBUG
@@ -31,7 +29,8 @@ void menu::input::Update(AppState& state, GLFWwindow* window) {
 #else
     const int max_focus = 2;
 #endif
-    menu::input::focus_x = std::min(menu::input::focus_x + 1, max_focus);
+    menu::input::focus_index =
+        std::min(menu::input::focus_index + 1, max_focus);
   }
 
   core::input::UpdateLastFrameKeyStates();

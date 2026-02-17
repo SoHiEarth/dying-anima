@@ -12,10 +12,10 @@
 
 std::once_flag font_flag, shader_flag, texture_flag;
 
-void PrintFontResults(FontAtlas& atlas) {
+void PrintFontResults(FontAtlas &atlas) {
   std::print("- Font Atlas Result -\nLoaded {} fonts from atlas.\n",
              atlas.size());
-  for (const auto& [tag, entry] : atlas) {
+  for (const auto &[tag, entry] : atlas) {
     std::print("Name: {} (Tag: {}) File: {})\n", entry.name, tag, entry.file);
   }
 }
@@ -43,10 +43,10 @@ FontAtlas LoadFontAtlas(std::string_view filename) {
   return font_atlas;
 }
 
-void PrintShaderResults(ShaderAtlas& atlas) {
+void PrintShaderResults(ShaderAtlas &atlas) {
   std::print("- Shader Atlas Result -\nLoaded {} shaders from atlas.\n",
              atlas.size());
-  for (const auto& [tag, entry] : atlas) {
+  for (const auto &[tag, entry] : atlas) {
     std::print("Name: {} (Tag: {}) Vertex File: {}, Fragment File: {})\n",
                entry.name, tag, entry.vertex_file, entry.fragment_file);
   }
@@ -78,10 +78,10 @@ ShaderAtlas LoadShaderAtlas(std::string_view filename) {
   return shader_atlas;
 }
 
-void PrintTextureResults(TextureAtlas& atlas) {
+void PrintTextureResults(TextureAtlas &atlas) {
   std::print("- Texture Atlas Result -\nLoaded {} textures from atlas.\n",
              atlas.size());
-  for (const auto& [name, entry] : atlas) {
+  for (const auto &[name, entry] : atlas) {
     std::print("Name: {} (File: {}, Dimensions: {}x{})\n", name, entry.path,
                entry.texture->width, entry.texture->height);
   }

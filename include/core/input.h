@@ -8,11 +8,11 @@
 namespace core::input {
 extern std::map<int, bool> key_states;
 extern std::map<int, bool> last_frame_key_states;
-void UpdateKeyState(GLFWwindow* window, int key);
+void UpdateKeyState(GLFWwindow *window, int key);
 bool IsKeyPressed(int key);
 bool IsKeyPressedThisFrame(int key);
 void UpdateLastFrameKeyStates();
 void NewFrame();
-}  // namespace core::input
+} // namespace core::input
 
 #endif

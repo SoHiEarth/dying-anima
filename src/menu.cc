@@ -72,7 +72,7 @@ AppState Menu(GameWindow window) {
 #endif
     int x_pos = (window.width - text_width) / 2;
 
-    if (menu::input::focus_x == static_cast<int>(AppState::PLAYING)) {
+    if (menu::input::focus_index == static_cast<int>(AppState::PLAYING)) {
       float width = font.GetWidth("Play", 1.0f) + selected_margin;
       float height = font.GetHeight("Play", 1.0f) + selected_margin;
       glm::vec2 center_pos = {x_pos + width / 2.0f - selected_margin / 2.0f,
@@ -86,7 +86,7 @@ AppState Menu(GameWindow window) {
                 text_shader, projection);
     x_pos += font.GetWidth("Play", 1.0f) + padding;
 
-    if (menu::input::focus_x == static_cast<int>(AppState::EXIT)) {
+    if (menu::input::focus_index == static_cast<int>(AppState::EXIT)) {
       float width = font.GetWidth("Quit", 1.0f) + selected_margin;
       float height = font.GetHeight("Quit", 1.0f) + selected_margin;
       glm::vec2 center_pos = {x_pos + width / 2.0f - selected_margin / 2.0f,
@@ -101,7 +101,7 @@ AppState Menu(GameWindow window) {
 
 #ifndef NDEBUG
     x_pos += font.GetWidth("Quit", 1.0f) + padding;
-    if (menu::input::focus_x == static_cast<int>(AppState::LEVEL_EDITOR)) {
+    if (menu::input::focus_index == static_cast<int>(AppState::LEVEL_EDITOR)) {
       float width = font.GetWidth("Level Editor", 1.0f) + selected_margin;
       float height = font.GetHeight("Level Editor", 1.0f) + selected_margin;
       glm::vec2 center_pos = {x_pos + width / 2.0f - selected_margin / 2.0f,

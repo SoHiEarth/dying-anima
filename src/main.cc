@@ -20,7 +20,7 @@
 #include "state.h"
 #include "window.h"
 
-void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {
+void FramebufferSizeCallback(GLFWwindow * /* window */, int width, int height) {
   auto window = GameWindow::GetGameWindow();
   window.width = width;
   window.height = height;
@@ -34,8 +34,8 @@ int main() {
     std::print("Failed to initialize GLFW\n");
     return -1;
   }
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   auto window = GameWindow::GetGameWindow();
   window.window = glfwCreateWindow(800, 600, "Dying Anima", nullptr, nullptr);
@@ -56,7 +56,7 @@ int main() {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
-  ImGuiIO& imgui_io = ImGui::GetIO();
+  ImGuiIO &imgui_io = ImGui::GetIO();
   auto font_atlas = LoadFontAtlas("assets/fonts/font.xml");
   imgui_io.Fonts->AddFontFromFileTTF(font_atlas.at("Debug").file.c_str(),
                                      18.5f);
@@ -66,17 +66,17 @@ int main() {
   while (game_state != AppState::EXIT) {
     std::print("Current State: {}\n", static_cast<int>(game_state));
     switch (game_state) {
-      case AppState::MENU:
-        game_state = Menu(window);
-        break;
-      case AppState::PLAYING:
-        game_state = Game(window);
-        break;
-      case AppState::LEVEL_EDITOR:
-        game_state = LevelEditor(window);
-        break;
-      case AppState::EXIT:
-        break;
+    case AppState::MENU:
+      game_state = Menu(window);
+      break;
+    case AppState::PLAYING:
+      game_state = Game(window);
+      break;
+    case AppState::LEVEL_EDITOR:
+      game_state = LevelEditor(window);
+      break;
+    case AppState::EXIT:
+      break;
     }
   }
   core::quad::Quit();

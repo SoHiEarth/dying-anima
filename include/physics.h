@@ -4,14 +4,14 @@
 #include <glm/glm.hpp>
 
 namespace physics {
-b2WorldId CreatePhysicsWorld(const glm::vec2& gravity) {
+b2WorldId CreatePhysicsWorld(const glm::vec2 &gravity) {
   b2WorldDef world_def = b2DefaultWorldDef();
   world_def.gravity = {gravity.x, gravity.y};
   return b2CreateWorld(&world_def);
 }
 
-b2BodyId CreatePhysicsBody(b2WorldId world, const glm::vec2& position,
-                           const glm::vec2& scale, float angle,
+b2BodyId CreatePhysicsBody(b2WorldId world, const glm::vec2 &position,
+                           const glm::vec2 &scale, float angle,
                            bool is_dynamic) {
   auto body_def = b2DefaultBodyDef();
   if (is_dynamic) {
@@ -31,16 +31,16 @@ b2BodyId CreatePhysicsBody(b2WorldId world, const glm::vec2& position,
   return body;
 }
 
-void SyncPosition(b2BodyId body, glm::vec2& position) {
+void SyncPosition(b2BodyId body, glm::vec2 &position) {
   b2Vec2 b2_position = b2Body_GetPosition(body);
   position.x = b2_position.x;
   position.y = b2_position.y;
 }
 
-void DestroyPhysicsWorld(b2WorldId& world) {
+void DestroyPhysicsWorld(b2WorldId &world) {
   if (b2World_IsValid(world)) {
     b2DestroyWorld(world);
     world = b2WorldId{};
   }
 }
-}  // namespace physics
+} // namespace physics

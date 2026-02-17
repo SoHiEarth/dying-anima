@@ -14,7 +14,7 @@
 Texture::Texture(std::string_view path) {
   this->path = std::string(path);
   stbi_set_flip_vertically_on_load(true);
-  unsigned char* data =
+  unsigned char *data =
       stbi_load(std::string(path).c_str(), &width, &height, &channels, 0);
   if (data) {
     glGenTextures(1, &id);
@@ -38,10 +38,10 @@ Texture::Texture(std::string_view path) {
 
 Texture::~Texture() { glDeleteTextures(1, &id); }
 
-void Texture::Render(const Shader& shader, const glm::mat4& projection,
-                     const glm::mat4& view, const glm::mat4& model) {
+void Texture::Render(const Shader &shader, const glm::mat4 &projection,
+                     const glm::mat4 &view, const glm::mat4 &model) {
   shader.Use();
-  const auto& mvp = projection * view * model;
+  const auto &mvp = projection * view * model;
   glUniformMatrix4fv(glGetUniformLocation(shader.id, "mvp"), 1, GL_FALSE,
                      glm::value_ptr(mvp));
   glActiveTexture(GL_TEXTURE0);

@@ -6,7 +6,7 @@
 std::map<int, bool> core::input::key_states{},
     core::input::last_frame_key_states{};
 
-void core::input::UpdateKeyState(GLFWwindow* window, int key) {
+void core::input::UpdateKeyState(GLFWwindow *window, int key) {
   if (key == GLFW_MOUSE_BUTTON_LEFT || key == GLFW_MOUSE_BUTTON_MIDDLE ||
       key == GLFW_MOUSE_BUTTON_RIGHT) {
     key_states.insert({key, glfwGetMouseButton(window, key) == GLFW_PRESS});

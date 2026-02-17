@@ -3,8 +3,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-glm::mat4 CalculateModelMatrix(const glm::vec2& position, float rotation,
-                               const glm::vec2& scale) {
+glm::mat4 CalculateModelMatrix(const glm::vec2 &position, float rotation,
+                               const glm::vec2 &scale) {
   glm::mat4 model = glm::mat4(1.0f);
   model = glm::translate(model, glm::vec3(position, 0.0f));
   model =

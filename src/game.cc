@@ -7,15 +7,10 @@
 #include <imgui_impl_opengl3.h>
 
 #include <algorithm>
-#include <filesystem>
 #include <format>
-#include <fstream>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <memory>
-#include <print>
 #include <pugixml.hpp>
-#include <sstream>
 #include <vector>
 
 #include "atlas.h"
@@ -29,18 +24,19 @@
 #include "physics.h"
 #include "player.h"
 #include "rect.h"
+#include "saves.h"
 #include "shader.h"
 #include "state.h"
 #include "window.h"
-#include "saves.h"
+#include <filesystem>
 
 std::vector<Object> objects;
 glm::vec3 camera_position{0.0f, 0.0f, -20.0f};
 b2WorldId physics_world;
 int frames_since_no_input = 0;
 
-void HandleGameInput(GameState& game_state, Player& player,
-                     b2BodyId player_body, GLFWwindow* window) {
+void HandleGameInput(GameState &game_state, Player &player,
+                     b2BodyId player_body, GLFWwindow *window) {
   core::input::UpdateKeyState(window, GLFW_KEY_ESCAPE);
   core::input::UpdateKeyState(window, GLFW_KEY_A);
   core::input::UpdateKeyState(window, GLFW_KEY_D);
@@ -53,7 +49,8 @@ void HandleGameInput(GameState& game_state, Player& player,
     else if (game_state == GameState::RUNNING)
       game_state = GameState::PAUSED;
   }
-  if (game_state == GameState::PAUSED) return;
+  if (game_state == GameState::PAUSED)
+    return;
   b2Vec2 velocity = b2Body_GetLinearVelocity(player_body);
 
   if (core::input::IsKeyPressed(GLFW_KEY_SPACE) && player.IsOnGround()) {
@@ -113,12 +110,28 @@ void HandleGameInput(GameState& game_state, Player& player,
 }
 
 AppState Game(GameWindow window) {
+  physics_world = physics::CreatePhysicsWorld({0.0f, -9.81f});
   auto shader_atlas = LoadShaderAtlas("assets/shaders/shader.xml");
   auto font_atlas = LoadFontAtlas("assets/fonts/font.xml");
   auto texture_atlas = LoadTextureAtlas("assets/textures/texture.xml");
-  Player player;
+  Player player{};
+  // Get the latest save data and initialize the player with it
+  auto folder = std::filesystem::path("saves");
+  if (!std::filesystem::exists(folder) || std::filesystem::is_empty(folder)) {
+    std::filesystem::create_directory(folder);
+  } else {
+    std::string largest_save_id = "";
+    for (const auto &entry : std::filesystem::directory_iterator(folder)) {
+      if (entry.is_regular_file() && entry.path().extension() == ".save") {
+        std::string filename = entry.path().filename().string();
+        std::string save_id = filename.substr(0, filename.find(".save"));
+        largest_save_id = std::max(largest_save_id, save_id);
+      }
+    }
+    auto save_data = SaveManager::LoadGame("saves/" + largest_save_id + ".save");
+    player = save_data.player;
+  }
   player.texture_name = "game.player";
-  physics_world = physics::CreatePhysicsWorld({0.0f, -9.81f});
   player.body = physics::CreatePhysicsBody(physics_world, player.position,
                                            player.scale, player.rotation, true);
 
@@ -179,7 +192,7 @@ AppState Game(GameWindow window) {
                                               player.scale));
     core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
 
-    for (auto& obj : objects) {
+    for (auto &obj : objects) {
       b2Vec2 physics_position = b2Body_GetPosition(obj.body);
       obj.position = glm::vec2(physics_position.x, physics_position.y);
       if (!texture_atlas.contains(obj.texture_name)) {
@@ -227,7 +240,7 @@ AppState Game(GameWindow window) {
     ImGui::End();
 
     ImGui::Begin("Texture Atlas");
-    for (const auto& [name, entry] : texture_atlas) {
+    for (const auto &[name, entry] : texture_atlas) {
       ImGui::Text("Name: %s", name.c_str());
       ImGui::Image(entry.texture->id, ImVec2(100, 100));
     }
@@ -280,7 +293,7 @@ AppState Game(GameWindow window) {
     b2DestroyWorld(physics_world);
     physics_world = b2WorldId{};
   }
-  for (auto& [name, entry] : texture_atlas) {
+  for (auto &[name, entry] : texture_atlas) {
     delete entry.texture;
   }
   return app_state;

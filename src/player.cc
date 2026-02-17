@@ -8,7 +8,7 @@ bool Player::IsOnGround() {
   std::vector<b2ContactData> contacts(capacity);
   int count = b2Body_GetContactData(body, contacts.data(), capacity);
   for (int i = 0; i < count; ++i) {
-    b2ContactData& cd = contacts[i];
+    b2ContactData &cd = contacts[i];
     if (cd.manifold.normal.y <= -0.9f) {
       return true;
     }

@@ -25,12 +25,12 @@ static std::vector<Object> editor_objects;
 glm::vec3 editor_camera_position = glm::vec3(0.0f, 0.0f, 1.0f);
 glm::dvec2 mouse_position, last_mouse_position;
 
-void ScrollCallback(GLFWwindow* /* window */, double /* xoffset */,
+void ScrollCallback(GLFWwindow * /* window */, double /* xoffset */,
                     double yoffset) {
   GRID_SIZE = std::max(5, GRID_SIZE + static_cast<int>(yoffset) * 5);
 }
 
-void HandleLevelEditorInput(GameWindow window, AppState& app_state) {
+void HandleLevelEditorInput(GameWindow window, AppState &app_state) {
   core::input::NewFrame();
   core::input::UpdateKeyState(window.window, GLFW_KEY_ESCAPE);
   core::input::UpdateKeyState(window.window, GLFW_MOUSE_BUTTON_LEFT);
@@ -40,10 +40,10 @@ void HandleLevelEditorInput(GameWindow window, AppState& app_state) {
     app_state = AppState::PLAYING;
   }
   glfwGetCursorPos(window.window, &mouse_position.x, &mouse_position.y);
-  glm::ivec2 mouse_world_position = glm::ivec2(
-      static_cast<int>(mouse_position.x + editor_camera_position.x),
-      static_cast<int>(window.height -
-                       (mouse_position.y - editor_camera_position.y)));
+  glm::ivec2 mouse_world_position =
+      glm::ivec2(static_cast<int>(mouse_position.x + editor_camera_position.x),
+                 static_cast<int>(window.height - (mouse_position.y -
+                                                   editor_camera_position.y)));
   glm::ivec2 grid_position = glm::ivec2(mouse_world_position.x / GRID_SIZE,
                                         mouse_world_position.y / GRID_SIZE);
   if (core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_MIDDLE)) {
@@ -54,7 +54,7 @@ void HandleLevelEditorInput(GameWindow window, AppState& app_state) {
   if (core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_LEFT)) {
     selected_object_index = -1;
     for (size_t i = 0; i < editor_objects.size(); ++i) {
-      auto& obj = editor_objects[i];
+      auto &obj = editor_objects[i];
       if (mouse_world_position.x >= obj.position.x &&
           mouse_world_position.x <= obj.position.x + obj.scale.x &&
           mouse_world_position.y >= obj.position.y &&
@@ -96,7 +96,7 @@ AppState LevelEditor(GameWindow window) {
     auto view = glm::translate(glm::mat4(1.0f), -editor_camera_position);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    for (const auto& object : editor_objects) {
+    for (const auto &object : editor_objects) {
       Rect box;
       box.position = glm::vec2(object.position.x + GRID_SIZE / 2.0f,
                                object.position.y + GRID_SIZE / 2.0f);
@@ -141,7 +141,7 @@ AppState LevelEditor(GameWindow window) {
     origin_horizontal.Render(shader, projection, view);
 
     if (selected_object_index != -1) {
-      auto& obj = editor_objects[selected_object_index];
+      auto &obj = editor_objects[selected_object_index];
       glm::vec2 center = glm::vec2(obj.position.x + obj.scale.x * 0.5f,
                                    obj.position.y + obj.scale.y * 0.5f);
       Rect x_axis, y_axis;

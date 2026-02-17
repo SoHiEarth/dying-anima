@@ -20,7 +20,7 @@ Font::Font(std::string_view font_path, unsigned int font_size) {
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
-                        (void*)(2 * sizeof(float)));
+                        (void *)(2 * sizeof(float)));
 
   FT_Library ft;
   if (FT_Init_FreeType(&ft)) {
@@ -65,8 +65,8 @@ Font::Font(std::string_view font_path, unsigned int font_size) {
 
 int Font::GetWidth(std::string_view text, float scale) const {
   int width = 0;
-  for (const char& c : text) {
-    const auto& ch = characters.at(c);
+  for (const char &c : text) {
+    const auto &ch = characters.at(c);
     width += (ch.advance >> 6) * (int)scale;
   }
   return width;
@@ -74,8 +74,8 @@ int Font::GetWidth(std::string_view text, float scale) const {
 
 int Font::GetHeight(std::string_view text, float scale) const {
   int height = 0;
-  for (const char& c : text) {
-    const auto& ch = characters.at(c);
+  for (const char &c : text) {
+    const auto &ch = characters.at(c);
     int h = ch.size.y * (int)scale;
     if (h > height) {
       height = h;
@@ -84,9 +84,9 @@ int Font::GetHeight(std::string_view text, float scale) const {
   return height;
 }
 
-void Font::Render(std::string_view text, const glm::vec2& position,
-                  const float scale, const glm::vec3& color,
-                  const Shader& shader, const glm::mat4& projection) const {
+void Font::Render(std::string_view text, const glm::vec2 &position,
+                  const float scale, const glm::vec3 &color,
+                  const Shader &shader, const glm::mat4 &projection) const {
   shader.Use();
   shader.SetUniform("color", color);
   shader.SetUniform("projection", projection);
@@ -95,8 +95,8 @@ void Font::Render(std::string_view text, const glm::vec2& position,
 
   float x_pos = position.x;
   float y_pos = position.y;
-  for (const char& c : text) {
-    const auto& ch = characters.at(c);
+  for (const char &c : text) {
+    const auto &ch = characters.at(c);
     float xpos = x_pos + ch.bearing.x * scale;
     float ypos = y_pos - (ch.size.y - ch.bearing.y) * scale;
     float w = ch.size.x * scale;
