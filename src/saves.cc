@@ -4,13 +4,14 @@
 #include <iostream>
 #include <pugixml.hpp>
 
-void SaveManager::SaveGame(const Player &player) {
+void SaveManager::SaveGame(const Transform &player_transform,
+    const Health &player_health) {
   pugi::xml_document doc;
   auto root = doc.append_child("SaveData");
   auto player_node = root.append_child("Player");
-  player_node.append_attribute("pos.x") = player.position.x;
-  player_node.append_attribute("pos.y") = player.position.y;
-  player_node.append_attribute("Health") = player.health;
+  player_node.append_attribute("pos.x") = player_transform.position.x;
+  player_node.append_attribute("pos.y") = player_transform.position.y;
+  player_node.append_attribute("Health") = player_health.health;
   if (!std::filesystem::exists("saves")) {
     std::filesystem::create_directory("saves");
   }
@@ -33,10 +34,22 @@ SaveData SaveManager::LoadGame(std::string_view file_name) {
   }
   auto player_node = doc.child("SaveData").child("Player");
   if (player_node) {
-    data.player.position.x = player_node.attribute("pos.x").as_float();
-    data.player.position.y = player_node.attribute("pos.y").as_float();
-    data.player.health = player_node.attribute("Health").as_float();
+    data.player_transform.position.x = player_node.attribute("pos.x").as_float();
+    data.player_transform.position.y = player_node.attribute("pos.y").as_float();
+    data.player_health.health = player_node.attribute("Health").as_float();
   }
   std::cout << "Loaded game from " << file_name << std::endl;
   return data;
+}
+
+SaveData SaveManager::LoadLatestSave() {
+  std::string largest_save_id = "";
+  for (const auto &entry : std::filesystem::directory_iterator("saves")) {
+    if (entry.is_regular_file() && entry.path().extension() == ".save") {
+      std::string filename = entry.path().filename().string();
+      std::string save_id = filename.substr(0, filename.find(".save"));
+      largest_save_id = std::max(largest_save_id, save_id);
+    }
+  }
+  return LoadGame("saves/" + largest_save_id + ".save");
 }

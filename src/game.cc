@@ -11,7 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <pugixml.hpp>
-#include <vector>
+#include <entt/entt.hpp>
 
 #include "atlas.h"
 #include "calculate.h"
@@ -20,7 +20,6 @@
 #include "font.h"
 #include "game.h"
 #include "level_utils.h"
-#include "object.h"
 #include "physics.h"
 #include "player.h"
 #include "rect.h"
@@ -29,14 +28,20 @@
 #include "state.h"
 #include "window.h"
 #include <filesystem>
+#include "transform.h"
+#include "sprite.h"
 
-std::vector<Object> objects;
-glm::vec3 camera_position{0.0f, 0.0f, -20.0f};
+glm::vec3 camera_position{0.0f, 0.0f, 20.0f};
 b2WorldId physics_world;
-int frames_since_no_input = 0;
 
-void HandleGameInput(GameState &game_state, Player &player,
-                     b2BodyId player_body, GLFWwindow *window) {
+void HandleGameInput(GameState &game_state,
+    entt::registry& registry,
+    entt::entity player,
+    GLFWwindow *window) {
+  static int frames_since_no_input = 0;
+  auto &player_speed = registry.get<PlayerSpeed>(player);
+  auto &player_transform = registry.get<Transform>(player);
+  auto &player_body = registry.get<PhysicsBody>(player).body;
   core::input::UpdateKeyState(window, GLFW_KEY_ESCAPE);
   core::input::UpdateKeyState(window, GLFW_KEY_A);
   core::input::UpdateKeyState(window, GLFW_KEY_D);
@@ -51,89 +56,67 @@ void HandleGameInput(GameState &game_state, Player &player,
   }
   if (game_state == GameState::PAUSED)
     return;
+
   b2Vec2 velocity = b2Body_GetLinearVelocity(player_body);
-
-  if (core::input::IsKeyPressed(GLFW_KEY_SPACE) && player.IsOnGround()) {
-    velocity.y = 0;
-  }
-
   if (core::input::IsKeyPressed(GLFW_KEY_A)) {
-    if (velocity.x > -player.max_speed && player.IsOnGround())
-      velocity.x -= player.speed;
-    if (core::input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
-      velocity.x = 0;
-    }
+    if (velocity.x > -player_speed.max_speed && IsOnGround(player_body))
+      velocity.x -= player_speed.speed;
   }
-
   if (core::input::IsKeyPressed(GLFW_KEY_D)) {
-    if (velocity.x < player.max_speed && player.IsOnGround())
-      velocity.x += player.speed;
-    if (core::input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
-      velocity.x = 0;
-    }
+    if (velocity.x < player_speed.max_speed && IsOnGround(player_body))
+      velocity.x += player_speed.speed;
+  }
+  if (!core::input::IsKeyPressed(GLFW_KEY_A) && !core::input::IsKeyPressed(GLFW_KEY_D)) {
+    velocity.x *= player_speed.deceleration;
+  }
+  b2Body_SetLinearVelocity(player_body, velocity);
+
+  if (core::input::IsKeyPressed(GLFW_KEY_SPACE) && IsOnGround(player_body)) {
+    b2Body_ApplyLinearImpulse(player_body, b2Vec2(0.0f, player_speed.jump_impulse), b2Body_GetLocalCenterOfMass(player_body), true);
   }
 
-  if (!core::input::IsKeyPressed(GLFW_KEY_A) &&
-      !core::input::IsKeyPressed(GLFW_KEY_D)) {
-    velocity.x *= player.deceleration;
+  if (core::input::IsKeyPressed(GLFW_KEY_A) && core::input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
+    b2Body_ApplyForceToCenter(player_body, b2Vec2(-player_speed.boost_speed, 0.0f), true);
+  }
+  if (core::input::IsKeyPressed(GLFW_KEY_D) && core::input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
+    b2Body_ApplyForceToCenter(player_body, b2Vec2(player_speed.boost_speed, 0.0f), true);
   }
 
-  velocity.x = glm::clamp(velocity.x, -player.max_speed, player.max_speed);
-
-  if (std::abs(velocity.x) < 0.01f && std::abs(velocity.y) < 0.01f) {
+  if (velocity.x == 0 && velocity.y == 0) {
     frames_since_no_input++;
-    if (frames_since_no_input - 100 > 500) {
-      camera_position.x += (-player.position.x - camera_position.x) * 0.002f;
-      camera_position.y += (-player.position.y - camera_position.y) * 0.002f;
-      camera_position.z += (-20.0f - camera_position.z) * 0.002f;
-      camera_position.z = std::min(camera_position.z, -20.0f);
+    if (frames_since_no_input > 120) {
+      camera_position = glm::mix(camera_position, glm::vec3(player_transform.position, 20.0f), 0.02f);
     }
   } else {
-    camera_position.z = std::clamp(camera_position.z - 0.1f, -30.0f, -20.0f);
-  }
-  b2Body_SetLinearVelocity(player.body, velocity);
-  if (core::input::IsKeyPressed(GLFW_KEY_SPACE) && player.IsOnGround()) {
-    b2Body_ApplyLinearImpulse(player.body, b2Vec2(0.0f, player.jump_impulse),
-                              b2Body_GetWorldCenterOfMass(player.body), true);
-  }
-
-  if (core::input::IsKeyPressed(GLFW_KEY_A) &&
-      core::input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
-    b2Body_ApplyLinearImpulse(player.body, b2Vec2(-player.boost_speed, 0.0f),
-                              b2Body_GetWorldCenterOfMass(player.body), true);
-  }
-  if (core::input::IsKeyPressed(GLFW_KEY_D) &&
-      core::input::IsKeyPressedThisFrame(GLFW_KEY_LEFT_SHIFT)) {
-    b2Body_ApplyLinearImpulse(player.body, b2Vec2(player.boost_speed, 0.0f),
-                              b2Body_GetWorldCenterOfMass(player.body), true);
+    frames_since_no_input = 0;
   }
 }
 
 AppState Game(GameWindow window) {
+  entt::registry registry;
   physics_world = physics::CreatePhysicsWorld({0.0f, -9.81f});
   auto shader_atlas = LoadShaderAtlas("assets/shaders/shader.xml");
   auto font_atlas = LoadFontAtlas("assets/fonts/font.xml");
   auto texture_atlas = LoadTextureAtlas("assets/textures/texture.xml");
-  Player player{};
-  // Get the latest save data and initialize the player with it
-  auto folder = std::filesystem::path("saves");
-  if (!std::filesystem::exists(folder) || std::filesystem::is_empty(folder)) {
-    std::filesystem::create_directory(folder);
+  
+  auto player = registry.create();
+  auto& player_transform = registry.emplace<Transform>(player);
+  registry.emplace<PlayerSpeed>(player, 2.0f, 4.0f, 0.0625, 100.0f, 5.0f);
+  auto& player_health = registry.emplace<Health>(player, 100.0f);
+  auto& player_body = registry.emplace<PhysicsBody>(player,
+    physics::CreatePhysicsBody(
+      physics_world, player_transform.position,
+      player_transform.scale, player_transform.rotation, true)).body;
+  registry.emplace<Sprite>(player, "game.player");
+  
+  LoadLevel("level.txt", registry, physics_world);
+  if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
+    std::filesystem::create_directory("saves");
   } else {
-    std::string largest_save_id = "";
-    for (const auto &entry : std::filesystem::directory_iterator(folder)) {
-      if (entry.is_regular_file() && entry.path().extension() == ".save") {
-        std::string filename = entry.path().filename().string();
-        std::string save_id = filename.substr(0, filename.find(".save"));
-        largest_save_id = std::max(largest_save_id, save_id);
-      }
-    }
-    auto save_data = SaveManager::LoadGame("saves/" + largest_save_id + ".save");
-    player = save_data.player;
+    auto save_data = SaveManager::LoadLatestSave();
+    player_transform = save_data.player_transform;
+    player_health = save_data.player_health;
   }
-  player.texture_name = "game.player";
-  player.body = physics::CreatePhysicsBody(physics_world, player.position,
-                                           player.scale, player.rotation, true);
 
   Shader shader(shader_atlas.at("Sprite").vertex_file,
                 shader_atlas.at("Sprite").fragment_file);
@@ -159,50 +142,41 @@ AppState Game(GameWindow window) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    float aspect =
-        static_cast<float>(window.width) / static_cast<float>(window.height);
-
-    glm::vec3 screen_player_position =
-        glm::vec3(-player.position, 0.0f) - camera_position;
+    glm::vec3 screen_player_position = glm::vec3(-player_transform.position, 0.0f) + camera_position;
     if (std::abs(screen_player_position.x) > 5.0f) {
-      camera_position.x =
-          -player.position.x - 5.0f * glm::sign(screen_player_position.x);
+      camera_position.x = player_transform.position.x + 5.0f * glm::sign(screen_player_position.x);
     }
     if (std::abs(screen_player_position.y) > 5.0f) {
-      camera_position.y =
-          -player.position.y - 5.0f * glm::sign(screen_player_position.y);
+      camera_position.y = player_transform.position.y + 5.0f * glm::sign(screen_player_position.y);
     }
 
     glfwPollEvents();
-    HandleGameInput(game_state, player, player.body, window.window);
+    HandleGameInput(game_state, registry, player, window.window);
     if (game_state == GameState::RUNNING) {
       b2World_Step(physics_world, 1.0f / 60.0f, 4);
     }
-    physics::SyncPosition(player.body, player.position);
-
-    auto view = glm::translate(glm::mat4(1.0f), camera_position);
-    auto projection =
-        glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
+    auto view = glm::translate(glm::mat4(1.0f), -camera_position);
+    float aspect = static_cast<float>(window.width) / static_cast<float>(window.height);
+    auto projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    texture_atlas.at(player.texture_name)
-        .texture->Render(shader, projection, view,
-                         CalculateModelMatrix(player.position, player.rotation,
-                                              player.scale));
-    core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
-
-    for (auto &obj : objects) {
-      b2Vec2 physics_position = b2Body_GetPosition(obj.body);
-      obj.position = glm::vec2(physics_position.x, physics_position.y);
-      if (!texture_atlas.contains(obj.texture_name)) {
-        obj.texture_name = "util.notexture";
+    auto physics_view = registry.view<Transform, PhysicsBody>();
+    for (auto entity : physics_view) {
+      auto& transform = physics_view.get<Transform>(entity);
+      auto& physics_body = physics_view.get<PhysicsBody>(entity);
+      physics::SyncPosition(physics_body.body, transform.position);
+    }
+    auto sprite_view = registry.view<Transform, Sprite>();
+    for (auto entity : sprite_view) {
+      auto& transform = sprite_view.get<Transform>(entity);
+      auto& sprite = sprite_view.get<Sprite>(entity);
+      if (!texture_atlas.contains(sprite.texture_name)) {
+        sprite.texture_name = "util.notexture";
       }
-      shader.Use();
-      texture_atlas.at(obj.texture_name)
-          .texture->Render(
-              shader, projection, view,
-              CalculateModelMatrix(obj.position, obj.rotation, obj.scale));
+      texture_atlas.at(sprite.texture_name).texture->Render(
+          shader, projection, view,
+          CalculateModelMatrix(transform.position, transform.rotation, transform.scale));
       core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
     }
 
@@ -210,7 +184,7 @@ AppState Game(GameWindow window) {
         glm::ortho(0.0f, static_cast<float>(window.width), 0.0f,
                    static_cast<float>(window.height));
     special_font.Render(
-        std::format("Health: {}", static_cast<int>(player.health)),
+        std::format("Health: {}", static_cast<int>(player_health.health)),
         glm::vec2(20.0f, 20.0f), 1.0f, glm::vec3(1.0f), text_shader,
         ui_projection);
 
@@ -228,13 +202,12 @@ AppState Game(GameWindow window) {
 
     ImGui::Begin("Debug Menu");
     ImGui::Text("FPS: %.2f", fps);
-    ImGui::DragFloat3("Position", glm::value_ptr(player.position));
-    auto velocity = b2Body_GetLinearVelocity(player.body);
+    ImGui::DragFloat3("Position", glm::value_ptr(player_transform.position));
+    auto velocity = b2Body_GetLinearVelocity(player_body);
     ImGui::Text("Velocity: (%.2f, %.2f)", velocity.x, velocity.y);
-    ImGui::Text("On Ground: %s", player.IsOnGround() ? "Yes" : "No");
+    ImGui::Text("On Ground: %s", IsOnGround(player_body) ? "Yes" : "No");
     ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", camera_position.x,
                 camera_position.y, camera_position.z);
-    ImGui::Text("Boxes: %zu", objects.size());
     ImGui::Text("Game State: %s",
                 game_state == GameState::RUNNING ? "Running" : "Paused");
     ImGui::End();
@@ -278,14 +251,10 @@ AppState Game(GameWindow window) {
     ImGui::Render();
     ImGui::EndFrame();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
     glfwSwapBuffers(window.window);
     core::input::UpdateLastFrameKeyStates();
-    if (objects.empty()) {
-      objects = LoadLevel("level.txt", physics_world);
-    }
   }
-  SaveManager::SaveGame(player);
+  SaveManager::SaveGame(player_transform, player_health);
   if (app_state == AppState::PLAYING) {
     app_state = AppState::EXIT;
   }

@@ -13,6 +13,8 @@ find_package(glm CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(pugixml CONFIG REQUIRED)
+find_package(EnTT CONFIG REQUIRED)
+
 add_executable(DyingAnima)
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
   src/*.c
@@ -48,6 +50,7 @@ target_link_libraries(DyingAnima PRIVATE
   OpenGL::GL
   imgui::imgui
   pugixml::pugixml
+  EnTT::EnTT
 )
 set_target_properties(DyingAnima PROPERTIES
   OUTPUT_NAME "Dying Anima"

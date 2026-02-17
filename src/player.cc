@@ -1,6 +1,7 @@
 #include "player.h"
+#include <vector>
 
-bool Player::IsOnGround() {
+bool IsOnGround(b2BodyId body) {
   int capacity = b2Body_GetContactCapacity(body);
   if (capacity <= 0) {
     return false;
