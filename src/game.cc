@@ -86,7 +86,7 @@ void HandleGameInput(GameState &game_state,
   if (std::abs(velocity.x) < 0.01f && std::abs(velocity.y) < 0.01f) {
     time_since_no_input += dt;
     if (time_since_no_input > 2.0f) {
-      float speed = 1.0f - std::pow(0.2f, dt);
+      float speed = 1.0f - std::pow(0.2f, (float)dt);
       camera_position = glm::mix(camera_position, glm::vec3(player_transform.position, 20.0f), speed);
     }
   } else {
@@ -104,7 +104,7 @@ AppState Game(GameWindow window) {
   
   auto player = registry.create();
   auto& player_transform = registry.emplace<Transform>(player);
-  registry.emplace<PlayerSpeed>(player, 2.0f, 4.0f, 0.0625, 100.0f, 5.0f);
+  registry.emplace<PlayerSpeed>(player, 2.0f, 4.0f, 0.0625f, 100.0f, 5.0f);
   auto& player_health = registry.emplace<Health>(player, 100.0f);
   auto& player_body = registry.emplace<PhysicsBody>(player,
     physics::CreatePhysicsBody(

@@ -15,12 +15,8 @@ void SaveManager::SaveGame(const Transform &player_transform,
   if (!std::filesystem::exists("saves")) {
     std::filesystem::create_directory("saves");
   }
-  std::string file_name =
-      std::filesystem::path("saves") /
-      std::filesystem::path(
-          std::to_string(
-              std::chrono::system_clock::now().time_since_epoch().count()) +
-          ".save");
+  std::string file_name = (std::filesystem::path("saves") /
+      std::filesystem::path(std::to_string(std::chrono::system_clock::now().time_since_epoch().count()) + ".save")).string();
   std::cout << "Saving game to " << file_name << std::endl;
   doc.save_file(file_name.c_str());
 }
