@@ -4,10 +4,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include <fstream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <print>
 #include <vector>
 
 #include "atlas.h"
@@ -18,6 +16,7 @@
 #include "object.h"
 #include "rect.h"
 #include "shader.h"
+#include "core/resource_manager.h"
 
 int GRID_SIZE = 5;
 static int selected_object_index = -1;
@@ -77,15 +76,11 @@ void HandleLevelEditorInput(GameWindow window, AppState &app_state) {
 }
 
 AppState LevelEditor(GameWindow window) {
-  auto font_atlas = LoadFontAtlas("assets/fonts/font.xml");
-  auto shader_atlas = LoadShaderAtlas("assets/shaders/shader.xml");
-  Shader shader(shader_atlas.at("Rect").vertex_file,
-                shader_atlas.at("Rect").fragment_file);
-  Shader text_shader(shader_atlas.at("Text").vertex_file,
-                     shader_atlas.at("Text").fragment_file);
-  text_shader.Use();
-  text_shader.SetUniform("character", 0);
-  Font font(font_atlas.at("UI").file, 32);
+  auto rect_shader = ResourceManager::GetShader("Rect").shader,
+       text_shader = ResourceManager::GetShader("Text").shader;
+  text_shader->Use();
+  text_shader->SetUniform("character", 0);
+  auto font = ResourceManager::GetFont("UI").font;
   glfwSetScrollCallback(window.window, ScrollCallback);
 
   AppState app_state = AppState::LEVEL_EDITOR;
@@ -102,7 +97,7 @@ AppState LevelEditor(GameWindow window) {
                                object.position.y + GRID_SIZE / 2.0f);
       box.scale = glm::vec2(object.scale.x, object.scale.y);
       box.color = glm::vec4(1.0f);
-      box.Render(shader, projection, view);
+      box.Render(rect_shader, projection, view);
     }
 
     float left = editor_camera_position.x;
@@ -118,7 +113,7 @@ AppState LevelEditor(GameWindow window) {
       grid_vertical.position = glm::vec2(x, (startY + endY) * 0.5f);
       grid_vertical.scale = glm::vec2(1.0f, endY - startY);
       grid_vertical.color = glm::vec4(0.3f);
-      grid_vertical.Render(shader, projection, view);
+      grid_vertical.Render(rect_shader, projection, view);
     }
 
     for (int y = startY; y <= endY; y += GRID_SIZE) {
@@ -126,7 +121,7 @@ AppState LevelEditor(GameWindow window) {
       grid_horizontal.position = glm::vec2((startX + endX) * 0.5f, y);
       grid_horizontal.scale = glm::vec2(endX - startX, 1.0f);
       grid_horizontal.color = glm::vec4(0.3f);
-      grid_horizontal.Render(shader, projection, view);
+      grid_horizontal.Render(rect_shader, projection, view);
     }
 
     // draw origin lines
@@ -134,11 +129,11 @@ AppState LevelEditor(GameWindow window) {
     origin_vertical.position = glm::vec2(0.0f, (startY + endY) * 0.5f);
     origin_vertical.scale = glm::vec2(2.0f, endY - startY);
     origin_vertical.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-    origin_vertical.Render(shader, projection, view);
+    origin_vertical.Render(rect_shader, projection, view);
     origin_horizontal.position = glm::vec2((startX + endX) * 0.5f, 0.0f);
     origin_horizontal.scale = glm::vec2(endX - startX, 2.0f);
     origin_horizontal.color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-    origin_horizontal.Render(shader, projection, view);
+    origin_horizontal.Render(rect_shader, projection, view);
 
     if (selected_object_index != -1) {
       auto &obj = editor_objects[selected_object_index];
@@ -148,16 +143,15 @@ AppState LevelEditor(GameWindow window) {
       x_axis.position = center + glm::vec2(20.0f, 0.0f);
       x_axis.scale = glm::vec2(40.0f, 4.0f);
       x_axis.color = glm::vec4(1, 0, 0, 1);
-      x_axis.Render(shader, projection, view);
+      x_axis.Render(rect_shader, projection, view);
       y_axis.position = center + glm::vec2(0.0f, 20.0f);
       y_axis.scale = glm::vec2(4.0f, 40.0f);
       y_axis.color = glm::vec4(0, 1, 0, 1);
-      y_axis.Render(shader, projection, view);
+      y_axis.Render(rect_shader, projection, view);
     }
 
-    font.Render(std::format("Grid Size: {}", GRID_SIZE),
-                glm::vec2(10.0f, 10.0f), 1.0f, glm::vec3(1.0f), text_shader,
-                projection);
+    font->Render(std::format("Grid Size: {}", GRID_SIZE),
+                glm::vec2(10.0f, 10.0f), glm::vec3(1.0f), text_shader, projection);
     glfwSwapBuffers(window.window);
     glfwPollEvents();
     HandleLevelEditorInput(window, app_state);

@@ -38,12 +38,11 @@ Texture::Texture(std::string_view path) {
 
 Texture::~Texture() { glDeleteTextures(1, &id); }
 
-void Texture::Render(const Shader &shader, const glm::mat4 &projection,
+void Texture::Render(const Shader* shader, const glm::mat4 &projection,
                      const glm::mat4 &view, const glm::mat4 &model) {
-  shader.Use();
+  shader->Use();
   const auto &mvp = projection * view * model;
-  glUniformMatrix4fv(glGetUniformLocation(shader.id, "mvp"), 1, GL_FALSE,
-                     glm::value_ptr(mvp));
+  shader->SetUniform("mvp", mvp);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, id);
 }

@@ -1,27 +1,32 @@
 #pragma once
+#include "font.h"
+#include "shader.h"
+#include "texture.h"
 #include <map>
 #include <string>
 
-#include "texture.h"
-
-struct FontAtlasEntry {
+struct FontHandle {
   std::string name;
   std::string file;
+  Font *font = nullptr;
 };
 
-struct ShaderAtlasEntry {
+struct ShaderHandle {
   std::string name;
   std::string vertex_file;
   std::string fragment_file;
+  Shader *shader = nullptr;
 };
 
-struct TextureAtlasEntry {
+struct TextureHandle {
   std::string path;
   Texture *texture = nullptr;
 };
 
-std::map<std::string, FontAtlasEntry> LoadFontAtlas(std::string_view filename);
-std::map<std::string, ShaderAtlasEntry>
-LoadShaderAtlas(std::string_view filename);
-std::map<std::string, TextureAtlasEntry>
-LoadTextureAtlas(std::string_view filename);
+#define FONT_ATLAS std::map<std::string, FontHandle>
+#define SHADER_ATLAS std::map<std::string, ShaderHandle>
+#define TEXTURE_ATLAS std::map<std::string, TextureHandle>
+
+FONT_ATLAS LoadFontAtlas(std::string_view filename);
+SHADER_ATLAS LoadShaderAtlas(std::string_view filename);
+TEXTURE_ATLAS LoadTextureAtlas(std::string_view filename);

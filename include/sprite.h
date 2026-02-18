@@ -1,6 +1,9 @@
-#pragma once
-#include <string>
+#ifndef SPRITE_H
+#define SPRITE_H
 
+#include <string>
 struct Sprite {
-  std::string texture_name;
+  std::string texture_tag;
 };
+
+#endif // SPRITE_H

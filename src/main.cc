@@ -12,13 +12,13 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <print>
 
-#include "atlas.h"
 #include "core/quad.h"
 #include "game.h"
 #include "level_editor.h"
 #include "menu.h"
 #include "state.h"
 #include "window.h"
+#include "core/resource_manager.h"
 
 void FramebufferSizeCallback(GLFWwindow * /* window */, int width, int height) {
   auto window = GameWindow::GetGameWindow();
@@ -34,8 +34,8 @@ int main() {
     std::print("Failed to initialize GLFW\n");
     return -1;
   }
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   auto window = GameWindow::GetGameWindow();
   window.window = glfwCreateWindow(800, 600, "Dying Anima", nullptr, nullptr);
@@ -57,8 +57,8 @@ int main() {
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO &imgui_io = ImGui::GetIO();
-  auto font_atlas = LoadFontAtlas("assets/fonts/font.xml");
-  imgui_io.Fonts->AddFontFromFileTTF(font_atlas.at("Debug").file.c_str(),
+  ResourceManager::Init();
+  imgui_io.Fonts->AddFontFromFileTTF(ResourceManager::GetFont("Debug").file.c_str(),
                                      18.5f);
   ImGui_ImplGlfw_InitForOpenGL(window.window, true);
   ImGui_ImplOpenGL3_Init("#version 150");
@@ -80,6 +80,7 @@ int main() {
     }
   }
   core::quad::Quit();
+  ResourceManager::Quit();
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();

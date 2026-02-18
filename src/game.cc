@@ -30,6 +30,7 @@
 #include <filesystem>
 #include "transform.h"
 #include "sprite.h"
+#include "core/resource_manager.h"
 
 glm::vec3 camera_position{0.0f, 0.0f, 20.0f};
 b2WorldId physics_world;
@@ -98,9 +99,6 @@ void HandleGameInput(GameState &game_state,
 AppState Game(GameWindow window) {
   entt::registry registry;
   physics_world = physics::CreatePhysicsWorld({0.0f, -9.81f});
-  auto shader_atlas = LoadShaderAtlas("assets/shaders/shader.xml");
-  auto font_atlas = LoadFontAtlas("assets/fonts/font.xml");
-  auto texture_atlas = LoadTextureAtlas("assets/textures/texture.xml");
   
   auto player = registry.create();
   auto& player_transform = registry.emplace<Transform>(player);
@@ -121,20 +119,16 @@ AppState Game(GameWindow window) {
     player_health = save_data.player_health;
   }
 
-  Shader shader(shader_atlas.at("Sprite").vertex_file,
-                shader_atlas.at("Sprite").fragment_file);
-  shader.Use();
-  shader.SetUniform("texture1", 0);
-
-  Shader rect_shader(shader_atlas.at("Rect").vertex_file,
-                     shader_atlas.at("Rect").fragment_file);
-  Shader text_shader(shader_atlas.at("Text").vertex_file,
-                     shader_atlas.at("Text").fragment_file);
-  text_shader.Use();
-  text_shader.SetUniform("character", 0);
-  Font special_font(font_atlas.at("Special").file, 48);
-  Font title_font(font_atlas.at("Title").file, 96);
-  Font ui_font(font_atlas.at("UI").file, 32);
+  auto sprite_shader = ResourceManager::GetShader("Sprite").shader,
+       rect_shader = ResourceManager::GetShader("Rect").shader,
+       text_shader = ResourceManager::GetShader("Text").shader;
+  auto special_font = ResourceManager::GetFont("Special").font,
+       title_font = ResourceManager::GetFont("Title").font,
+       ui_font = ResourceManager::GetFont("UI").font;
+  sprite_shader->Use();
+  sprite_shader->SetUniform("texture1", 0);
+  text_shader->Use();
+  text_shader->SetUniform("character", 0);
 
   AppState app_state = AppState::PLAYING;
   GameState game_state = GameState::RUNNING;
@@ -177,13 +171,11 @@ AppState Game(GameWindow window) {
     }
     auto sprite_view = registry.view<Transform, Sprite>();
     for (auto entity : sprite_view) {
-      auto& transform = sprite_view.get<Transform>(entity);
-      auto& sprite = sprite_view.get<Sprite>(entity);
-      if (!texture_atlas.contains(sprite.texture_name)) {
-        sprite.texture_name = "util.notexture";
-      }
-      texture_atlas.at(sprite.texture_name).texture->Render(
-          shader, projection, view,
+      const auto& transform = sprite_view.get<Transform>(entity);
+      const auto& sprite = sprite_view.get<Sprite>(entity);
+      const auto texture = ResourceManager::GetTexture(sprite.texture_tag).texture;
+      texture->Render(
+          sprite_shader, projection, view,
           CalculateModelMatrix(transform.position, transform.rotation, transform.scale));
       core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
     }
@@ -191,9 +183,9 @@ AppState Game(GameWindow window) {
     glm::mat4 ui_projection =
         glm::ortho(0.0f, static_cast<float>(window.width), 0.0f,
                    static_cast<float>(window.height));
-    special_font.Render(
+    special_font->Render(
         std::format("Health: {}", static_cast<int>(player_health.health)),
-        glm::vec2(20.0f, 20.0f), 1.0f, glm::vec3(1.0f), text_shader,
+        glm::vec2(20.0f, 20.0f), glm::vec3(1.0f), text_shader,
         ui_projection);
 
     // debug info: fps
@@ -221,7 +213,7 @@ AppState Game(GameWindow window) {
     ImGui::End();
 
     ImGui::Begin("Texture Atlas");
-    for (const auto &[name, entry] : texture_atlas) {
+    for (const auto &[name, entry] : ResourceManager::texture_atlas) {
       ImGui::Text("Name: %s", name.c_str());
       ImGui::Image(entry.texture->id, ImVec2(100, 100));
     }
@@ -238,20 +230,20 @@ AppState Game(GameWindow window) {
       int x_pos = 30;
       int y_pos = window.height / 2 + 100;
       int padding = 10;
-      title_font.Render("PAUSED", glm::vec2(x_pos, y_pos), 1.0f,
+      title_font->Render("PAUSED", glm::vec2(x_pos, y_pos),
                         glm::vec3(1.0f), text_shader, ui_projection);
-      y_pos -= title_font.GetHeight("PAUSED", 1.0f) + padding;
-      ui_font.Render("Resume", glm::vec2(x_pos, y_pos), 1.0f, glm::vec3(1.0f),
+      y_pos -= title_font->GetHeight("PAUSED") + padding;
+      ui_font->Render("Resume", glm::vec2(x_pos, y_pos), glm::vec3(1.0f),
                      text_shader, ui_projection);
-      y_pos -= ui_font.GetHeight("Resume", 1.0f) + padding;
-      ui_font.Render("Menu", glm::vec2(x_pos, y_pos), 1.0f, glm::vec3(1.0f),
+      y_pos -= ui_font->GetHeight("Resume") + padding;
+      ui_font->Render("Menu", glm::vec2(x_pos, y_pos), glm::vec3(1.0f),
                      text_shader, ui_projection);
-      y_pos -= ui_font.GetHeight("Menu", 1.0f) + padding;
-      ui_font.Render("Exit", glm::vec2(x_pos, y_pos), 1.0f, glm::vec3(1.0f),
+      y_pos -= ui_font->GetHeight("Menu") + padding;
+      ui_font->Render("Exit", glm::vec2(x_pos, y_pos), glm::vec3(1.0f),
                      text_shader, ui_projection);
 #ifndef NDEBUG
-      y_pos -= ui_font.GetHeight("Exit", 1.0f) + padding;
-      ui_font.Render("Level Editor", glm::vec2(x_pos, y_pos), 1.0f,
+      y_pos -= ui_font->GetHeight("Exit") + padding;
+      ui_font->Render("Level Editor", glm::vec2(x_pos, y_pos),
                      glm::vec3(1.0f), text_shader, ui_projection);
 #endif
     }
@@ -270,7 +262,7 @@ AppState Game(GameWindow window) {
     b2DestroyWorld(physics_world);
     physics_world = b2WorldId{};
   }
-  for (auto &[name, entry] : texture_atlas) {
+  for (auto &[name, entry] : ResourceManager::texture_atlas) {
     delete entry.texture;
   }
   return app_state;

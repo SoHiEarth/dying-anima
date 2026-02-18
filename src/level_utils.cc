@@ -34,8 +34,8 @@ std::vector<Object> LoadLevel(std::string_view filename,
       continue;
     }
     auto& sprite = registry.emplace<Sprite>(entity);
-    if (!(iss >> sprite.texture_name)) {
-      std::print("Error reading texture name in level file: {}\n", line);
+    if (!(iss >> sprite.texture_tag)) {
+      std::print("Error reading texture tag in level file: {}\n", line);
       continue;
     }
     b2BodyDef box_body_def = b2DefaultBodyDef();
