@@ -2,4 +2,4 @@
 #include "state.h"
 #include "window.h"
 
-AppState Game(GameWindow window);
+AppState Game(GameWindow &window);

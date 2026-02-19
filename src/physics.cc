@@ -7,8 +7,8 @@ b2WorldId physics::CreatePhysicsWorld(const glm::vec2 &gravity) {
 }
 
 b2BodyId physics::CreatePhysicsBody(b2WorldId world, const glm::vec2 &position,
-                           const glm::vec2 &scale, float angle,
-                           bool is_dynamic) {
+                                    const glm::vec2 &scale, float angle,
+                                    bool is_dynamic) {
   auto body_def = b2DefaultBodyDef();
   if (is_dynamic) {
     body_def.type = b2_dynamicBody;

@@ -13,15 +13,15 @@
 #include <print>
 
 #include "core/quad.h"
+#include "core/resource_manager.h"
 #include "game.h"
 #include "level_editor.h"
 #include "menu.h"
 #include "state.h"
 #include "window.h"
-#include "core/resource_manager.h"
 
 void FramebufferSizeCallback(GLFWwindow * /* window */, int width, int height) {
-  auto window = GameWindow::GetGameWindow();
+  auto &window = GetGameWindow();
   window.width = width;
   window.height = height;
   assert(width > 0 && height > 0);
@@ -37,7 +37,7 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  auto window = GameWindow::GetGameWindow();
+  auto &window = GetGameWindow();
   window.window = glfwCreateWindow(800, 600, "Dying Anima", nullptr, nullptr);
   if (!window.window) {
     glfwTerminate();
@@ -58,8 +58,8 @@ int main() {
   ImGui::CreateContext();
   ImGuiIO &imgui_io = ImGui::GetIO();
   ResourceManager::Init();
-  imgui_io.Fonts->AddFontFromFileTTF(ResourceManager::GetFont("Debug").file.c_str(),
-                                     18.5f);
+  imgui_io.Fonts->AddFontFromFileTTF(
+      ResourceManager::GetFont("Debug").file.c_str(), 18.5f);
   ImGui_ImplGlfw_InitForOpenGL(window.window, true);
   ImGui_ImplOpenGL3_Init("#version 150");
   core::quad::Init();

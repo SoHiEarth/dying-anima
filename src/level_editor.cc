@@ -9,19 +9,20 @@
 #include <vector>
 
 #include "atlas.h"
+#include "camera.h"
 #include "core/input.h"
+#include "core/resource_manager.h"
 #include "font.h"
 #include "level_editor.h"
 #include "level_utils.h"
 #include "object.h"
 #include "rect.h"
 #include "shader.h"
-#include "core/resource_manager.h"
+#include "window.h"
 
 int GRID_SIZE = 5;
 static int selected_object_index = -1;
 static std::vector<Object> editor_objects;
-glm::vec3 editor_camera_position = glm::vec3(0.0f, 0.0f, 1.0f);
 glm::dvec2 mouse_position, last_mouse_position;
 
 void ScrollCallback(GLFWwindow * /* window */, double /* xoffset */,
@@ -39,16 +40,16 @@ void HandleLevelEditorInput(GameWindow window, AppState &app_state) {
     app_state = AppState::PLAYING;
   }
   glfwGetCursorPos(window.window, &mouse_position.x, &mouse_position.y);
-  glm::ivec2 mouse_world_position =
-      glm::ivec2(static_cast<int>(mouse_position.x + editor_camera_position.x),
-                 static_cast<int>(window.height - (mouse_position.y -
-                                                   editor_camera_position.y)));
+  auto &camera_position = GetCamera().position;
+  glm::ivec2 mouse_world_position = glm::ivec2(
+      static_cast<int>(mouse_position.x + camera_position.x),
+      static_cast<int>(window.height - (mouse_position.y - camera_position.y)));
   glm::ivec2 grid_position = glm::ivec2(mouse_world_position.x / GRID_SIZE,
                                         mouse_world_position.y / GRID_SIZE);
   if (core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_MIDDLE)) {
-    editor_camera_position += glm::vec3(
+    camera_position += glm::vec2(
         static_cast<float>(last_mouse_position.x - mouse_position.x),
-        -static_cast<float>(last_mouse_position.y - mouse_position.y), 0.0f);
+        -static_cast<float>(last_mouse_position.y - mouse_position.y));
   }
   if (core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_LEFT)) {
     selected_object_index = -1;
@@ -75,7 +76,7 @@ void HandleLevelEditorInput(GameWindow window, AppState &app_state) {
   last_mouse_position = mouse_position;
 }
 
-AppState LevelEditor(GameWindow window) {
+AppState LevelEditor(GameWindow &window) {
   auto rect_shader = ResourceManager::GetShader("Rect").shader,
        text_shader = ResourceManager::GetShader("Text").shader;
   text_shader->Use();
@@ -86,24 +87,24 @@ AppState LevelEditor(GameWindow window) {
   AppState app_state = AppState::LEVEL_EDITOR;
   while (!glfwWindowShouldClose(window.window) &&
          app_state == AppState::LEVEL_EDITOR) {
-    auto projection = glm::ortho(0.0f, static_cast<float>(window.width), 0.0f,
-                                 static_cast<float>(window.height));
-    auto view = glm::translate(glm::mat4(1.0f), -editor_camera_position);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+    window.SetProjection(ProjectionType::CENTERED);
+    GetCamera().SetType(CameraType::WORLD);
     for (const auto &object : editor_objects) {
       Rect box;
       box.position = glm::vec2(object.position.x + GRID_SIZE / 2.0f,
                                object.position.y + GRID_SIZE / 2.0f);
       box.scale = glm::vec2(object.scale.x, object.scale.y);
       box.color = glm::vec4(1.0f);
-      box.Render(rect_shader, projection, view);
+      box.Render(rect_shader);
     }
 
-    float left = editor_camera_position.x;
-    float right = editor_camera_position.x + window.width;
-    float bottom = editor_camera_position.y;
-    float top = editor_camera_position.y + window.height;
+    auto &camera_position = GetCamera().position;
+    float left = camera_position.x;
+    float right = camera_position.x + window.width;
+    float bottom = camera_position.y;
+    float top = camera_position.y + window.height;
     int startX = static_cast<int>(std::floor(left / GRID_SIZE)) * GRID_SIZE;
     int endX = static_cast<int>(std::ceil(right / GRID_SIZE)) * GRID_SIZE;
     int startY = static_cast<int>(std::floor(bottom / GRID_SIZE)) * GRID_SIZE;
@@ -113,7 +114,7 @@ AppState LevelEditor(GameWindow window) {
       grid_vertical.position = glm::vec2(x, (startY + endY) * 0.5f);
       grid_vertical.scale = glm::vec2(1.0f, endY - startY);
       grid_vertical.color = glm::vec4(0.3f);
-      grid_vertical.Render(rect_shader, projection, view);
+      grid_vertical.Render(rect_shader);
     }
 
     for (int y = startY; y <= endY; y += GRID_SIZE) {
@@ -121,7 +122,7 @@ AppState LevelEditor(GameWindow window) {
       grid_horizontal.position = glm::vec2((startX + endX) * 0.5f, y);
       grid_horizontal.scale = glm::vec2(endX - startX, 1.0f);
       grid_horizontal.color = glm::vec4(0.3f);
-      grid_horizontal.Render(rect_shader, projection, view);
+      grid_horizontal.Render(rect_shader);
     }
 
     // draw origin lines
@@ -129,11 +130,11 @@ AppState LevelEditor(GameWindow window) {
     origin_vertical.position = glm::vec2(0.0f, (startY + endY) * 0.5f);
     origin_vertical.scale = glm::vec2(2.0f, endY - startY);
     origin_vertical.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-    origin_vertical.Render(rect_shader, projection, view);
+    origin_vertical.Render(rect_shader);
     origin_horizontal.position = glm::vec2((startX + endX) * 0.5f, 0.0f);
     origin_horizontal.scale = glm::vec2(endX - startX, 2.0f);
     origin_horizontal.color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-    origin_horizontal.Render(rect_shader, projection, view);
+    origin_horizontal.Render(rect_shader);
 
     if (selected_object_index != -1) {
       auto &obj = editor_objects[selected_object_index];
@@ -143,15 +144,17 @@ AppState LevelEditor(GameWindow window) {
       x_axis.position = center + glm::vec2(20.0f, 0.0f);
       x_axis.scale = glm::vec2(40.0f, 4.0f);
       x_axis.color = glm::vec4(1, 0, 0, 1);
-      x_axis.Render(rect_shader, projection, view);
+      x_axis.Render(rect_shader);
       y_axis.position = center + glm::vec2(0.0f, 20.0f);
       y_axis.scale = glm::vec2(4.0f, 40.0f);
       y_axis.color = glm::vec4(0, 1, 0, 1);
-      y_axis.Render(rect_shader, projection, view);
+      y_axis.Render(rect_shader);
     }
 
+    window.SetProjection(ProjectionType::SCREEN_SPACE);
+    GetCamera().SetType(CameraType::UI);
     font->Render(std::format("Grid Size: {}", GRID_SIZE),
-                glm::vec2(10.0f, 10.0f), glm::vec3(1.0f), text_shader, projection);
+                 glm::vec2(10.0f, 10.0f), glm::vec3(1.0f), text_shader);
     glfwSwapBuffers(window.window);
     glfwPollEvents();
     HandleLevelEditorInput(window, app_state);

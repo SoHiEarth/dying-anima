@@ -9,7 +9,10 @@
 #include <print>
 #include <string>
 
+#include "camera.h"
 #include "shader.h"
+#include "window.h"
+#include "core/quad.h"
 
 Texture::Texture(std::string_view path) {
   this->path = std::string(path);
@@ -38,11 +41,12 @@ Texture::Texture(std::string_view path) {
 
 Texture::~Texture() { glDeleteTextures(1, &id); }
 
-void Texture::Render(const Shader* shader, const glm::mat4 &projection,
-                     const glm::mat4 &view, const glm::mat4 &model) {
+void Texture::Render(const Shader *shader, const glm::mat4 &model) {
   shader->Use();
-  const auto &mvp = projection * view * model;
+  const auto &mvp = GetGameWindow().GetProjection() *
+                    GetCamera().GetView() * model;
   shader->SetUniform("mvp", mvp);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, id);
+  core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
 }

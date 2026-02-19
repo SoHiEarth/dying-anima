@@ -5,7 +5,7 @@
 #include <pugixml.hpp>
 
 void SaveManager::SaveGame(const Transform &player_transform,
-    const Health &player_health) {
+                           const Health &player_health) {
   pugi::xml_document doc;
   auto root = doc.append_child("SaveData");
   auto player_node = root.append_child("Player");
@@ -15,8 +15,13 @@ void SaveManager::SaveGame(const Transform &player_transform,
   if (!std::filesystem::exists("saves")) {
     std::filesystem::create_directory("saves");
   }
-  std::string file_name = (std::filesystem::path("saves") /
-      std::filesystem::path(std::to_string(std::chrono::system_clock::now().time_since_epoch().count()) + ".save")).string();
+  std::string file_name =
+      (std::filesystem::path("saves") /
+       std::filesystem::path(
+           std::to_string(
+               std::chrono::system_clock::now().time_since_epoch().count()) +
+           ".save"))
+          .string();
   std::cout << "Saving game to " << file_name << std::endl;
   doc.save_file(file_name.c_str());
 }
@@ -30,8 +35,10 @@ SaveData SaveManager::LoadGame(std::string_view file_name) {
   }
   auto player_node = doc.child("SaveData").child("Player");
   if (player_node) {
-    data.player_transform.position.x = player_node.attribute("pos.x").as_float();
-    data.player_transform.position.y = player_node.attribute("pos.y").as_float();
+    data.player_transform.position.x =
+        player_node.attribute("pos.x").as_float();
+    data.player_transform.position.y =
+        player_node.attribute("pos.y").as_float();
     data.player_health.health = player_node.attribute("Health").as_float();
   }
   std::cout << "Loaded game from " << file_name << std::endl;

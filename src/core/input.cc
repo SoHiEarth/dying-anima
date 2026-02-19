@@ -17,6 +17,9 @@ void core::input::UpdateKeyState(GLFWwindow *window, int key) {
 bool core::input::IsKeyPressed(int key) { return key_states.at(key); }
 
 bool core::input::IsKeyPressedThisFrame(int key) {
+  if (last_frame_key_states.find(key) == last_frame_key_states.end()) {
+    return key_states.at(key);
+  }
   return key_states.at(key) && !last_frame_key_states.at(key);
 }
 

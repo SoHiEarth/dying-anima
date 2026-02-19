@@ -8,33 +8,23 @@
 #include "shader.h"
 #include FT_FREETYPE_H
 #include "font.h"
-
-#include <GLFW/glfw3.h>
-float getMonitorDPI() {
-  auto window = glfwGetCurrentContext();
-  GLFWmonitor* monitor = glfwGetWindowMonitor(window);
-  if (!monitor) {
-    monitor = glfwGetPrimaryMonitor();
-  }
-  float dpi;
-  glfwGetMonitorContentScale(monitor, &dpi, &dpi);
-  return dpi;
-}
+#include "window.h"
+#include "calculate.h"
+#include "camera.h"
 
 Font::Font(std::string_view font_path) {
-  //auto dpi = getMonitorDPI();
   auto dpi = 64.0f;
   glGenVertexArrays(1, &vertex_attrib);
   glGenBuffers(1, &vertex_buffer);
   glBindVertexArray(vertex_attrib);
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr,
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 5, nullptr,
                GL_DYNAMIC_DRAW);
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
   glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
-                        (void *)(2 * sizeof(float)));
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
 
   FT_Library ft;
   if (FT_Init_FreeType(&ft)) {
@@ -98,16 +88,20 @@ int Font::GetHeight(std::string_view text) const {
   return height;
 }
 
-void Font::Render(std::string_view text, const glm::vec2 &position, const glm::vec3 &color,
-                  const Shader* shader, const glm::mat4 &projection) const {
+void Font::Render(std::string_view text, const glm::vec2 &position,
+                  const glm::vec3 &color, const Shader *shader) const {
   shader->Use();
   shader->SetUniform("color", color);
-  shader->SetUniform("projection", projection);
+  auto mvp = GetGameWindow().GetProjection() * GetCamera().GetView() *
+             CalculateModelMatrix(position, 0.0f, glm::vec2(1.0f));
+  shader->SetUniform("mvp", mvp);
   glActiveTexture(GL_TEXTURE0);
   glBindVertexArray(vertex_attrib);
 
-  float x_pos = position.x;
-  float y_pos = position.y;
+  //float x_pos = position.x;
+  //float y_pos = position.y;
+  float x_pos = 0.0f;
+  float y_pos = 0.0f;
   for (const char &c : text) {
     const auto &ch = characters.at(c);
     float xpos = x_pos + ch.bearing.x;
@@ -115,12 +109,11 @@ void Font::Render(std::string_view text, const glm::vec2 &position, const glm::v
     float w = ch.size.x;
     float h = ch.size.y;
 
-    float vertices[6][4] = {
-        {xpos, ypos + h, 0.0f, 0.0f},    {xpos, ypos, 0.0f, 1.0f},
-        {xpos + w, ypos, 1.0f, 1.0f},
-
-        {xpos, ypos + h, 0.0f, 0.0f},    {xpos + w, ypos, 1.0f, 1.0f},
-        {xpos + w, ypos + h, 1.0f, 0.0f}};
+    float vertices[6][5] = {
+        {xpos, ypos + h, 0.0f, 0.0f, 0.0f}, {xpos, ypos, 0.0f, 0.0f, 1.0f},
+        {xpos + w, ypos, 0.0f, 1.0f, 1.0f},
+        {xpos, ypos + h, 0.0f, 0.0f, 0.0f},    {xpos + w, ypos, 0.0f, 1.0f, 1.0f},
+        {xpos + w, ypos + h, 0.0f, 1.0f, 0.0f}};
     glBindTexture(GL_TEXTURE_2D, ch.texture);
     glBindVertexArray(vertex_attrib);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);

@@ -2,4 +2,4 @@
 #include "state.h"
 #include "window.h"
 
-AppState LevelEditor(GameWindow window);
+AppState LevelEditor(GameWindow &window);

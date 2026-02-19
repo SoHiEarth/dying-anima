@@ -1,7 +1,13 @@
 #include "calculate.h"
 
+#include "transform.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+glm::mat4 CalculateModelMatrix(const Transform &transform) {
+  return CalculateModelMatrix(transform.position, transform.rotation,
+                              transform.scale);
+}
 
 glm::mat4 CalculateModelMatrix(const glm::vec2 &position, float rotation,
                                const glm::vec2 &scale) {
