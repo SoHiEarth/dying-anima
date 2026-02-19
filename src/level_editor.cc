@@ -59,7 +59,7 @@ void HandleLevelEditorInput(GameWindow window, AppState &app_state) {
           mouse_world_position.x <= obj.position.x + obj.scale.x &&
           mouse_world_position.y >= obj.position.y &&
           mouse_world_position.y <= obj.position.y + obj.scale.y) {
-        selected_object_index = i;
+        selected_object_index = (int)i;
         break;
       }
     }

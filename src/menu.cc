@@ -63,10 +63,10 @@ AppState Menu(GameWindow &window) {
 
 
     if (menu::input::focus_index == static_cast<int>(AppState::PLAYING)) {
-      float width = font->GetWidth("Play") + selected_margin;
-      float height = font->GetHeight("Play") + selected_margin;
-      glm::vec2 center_pos = {x_pos + width / 2.0f - selected_margin / 2.0f,
-                              menu_y + height / 2.0f - selected_margin / 2.0f};
+      int width = font->GetWidth("Play") + selected_margin;
+      int height = font->GetHeight("Play") + selected_margin;
+      glm::ivec2 center_pos = {x_pos + width / 2 - selected_margin / 2,
+                              menu_y + height / 2 - selected_margin / 2};
       selected_texture->Render(
           sprite_shader,
           CalculateModelMatrix(center_pos, 0.0f, {width, height}));
@@ -77,8 +77,8 @@ AppState Menu(GameWindow &window) {
     x_pos += font->GetWidth("Play") + padding;
 
     if (menu::input::focus_index == static_cast<int>(AppState::EXIT)) {
-      float width = font->GetWidth("Quit") + selected_margin;
-      float height = font->GetHeight("Quit") + selected_margin;
+      int width = font->GetWidth("Quit") + selected_margin;
+      int height = font->GetHeight("Quit") + selected_margin;
       glm::vec2 center_pos = {x_pos + width / 2.0f - selected_margin / 2.0f,
                               menu_y + height / 2.0f - selected_margin / 2.0f};
       selected_texture->Render(
@@ -92,8 +92,8 @@ AppState Menu(GameWindow &window) {
 #ifndef NDEBUG
     x_pos += font->GetWidth("Quit") + padding;
     if (menu::input::focus_index == static_cast<int>(AppState::LEVEL_EDITOR)) {
-      float width = font->GetWidth("Level Editor") + selected_margin;
-      float height = font->GetHeight("Level Editor") + selected_margin;
+      int width = font->GetWidth("Level Editor") + selected_margin;
+      int height = font->GetHeight("Level Editor") + selected_margin;
       glm::vec2 center_pos = {x_pos + width / 2.0f - selected_margin / 2.0f,
                               menu_y + height / 2.0f - selected_margin / 2.0f};
       selected_texture->Render(

@@ -21,9 +21,8 @@ public:
     case CameraType::WORLD:
       return glm::lookAt({position, 20.0f}, glm::vec3(position, 0.0f),
                          glm::vec3(0.0f, 1.0f, 0.0f));
-    case CameraType::UI:
-      return glm::mat4(1.0f);
     }
+    return glm::mat4(1.0f);
   }
 };
 
