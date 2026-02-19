@@ -24,6 +24,7 @@ void FramebufferSizeCallback(GLFWwindow * /* window */, int width, int height) {
   auto &window = GetGameWindow();
   window.width = width;
   window.height = height;
+  window.SetPixelsPerUnit(window.GetPixelsPerUnit());
   assert(width > 0 && height > 0);
   glViewport(0, 0, width, height);
 }
