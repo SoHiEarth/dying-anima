@@ -31,8 +31,6 @@
 #include "window.h"
 #include <filesystem>
 
-b2WorldId physics_world;
-
 void HandleGameInput(GameState &game_state, entt::registry &registry,
                      entt::entity player, GLFWwindow *window) {
   auto &player_speed = registry.get<PlayerSpeed>(player);
@@ -43,7 +41,7 @@ void HandleGameInput(GameState &game_state, entt::registry &registry,
   core::input::UpdateKeyState(window, GLFW_KEY_SPACE);
   core::input::UpdateKeyState(window, GLFW_KEY_LEFT_SHIFT);
 
-  if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
+  if (core::input::IsKeyPressed(GLFW_KEY_ESCAPE)) {
     if (game_state == GameState::PAUSED)
       game_state = GameState::RUNNING;
     else if (game_state == GameState::RUNNING)
@@ -87,19 +85,15 @@ void HandleGameInput(GameState &game_state, entt::registry &registry,
 
 AppState Game(GameWindow &window) {
   entt::registry registry;
-  physics_world = physics::CreatePhysicsWorld({0.0f, -9.81f});
+  auto physics_world = physics::CreateWorld({0.0f, -9.81f});
 
   auto player = registry.create();
   auto &player_transform = registry.emplace<Transform>(player);
   registry.emplace<PlayerSpeed>(player, 2.0f, 4.0f, 0.0625f, 100.0f, 5.0f);
   auto &player_health = registry.emplace<Health>(player, 100.0f);
   auto &player_body =
-      registry
-          .emplace<PhysicsBody>(player,
-                                physics::CreatePhysicsBody(
-                                    physics_world, player_transform.position,
-                                    player_transform.scale,
-                                    player_transform.rotation, true))
+      registry.emplace<PhysicsBody>(player,
+                                physics::CreateBody(physics_world, player_transform, true))
           .body;
   registry.emplace<Sprite>(player, "game.player");
 
@@ -209,9 +203,7 @@ AppState Game(GameWindow &window) {
                 camera_position.y);
     ImGui::Text("Game State: %s",
                 game_state == GameState::RUNNING ? "Running" : "Paused");
-    ImGui::End();
-
-    ImGui::Begin("Texture Atlas");
+    ImGui::SeparatorText("Texture Atlas");
     for (const auto &[name, entry] : ResourceManager::texture_atlas) {
       ImGui::Text("Name: %s", name.c_str());
       ImGui::Image(entry.texture->id, ImVec2(100, 100));
@@ -247,6 +239,15 @@ AppState Game(GameWindow &window) {
 #endif
     }
 
+    ImGui::Begin("Player Tweaker");
+    auto &player_speed = registry.get<PlayerSpeed>(player);
+    ImGui::DragFloat("Max Speed", &player_speed.max_speed, 0.1f, 0.0f);
+    ImGui::DragFloat("Speed", &player_speed.speed, 0.01f, 0.0f);
+    ImGui::DragFloat("Deceleration", &player_speed.deceleration, 0.01f, 0.0f);
+    ImGui::DragFloat("Boost Speed", &player_speed.boost_speed, 1.0f, 0.0f);
+    ImGui::DragFloat("Jump Impulse", &player_speed.jump_impulse, 1.0f, 0.0f);
+    ImGui::End();
+
     ImGui::Render();
     ImGui::EndFrame();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -256,12 +257,6 @@ AppState Game(GameWindow &window) {
   if (app_state == AppState::PLAYING) {
     app_state = AppState::EXIT;
   }
-  if (b2World_IsValid(physics_world)) {
-    b2DestroyWorld(physics_world);
-    physics_world = b2WorldId{};
-  }
-  for (auto &[name, entry] : ResourceManager::texture_atlas) {
-    delete entry.texture;
-  }
+  physics::DestroyWorld(physics_world);
   return app_state;
 }

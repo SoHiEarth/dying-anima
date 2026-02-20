@@ -3,6 +3,12 @@
 #include <print>
 #include <stdexcept>
 
+namespace ResourceManager {
+  TEXTURE_ATLAS texture_atlas;
+  SHADER_ATLAS shader_atlas;
+  FONT_ATLAS font_atlas;
+}
+
 void ResourceManager::Init() {
   texture_atlas = LoadTextureAtlas("assets/textures/texture.xml");
   shader_atlas = LoadShaderAtlas("assets/shaders/shader.xml");

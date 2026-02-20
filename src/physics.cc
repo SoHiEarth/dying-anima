@@ -1,12 +1,16 @@
 #include "physics.h"
 
-b2WorldId physics::CreatePhysicsWorld(const glm::vec2 &gravity) {
+b2WorldId physics::CreateWorld(const glm::vec2 &gravity) {
   b2WorldDef world_def = b2DefaultWorldDef();
   world_def.gravity = {gravity.x, gravity.y};
   return b2CreateWorld(&world_def);
 }
 
-b2BodyId physics::CreatePhysicsBody(b2WorldId world, const glm::vec2 &position,
+void physics::SetGravity(b2WorldId world, const glm::vec2 &gravity) {
+  b2World_SetGravity(world, {gravity.x, gravity.y});
+}
+
+b2BodyId physics::CreateBody(b2WorldId world, const glm::vec2 &position,
                                     const glm::vec2 &scale, float angle,
                                     bool is_dynamic) {
   auto body_def = b2DefaultBodyDef();
@@ -27,13 +31,25 @@ b2BodyId physics::CreatePhysicsBody(b2WorldId world, const glm::vec2 &position,
   return body;
 }
 
+b2BodyId physics::CreateBody(b2WorldId world, Transform transform,
+                                    bool is_dynamic) {
+  return CreateBody(world, transform.position, transform.scale,
+                           transform.rotation, is_dynamic);
+}
+
 void physics::SyncPosition(b2BodyId body, glm::vec2 &position) {
   b2Vec2 b2_position = b2Body_GetPosition(body);
   position.x = b2_position.x;
   position.y = b2_position.y;
 }
 
-void physics::DestroyPhysicsWorld(b2WorldId &world) {
+void physics::SyncTransform(b2BodyId body, Transform &transform) {
+  b2Vec2 b2_position = b2Body_GetPosition(body);
+  transform.position = { b2_position.x, b2_position.y };
+  transform.rotation = b2Rot_GetAngle(b2Body_GetRotation(body));
+}
+
+void physics::DestroyWorld(b2WorldId &world) {
   if (b2World_IsValid(world)) {
     b2DestroyWorld(world);
     world = b2WorldId{};

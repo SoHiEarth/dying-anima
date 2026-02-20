@@ -3,9 +3,9 @@
 #include "../atlas.h"
 
 namespace ResourceManager {
-static TEXTURE_ATLAS texture_atlas;
-static SHADER_ATLAS shader_atlas;
-static FONT_ATLAS font_atlas;
+extern TEXTURE_ATLAS texture_atlas;
+extern SHADER_ATLAS shader_atlas;
+extern FONT_ATLAS font_atlas;
 void Init();
 TextureHandle GetTexture(std::string_view tag);
 ShaderHandle GetShader(std::string_view tag);
