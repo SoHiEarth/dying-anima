@@ -15,36 +15,36 @@ void ResourceManager::Init() {
   font_atlas = LoadFontAtlas("assets/fonts/font.xml");
 }
 
-TextureHandle ResourceManager::GetTexture(std::string_view tag) {
-  if (texture_atlas.contains(std::string(tag))) {
-    return texture_atlas.at(std::string(tag));
+TextureHandle ResourceManager::GetTexture(const std::string& tag) {
+  if (auto it = texture_atlas.find(tag);it != texture_atlas.end()) {
+    return it->second;
   }
   std::print("Texture with tag '{}' not found in atlas\n", tag);
   // Return util.notexture
-  if (texture_atlas.contains("util.notexture")) {
-    return texture_atlas.at("util.notexture");
+  if (auto it = texture_atlas.find("util.notexture"); it != texture_atlas.end()) {
+    return it->second;
   } else {
     throw std::runtime_error(
         "Fallback texture 'util.notexture' not found in atlas");
   }
 }
 
-ShaderHandle ResourceManager::GetShader(std::string_view tag) {
-  if (shader_atlas.contains(std::string(tag))) {
-    return shader_atlas.at(std::string(tag));
+ShaderHandle ResourceManager::GetShader(const std::string& tag) {
+  if (auto it = shader_atlas.find(tag); it != shader_atlas.end()) {
+    return it->second;
   }
   throw std::runtime_error(
       std::format("Shader with tag '{}' not found in atlas", tag));
 }
 
-FontHandle ResourceManager::GetFont(std::string_view tag) {
-  if (font_atlas.contains(std::string(tag))) {
-    return font_atlas.at(std::string(tag));
+FontHandle ResourceManager::GetFont(const std::string& tag) {
+  if (auto it = font_atlas.find(tag); it != font_atlas.end()) {
+    return it->second;
   }
   std::print("Font with tag '{}' not found in atlas\n", tag);
   // Return util.nofont
-  if (font_atlas.contains("util.nofont")) {
-    return font_atlas.at("util.nofont");
+  if (auto it = font_atlas.find("util.nofont"); it != font_atlas.end()) {
+    return it->second;
   } else {
     throw std::runtime_error("Fallback font 'util.nofont' not found in atlas");
   }

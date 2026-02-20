@@ -3,6 +3,7 @@
 #include "physics.h"
 #include "sprite.h"
 #include "transform.h"
+#include "core/resource_manager.h"
 #include <fstream>
 #include <print>
 #include <sstream>
@@ -38,19 +39,13 @@ std::vector<Object> LoadLevel(std::string_view filename,
       std::print("Error reading texture tag in level file: {}\n", line);
       continue;
     }
-    b2BodyDef box_body_def = b2DefaultBodyDef();
-    box_body_def.type = b2_staticBody;
-    box_body_def.position = b2Vec2(transform.position.x, transform.position.y);
-    auto body = registry
+    sprite.texture = ResourceManager::GetTexture(sprite.texture_tag).texture;
+    registry
                     .emplace<PhysicsBody>(
-                        entity, b2CreateBody(physics_world, &box_body_def))
+                        entity, physics::CreatePhysicsBody(
+                                    physics_world, transform.position,
+                                    transform.scale, transform.rotation, true))
                     .body;
-    b2Polygon box_shape =
-        b2MakeBox(transform.scale.x / 2.0f, transform.scale.y / 2.0f);
-    b2ShapeDef box_shape_def = b2DefaultShapeDef();
-    box_shape_def.density = 1.0F;
-    box_shape_def.material.friction = 0.5F;
-    b2CreatePolygonShape(body, &box_shape_def, &box_shape);
   }
   file.close();
   return objects;

@@ -25,6 +25,8 @@ void FramebufferSizeCallback(GLFWwindow * /* window */, int width, int height) {
   window.width = width;
   window.height = height;
   window.SetPixelsPerUnit(window.GetPixelsPerUnit());
+  window.RecalculateCenteredProjection();
+  window.RecalculateScreenSpaceProjection();
   assert(width > 0 && height > 0);
   glViewport(0, 0, width, height);
 }
@@ -52,6 +54,8 @@ int main() {
     glfwPollEvents();
   }
   glViewport(0, 0, window.width, window.height);
+  window.RecalculateCenteredProjection();
+  window.RecalculateScreenSpaceProjection();
   glfwSetFramebufferSizeCallback(window.window, FramebufferSizeCallback);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

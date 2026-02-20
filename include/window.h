@@ -10,15 +10,8 @@ private:
   ProjectionType current_projection = ProjectionType::CENTERED;
   float pixels_per_unit = 100.0f;
   float half_width = 0.0f, half_height = 0.0f;
-  glm::mat4 GetCenteredProjection() {
-    float half_width = (width / pixels_per_unit) / 2.0f;
-    float half_height = (height / pixels_per_unit) / 2.0f;
-    return glm::ortho(-half_width, half_width, -half_height, half_height, near,
-                      far);
-  }
-  glm::mat4 GetScreenSpaceProjection() {
-    return glm::ortho(0.0f, (float)width, 0.0f, (float)height);
-  }
+    // cache projection matrices
+  glm::mat4 centered_projection, screen_space_projection;
 
 public:
   GLFWwindow *window = nullptr;
@@ -38,10 +31,17 @@ public:
   glm::mat4 GetProjection() {
     switch (current_projection) {
     case ProjectionType::CENTERED:
-      return GetCenteredProjection();
+      return centered_projection;
     case ProjectionType::SCREEN_SPACE:
-      return GetScreenSpaceProjection();
+      return screen_space_projection;
     }
+    return glm::mat4(1.0f);
+  }
+  void RecalculateCenteredProjection() {
+    centered_projection = glm::ortho(-half_width, half_width, -half_height, half_height, near, far);
+  }
+  void RecalculateScreenSpaceProjection() {
+    screen_space_projection = glm::ortho(0.0f, (float)width, 0.0f, (float)height);
   }
   bool IsMinimized() { return (width <= 0 && height <= 0); }
 };

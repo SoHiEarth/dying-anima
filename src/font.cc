@@ -37,7 +37,7 @@ Font::Font(std::string_view font_path) {
     throw std::runtime_error("Failed to load font: " + std::string(font_path));
   }
 
-  FT_Set_Pixel_Sizes(face, 0, dpi);
+  FT_Set_Pixel_Sizes(face, 0, (unsigned int)dpi);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
   for (unsigned char c = 0; c < 128; c++) {
@@ -88,13 +88,22 @@ int Font::GetHeight(std::string_view text) const {
   return height;
 }
 
+static glm::mat4 last_projection, last_view, last_vp;
+
 void Font::Render(std::string_view text, const glm::vec2 &position,
                   const glm::vec3 &color, const Shader *shader) const {
   shader->Use();
   shader->SetUniform("color", color);
-  auto mvp = GetGameWindow().GetProjection() * GetCamera().GetView() *
-             CalculateModelMatrix(position, 0.0f, glm::vec2(1.0f));
-  shader->SetUniform("mvp", mvp);
+  if (last_projection != GetGameWindow().GetProjection()) {
+    last_projection = GetGameWindow().GetProjection();
+    last_vp = last_projection * GetCamera().GetView();
+  } else if (last_view != GetCamera().GetView()) {
+    last_view = GetCamera().GetView();
+    last_vp = GetGameWindow().GetProjection() * last_view;
+  }
+
+  shader->SetUniform(
+      "mvp", last_vp * CalculateModelMatrix(position, 0.0f, glm::vec2(1.0f)));
   glActiveTexture(GL_TEXTURE0);
   glBindVertexArray(vertex_attrib);
 
@@ -106,8 +115,8 @@ void Font::Render(std::string_view text, const glm::vec2 &position,
     const auto &ch = characters.at(c);
     float xpos = x_pos + ch.bearing.x;
     float ypos = y_pos - (ch.size.y - ch.bearing.y);
-    float w = ch.size.x;
-    float h = ch.size.y;
+    float w = (float)ch.size.x;
+    float h = (float)ch.size.y;
 
     float vertices[6][5] = {
         {xpos, ypos + h, 0.0f, 0.0f, 0.0f}, {xpos, ypos, 0.0f, 0.0f, 1.0f},

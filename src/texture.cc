@@ -41,11 +41,23 @@ Texture::Texture(std::string_view path) {
 
 Texture::~Texture() { glDeleteTextures(1, &id); }
 
+static glm::mat4 last_proj, last_view, last_vp;
 void Texture::Render(const Shader *shader, const glm::mat4 &model) {
   shader->Use();
-  const auto &mvp = GetGameWindow().GetProjection() *
-                    GetCamera().GetView() * model;
-  shader->SetUniform("mvp", mvp);
+  bool recalculate_vp = false;
+  if (last_proj != GetGameWindow().GetProjection()) {
+    last_proj = GetGameWindow().GetProjection();
+    recalculate_vp = true;
+  }
+  if (last_view != GetCamera().GetView()) {
+    last_view = GetCamera().GetView();
+    recalculate_vp = true;
+  }
+  if (recalculate_vp) {
+    last_vp = last_proj * last_view;
+  }
+  
+  shader->SetUniform("mvp", last_vp * model);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, id);
   core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);

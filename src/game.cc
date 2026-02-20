@@ -95,7 +95,7 @@ AppState Game(GameWindow &window) {
       registry.emplace<PhysicsBody>(player,
                                 physics::CreateBody(physics_world, player_transform, true))
           .body;
-  registry.emplace<Sprite>(player, "game.player");
+  registry.emplace<Sprite>(player, "game.player", ResourceManager::GetTexture("game.player").texture);
 
   LoadLevel("level.txt", registry, physics_world);
   if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
@@ -138,7 +138,7 @@ AppState Game(GameWindow &window) {
     auto &camera_position = GetCamera().position;
     camera_position = glm::mix({camera_position.x, camera_position.y, 0.0f}, glm::vec3(player_transform.position, 0.0f), speed);
 
-    physics_accumulator += frame_time;
+    physics_accumulator += (float)frame_time;
     if (game_state == GameState::RUNNING) {
       while (physics_accumulator >= physics_time_step) {
         core::input::NewFrame();
@@ -155,17 +155,14 @@ AppState Game(GameWindow &window) {
     GetCamera().SetType(CameraType::WORLD);
     auto physics_view = registry.view<Transform, PhysicsBody>();
     for (auto entity : physics_view) {
-      auto &transform = physics_view.get<Transform>(entity);
-      auto &physics_body = physics_view.get<PhysicsBody>(entity);
-      physics::SyncPosition(physics_body.body, transform.position);
+      physics::SyncPosition(physics_view.get<PhysicsBody>(entity).body,
+                            physics_view.get<Transform>(entity).position);
     }
     auto sprite_view = registry.view<Transform, Sprite>();
     for (auto entity : sprite_view) {
-      const auto &transform = sprite_view.get<Transform>(entity);
-      const auto &sprite = sprite_view.get<Sprite>(entity);
-      const auto texture =
-          ResourceManager::GetTexture(sprite.texture_tag).texture;
-      texture->Render(sprite_shader, CalculateModelMatrix(transform));
+      sprite_view.get<Sprite>(entity).texture->Render(
+          sprite_shader,
+          CalculateModelMatrix(sprite_view.get<Transform>(entity)));
     }
 
     window.SetProjection(ProjectionType::SCREEN_SPACE);
@@ -203,11 +200,6 @@ AppState Game(GameWindow &window) {
                 camera_position.y);
     ImGui::Text("Game State: %s",
                 game_state == GameState::RUNNING ? "Running" : "Paused");
-    ImGui::SeparatorText("Texture Atlas");
-    for (const auto &[name, entry] : ResourceManager::texture_atlas) {
-      ImGui::Text("Name: %s", name.c_str());
-      ImGui::Image(entry.texture->id, ImVec2(100, 100));
-    }
     ImGui::End();
 
     if (game_state == GameState::PAUSED) {
