@@ -18,6 +18,7 @@
 #include "level_editor.h"
 #include "menu.h"
 #include "state.h"
+#include "core/scene.h"
 #include "window.h"
 
 void FramebufferSizeCallback(GLFWwindow * /* window */, int width, int height) {

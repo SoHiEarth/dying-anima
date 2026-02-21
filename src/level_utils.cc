@@ -42,7 +42,7 @@ std::vector<Object> LoadLevel(std::string_view filename,
     sprite.texture = ResourceManager::GetTexture(sprite.texture_tag).texture;
     registry
                     .emplace<PhysicsBody>(
-                        entity, physics::CreatePhysicsBody(
+                        entity, physics::CreateBody(
                                     physics_world, transform.position,
                                     transform.scale, transform.rotation, true))
                     .body;
