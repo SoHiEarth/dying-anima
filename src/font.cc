@@ -67,6 +67,14 @@ Font::Font(std::string_view font_path) {
   FT_Done_FreeType(ft);
 }
 
+Font::~Font() {
+  for (const auto &[_, character] : characters) {
+    glDeleteTextures(1, &character.texture);
+  }
+  glDeleteVertexArrays(1, &vertex_attrib);
+  glDeleteBuffers(1, &vertex_buffer);
+}
+
 int Font::GetWidth(std::string_view text) const {
   int width = 0;
   for (const char &c : text) {

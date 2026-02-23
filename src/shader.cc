@@ -49,6 +49,8 @@ Shader::Shader(std::string_view vertex_path, std::string_view fragment_path) {
   glDeleteShader(fragment_shader);
 }
 
+Shader::~Shader() { glDeleteProgram(id); }
+
 void Shader::Use() const { glUseProgram(id); }
 
 template <>

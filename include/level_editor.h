@@ -4,12 +4,13 @@
 
 struct LevelEditor : public Scene {
  public:
+   std::string Name() override { return "LevelEditor"; };
 	 using Scene::Scene;
 	 void Init() override;
 	 void Quit() override;
 	 void HandleInput() override;
 	 void Update(float dt) override;
    void Render(GameWindow& window) override;
-   bool is_transparent = false;
+   bool IsTransparent() { return false; };
    Shader* rect_shader = nullptr;
 };

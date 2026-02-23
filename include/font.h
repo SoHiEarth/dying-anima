@@ -15,6 +15,7 @@ struct Font {
   unsigned int vertex_buffer;
   std::map<char, Character> characters;
   Font(std::string_view font_path);
+  ~Font();
   int GetWidth(std::string_view text) const;
   int GetHeight(std::string_view text) const;
   void Render(std::string_view text, const glm::vec2 &position,

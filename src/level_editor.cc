@@ -49,7 +49,9 @@ void LevelEditor::Init() {
   rect_shader = ResourceManager::GetShader("Rect").shader;
 }
 
-void LevelEditor::Quit() {}
+void LevelEditor::Quit() {
+  delete rect_shader;
+}
 
 void LevelEditor::HandleInput() {
 

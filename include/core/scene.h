@@ -9,6 +9,8 @@ struct SceneManager;
 
 struct Scene {
  public:
+  // Optional Field
+  virtual std::string Name() { return "BaseScene"; };
   explicit Scene(SceneManager& manager) : scene_manager(manager) {}
   virtual ~Scene() = default;
   virtual void Init() {}
@@ -16,8 +18,7 @@ struct Scene {
   virtual void HandleInput() {}
   virtual void Update(float dt) {}
   virtual void Render(GameWindow& window) {}
-
-  bool is_transparent = false;
+  virtual bool IsTransparent() { return false; };
 
  protected:
    SceneManager& scene_manager;
@@ -47,7 +48,14 @@ struct SceneManager {
   }
   void Render(GameWindow& window) {
     if (scenes.empty()) return;
-    scenes.back()->Render(window);
+    for (auto it = scenes.rbegin(); it != scenes.rend(); ++it) {
+      if (!(*it)->IsTransparent()) {
+        (*it)->Render(window);
+        return;
+      } else {
+        (*it)->Render(window);
+      }
+    }
   }
  private:
   std::vector<std::unique_ptr<Scene>> scenes;

@@ -10,12 +10,13 @@
 struct GameScene : public Scene {
  public:
   using Scene::Scene;
+  std::string Name() override { return "GameScene"; };
   void Init() override;
   void Quit() override;
   void HandleInput() override;
   void Update(float dt) override;
   void Render(GameWindow& window) override;
-  bool is_transparent = false;
+  bool IsTransparent() { return false; };
   entt::registry registry;
   Shader *sprite_shader, *rect_shader, *text_shader;
   Font *special_font, *title_font, *ui_font;
