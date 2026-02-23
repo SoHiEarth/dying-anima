@@ -3,28 +3,29 @@
 #include <map>
 #include <print>
 
-std::map<int, bool> core::input::key_states{},
-    core::input::last_frame_key_states{};
+std::map<int, bool> core::input::states{},
+    core::input::last_frame_states{};
 
-void core::input::UpdateKeyState(GLFWwindow *window, int key) {
-  if (key == GLFW_MOUSE_BUTTON_LEFT || key == GLFW_MOUSE_BUTTON_MIDDLE ||
-      key == GLFW_MOUSE_BUTTON_RIGHT) {
-    key_states.insert({key, glfwGetMouseButton(window, key) == GLFW_PRESS});
-  }
-  key_states.insert({key, glfwGetKey(window, key) == GLFW_PRESS});
+bool core::input::IsKeyPressed(int key) {
+  return states.at(key);
 }
-
-bool core::input::IsKeyPressed(int key) { return key_states.at(key); }
 
 bool core::input::IsKeyPressedThisFrame(int key) {
-  if (last_frame_key_states.find(key) == last_frame_key_states.end()) {
-    return key_states.at(key);
+  if (last_frame_states.find(key) == last_frame_states.end()) {
+    return states.at(key);
   }
-  return key_states.at(key) && !last_frame_key_states.at(key);
+  return states.at(key) && !last_frame_states.at(key);
 }
 
-void core::input::UpdateLastFrameKeyStates() {
-  last_frame_key_states = key_states;
-}
+void core::input::Update(GameWindow& window) {
+  last_frame_states = states;
+  states.clear();
 
-void core::input::NewFrame() { key_states.clear(); }
+  for (int key = GLFW_MOUSE_BUTTON_1; key <= GLFW_MOUSE_BUTTON_LAST; key++) {
+    states.insert({key, glfwGetMouseButton(window.window, key) == GLFW_PRESS});
+  }
+
+  for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; key++) {
+    states.insert({key, glfwGetKey(window.window, key) == GLFW_PRESS});
+  }
+}

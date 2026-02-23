@@ -19,6 +19,7 @@
 #include "menu.h"
 #include "state.h"
 #include "core/scene.h"
+#include "core/input.h"
 #include "window.h"
 
 void FramebufferSizeCallback(GLFWwindow * /* window */, int width, int height) {
@@ -69,22 +70,20 @@ int main() {
   ImGui_ImplGlfw_InitForOpenGL(window.window, true);
   ImGui_ImplOpenGL3_Init("#version 150");
   core::quad::Init();
-  while (game_state != AppState::EXIT) {
-    std::print("Current State: {}\n", static_cast<int>(game_state));
-    switch (game_state) {
-    case AppState::MENU:
-      game_state = Menu(window);
-      break;
-    case AppState::PLAYING:
-      game_state = Game(window);
-      break;
-    case AppState::LEVEL_EDITOR:
-      game_state = LevelEditor(window);
-      break;
-    case AppState::EXIT:
-      break;
-    }
+  
+  SceneManager scene_manager;
+  scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
+  while (!glfwWindowShouldClose(window.window)) {
+    glfwPollEvents();
+    core::input::Update(window);
+    scene_manager.HandleInput();
+    scene_manager.Update(1.0f / 60.0f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    scene_manager.Render(window);
+    glfwSwapBuffers(window.window);
   }
+
   core::quad::Quit();
   ResourceManager::Quit();
   ImGui_ImplOpenGL3_Shutdown();
