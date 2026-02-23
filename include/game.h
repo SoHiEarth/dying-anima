@@ -16,7 +16,6 @@ struct GameScene : public Scene {
   void Update(float dt) override;
   void Render(GameWindow& window) override;
   bool is_transparent = false;
-  b2WorldId physics_world;
   entt::registry registry;
   Shader *sprite_shader, *rect_shader, *text_shader;
   Font *special_font, *title_font, *ui_font;

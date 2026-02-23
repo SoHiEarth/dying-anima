@@ -9,8 +9,7 @@
 #include <sstream>
 
 std::vector<Object> LoadLevel(std::string_view filename,
-                              entt::registry &registry,
-                              b2WorldId physics_world) {
+                              entt::registry &registry) {
   std::vector<Object> objects{};
   std::fstream file(filename.data());
   if (!file.is_open()) {
@@ -42,8 +41,7 @@ std::vector<Object> LoadLevel(std::string_view filename,
     sprite.texture = ResourceManager::GetTexture(sprite.texture_tag).texture;
     registry
                     .emplace<PhysicsBody>(
-                        entity, physics::CreateBody(
-                                    physics_world, transform.position,
+                        entity, physics::CreateBody(transform.position,
                                     transform.scale, transform.rotation, true))
                     .body;
   }

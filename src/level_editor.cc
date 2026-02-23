@@ -51,9 +51,13 @@ void LevelEditor::Init() {
 
 void LevelEditor::Quit() {}
 
-void LevelEditor::HandleInput() {}
+void LevelEditor::HandleInput() {
 
-void LevelEditor::Update(float dt) {}
+}
+
+void LevelEditor::Update(float dt) {
+
+}
 
 void LevelEditor::Render(GameWindow& window) {
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);

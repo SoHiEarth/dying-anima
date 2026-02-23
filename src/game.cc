@@ -79,19 +79,16 @@ void GameScene::HandleInput() {
 }
 
 void GameScene::Init() {
-  physics_world = physics::CreateWorld({0.0f, -9.81f});
-
+  physics::Init({0, -9.81f});
   player = registry.create();
   auto& player_transform = registry.emplace<Transform>(player);
   registry.emplace<PlayerSpeed>(player, 2.0f, 4.0f, 0.0625f, 100.0f, 5.0f);
   auto& player_health = registry.emplace<Health>(player, 100.0f);
-  player_body = registry.emplace<PhysicsBody>(
-    player,
-    physics::CreateBody(physics_world, player_transform, true)).body;
+  player_body = registry.emplace<PhysicsBody>(player, physics::CreateBody(player_transform, true)).body;
   registry.emplace<Sprite>(player, "game.player",
     ResourceManager::GetTexture("game.player").texture);
 
-  LoadLevel("level.txt", registry, physics_world);
+  LoadLevel("level.txt", registry);
   if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
     std::filesystem::create_directory("saves");
   } else {
@@ -125,7 +122,7 @@ void GameScene::Update(float dt) {
 
   physics_accumulator += (float)dt;
   while (physics_accumulator >= physics_time_step) {
-    b2World_Step(physics_world, 1.0f / 60.0f, 4);
+    b2World_Step(physics::world, 1.0f / 60.0f, 4);
     physics_accumulator -= physics_time_step;
   }
 }
@@ -231,6 +228,6 @@ void GameScene::Quit() {
   auto &player_transform = registry.get<Transform>(player);
   auto &player_health = registry.get<Health>(player);
   SaveManager::SaveGame(player_transform, player_health);
-  physics::DestroyWorld(physics_world);
+  physics::Quit();
   registry.clear();
 }

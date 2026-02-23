@@ -65,8 +65,7 @@ int main() {
   ImGui::CreateContext();
   ImGuiIO &imgui_io = ImGui::GetIO();
   ResourceManager::Init();
-  imgui_io.Fonts->AddFontFromFileTTF(
-      ResourceManager::GetFont("Debug").file.c_str(), 18.5f);
+  imgui_io.Fonts->AddFontFromFileTTF(ResourceManager::GetFont("Debug").file.c_str(), 18.5f);
   ImGui_ImplGlfw_InitForOpenGL(window.window, true);
   ImGui_ImplOpenGL3_Init("#version 150");
   core::quad::Init();
@@ -74,14 +73,18 @@ int main() {
   SceneManager scene_manager;
   scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
   while (!glfwWindowShouldClose(window.window)) {
+    static double last_time = glfwGetTime();
+    double current_time = glfwGetTime();
+    double delta_time = current_time - last_time;
     glfwPollEvents();
     core::input::Update(window);
     scene_manager.HandleInput();
-    scene_manager.Update(1.0f / 60.0f);
+    scene_manager.Update((float)delta_time);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     scene_manager.Render(window);
     glfwSwapBuffers(window.window);
+    last_time = current_time;
   }
 
   core::quad::Quit();
