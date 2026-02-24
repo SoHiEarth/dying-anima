@@ -1,6 +1,7 @@
 #pragma once
 #include "core/scene.h"
 #include "shader.h"
+#include <entt/entt.hpp>
 
 struct LevelEditor : public Scene {
  public:
@@ -12,5 +13,6 @@ struct LevelEditor : public Scene {
 	 void Update(float dt) override;
    void Render(GameWindow& window) override;
    bool IsTransparent() { return false; };
-   Shader* rect_shader = nullptr;
+   Shader* rect_shader = nullptr, *sprite_shader = nullptr;
+   entt::registry registry;
 };

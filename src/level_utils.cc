@@ -4,62 +4,67 @@
 #include "sprite.h"
 #include "transform.h"
 #include "core/resource_manager.h"
-#include <fstream>
+#include <pugixml.hpp>
 #include <print>
 #include <sstream>
 
-std::vector<Object> LoadLevel(std::string_view filename,
-                              entt::registry &registry) {
-  std::vector<Object> objects{};
-  std::fstream file(filename.data());
-  if (!file.is_open()) {
-    std::print("Failed to open level file: {}\n", filename);
+entt::registry LoadLevel(std::string_view filename) {
+  pugi::xml_document doc;
+  if (!doc.load_file(filename.data())) {
+    std::print("Failed to load level file: {}\n", filename);
     return {};
   }
-  std::string line;
-  while (std::getline(file, line)) {
-    std::istringstream iss(line);
+  auto registry = entt::registry{};
+  auto root = doc.child("Level");
+  int object_count = std::distance(root.children("Object").begin(),
+                                   root.children("Object").end());
+  printf("Loading level with %d objects\n", object_count);
+  for (auto object_node : root.children("Object")) {
     auto entity = registry.create();
-    auto &transform = registry.emplace<Transform>(entity);
-    if (!(iss >> transform.position.x >> transform.position.y)) {
-      std::print("Error reading position in level file: {}\n", line);
-      continue;
+    {
+      auto transform_node = object_node.child("Transform");
+      auto& transform = registry.emplace<Transform>(entity);
+      transform.position.x = transform_node.attribute("pos.x").as_float();
+      transform.position.y = transform_node.attribute("pos.y").as_float();
+      transform.scale.x = transform_node.attribute("scale.x").as_float();
+      transform.scale.y = transform_node.attribute("scale.y").as_float();
+      transform.rotation = transform_node.attribute("rotation").as_float();
     }
-    if (!(iss >> transform.scale.x >> transform.scale.y)) {
-      std::print("Error reading scale in level file: {}\n", line);
-      continue;
+    {
+      auto sprite_node = object_node.child("Sprite");
+      auto& sprite = registry.emplace<Sprite>(entity);
+      sprite.texture_tag = sprite_node.attribute("texture_tag").as_string();
+      sprite.texture = ResourceManager::GetTexture(sprite.texture_tag).texture;
     }
-    if (!(iss >> transform.rotation)) {
-      std::print("Error reading rotation in level file: {}\n", line);
-      continue;
-    }
-    auto &sprite = registry.emplace<Sprite>(entity);
-    if (!(iss >> sprite.texture_tag)) {
-      std::print("Error reading texture tag in level file: {}\n", line);
-      continue;
-    }
-    sprite.texture = ResourceManager::GetTexture(sprite.texture_tag).texture;
-    registry
-                    .emplace<PhysicsBody>(
-                        entity, physics::CreateBody(transform.position,
-                                    transform.scale, transform.rotation, true))
-                    .body;
   }
-  file.close();
-  return objects;
+  return registry;
 }
 
-void SaveLevel(std::string_view filename, const std::vector<Object> &objects) {
-  std::ofstream file(filename.data());
-  if (!file.is_open()) {
-    std::print("Failed to open level file for writing: {}\n", filename);
-    return;
+void SaveLevel(std::string_view filename, const entt::registry& registry) {
+  pugi::xml_document doc;
+  auto view = registry.view<Transform, Sprite>();
+  auto root = doc.append_child("Level");
+  for (auto entity : view) {
+    auto object_node = root.append_child("Object");
+    {
+      const auto& transform = view.get<Transform>(entity);
+      auto transform_node = object_node.append_child("Transform");
+      transform_node.append_attribute("pos.x") = transform.position.x;
+      transform_node.append_attribute("pos.y") = transform.position.y;
+      transform_node.append_attribute("scale.x") = transform.scale.x;
+      transform_node.append_attribute("scale.y") = transform.scale.y;
+      transform_node.append_attribute("rotation") = transform.rotation;
+    }
+    {
+      const auto& sprite = view.get<Sprite>(entity);
+      auto sprite_node = object_node.append_child("Sprite");
+      sprite_node.append_attribute("texture_tag") = sprite.texture_tag.c_str();
+    }
   }
-  for (const auto &obj : objects) {
-    file << obj.position.x << " " << obj.position.y << " ";
-    file << obj.scale.x << " " << obj.scale.y << " ";
-    file << obj.rotation << " ";
-    file << "util.notexture" << "\n";
+  int object_count = std::distance(root.children("Object").begin(),
+                                   root.children("Object").end());
+  printf("Saving level with %d objects\n", object_count);
+  if (!doc.save_file(filename.data())) {
+    std::print("Failed to save level file: {}\n", filename);
   }
-  file.close();
 }

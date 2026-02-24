@@ -80,15 +80,13 @@ void GameScene::HandleInput() {
 
 void GameScene::Init() {
   physics::Init({0, -9.81f});
+  registry = LoadLevel("level.txt");
   player = registry.create();
-  auto& player_transform = registry.emplace<Transform>(player);
+  auto &player_transform = registry.emplace<Transform>(player);
   registry.emplace<PlayerSpeed>(player, 2.0f, 4.0f, 0.0625f, 100.0f, 5.0f);
-  auto& player_health = registry.emplace<Health>(player, 100.0f);
+  auto &player_health = registry.emplace<Health>(player, 100.0f);
   player_body = registry.emplace<PhysicsBody>(player, physics::CreateBody(player_transform, true)).body;
-  registry.emplace<Sprite>(player, "game.player",
-    ResourceManager::GetTexture("game.player").texture);
-
-  LoadLevel("level.txt", registry);
+  registry.emplace<Sprite>(player, "game.player", ResourceManager::GetTexture("game.player").texture);
   if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
     std::filesystem::create_directory("saves");
   } else {
@@ -111,10 +109,6 @@ void GameScene::Init() {
 }
 
 void GameScene::Update(float dt) {
-  ImGui_ImplOpenGL3_NewFrame();
-  ImGui_ImplGlfw_NewFrame();
-  ImGui::NewFrame();
-
   float speed = 1.0f - std::pow(0.2f, (float)dt);
   auto &camera_position = GetCamera().position;
   auto &player_transform = registry.get<Transform>(player);
@@ -125,19 +119,23 @@ void GameScene::Update(float dt) {
     b2World_Step(physics::world, 1.0f / 60.0f, 4);
     physics_accumulator -= physics_time_step;
   }
-}
-
-void GameScene::Render(GameWindow &window) {
-  auto &camera_position = GetCamera().position;
-  glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
-  window.SetProjection(ProjectionType::CENTERED);
-  GetCamera().SetType(CameraType::WORLD);
   auto physics_view = registry.view<Transform, PhysicsBody>();
   for (auto entity : physics_view) {
     physics::SyncPosition(physics_view.get<PhysicsBody>(entity).body,
                           physics_view.get<Transform>(entity).position);
   }
+}
+
+void GameScene::Render(GameWindow &window) {
+  auto &camera_position = GetCamera().position;
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+  glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  window.SetProjection(ProjectionType::CENTERED);
+  GetCamera().SetType(CameraType::WORLD);  
   auto sprite_view = registry.view<Transform, Sprite>();
   for (auto entity : sprite_view) {
     sprite_view.get<Sprite>(entity).texture->Render(
@@ -167,8 +165,7 @@ void GameScene::Render(GameWindow &window) {
   ImGui::Begin("Debug Menu");
   ImGui::Text("FPS: %.2f", fps);
   auto &player_transform = registry.get<Transform>(player);
-  if (ImGui::DragFloat3("Position",
-                        glm::value_ptr(player_transform.position))) {
+  if (ImGui::DragFloat3("Position", glm::value_ptr(player_transform.position))) {
     b2Body_SetTransform(
         player_body,
         b2Vec2(player_transform.position.x, player_transform.position.y),
@@ -180,6 +177,15 @@ void GameScene::Render(GameWindow &window) {
   ImGui::Text("On Ground: %s", IsOnGround(player_body) ? "Yes" : "No");
   ImGui::Text("Camera Position: (%.2f, %.2f)", camera_position.x,
               camera_position.y);
+  ImGui::End();
+
+  ImGui::Begin("Player Tweaker");
+  auto &player_speed = registry.get<PlayerSpeed>(player);
+  ImGui::DragFloat("Max Speed", &player_speed.max_speed, 0.1f, 0.0f);
+  ImGui::DragFloat("Speed", &player_speed.speed, 0.01f, 0.0f);
+  ImGui::DragFloat("Deceleration", &player_speed.deceleration, 0.01f, 0.0f);
+  ImGui::DragFloat("Boost Speed", &player_speed.boost_speed, 1.0f, 0.0f);
+  ImGui::DragFloat("Jump Impulse", &player_speed.jump_impulse, 1.0f, 0.0f);
   ImGui::End();
 
   /*
@@ -210,24 +216,14 @@ void GameScene::Render(GameWindow &window) {
 #endif
     */
 
-  ImGui::Begin("Player Tweaker");
-  auto &player_speed = registry.get<PlayerSpeed>(player);
-  ImGui::DragFloat("Max Speed", &player_speed.max_speed, 0.1f, 0.0f);
-  ImGui::DragFloat("Speed", &player_speed.speed, 0.01f, 0.0f);
-  ImGui::DragFloat("Deceleration", &player_speed.deceleration, 0.01f, 0.0f);
-  ImGui::DragFloat("Boost Speed", &player_speed.boost_speed, 1.0f, 0.0f);
-  ImGui::DragFloat("Jump Impulse", &player_speed.jump_impulse, 1.0f, 0.0f);
-  ImGui::End();
-
   ImGui::Render();
   ImGui::EndFrame();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void GameScene::Quit() {
-  auto &player_transform = registry.get<Transform>(player);
-  auto &player_health = registry.get<Health>(player);
-  SaveManager::SaveGame(player_transform, player_health);
+  SaveManager::SaveGame(registry.get<Transform>(player),
+                        registry.get<Health>(player));
   physics::Quit();
   registry.clear();
 }

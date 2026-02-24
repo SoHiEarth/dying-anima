@@ -132,10 +132,4 @@ void MenuScene::Render(GameWindow& window) {
 #endif
 }
 
-void MenuScene::Quit() {
-  delete font;
-  delete text_shader;
-  delete sprite_shader;
-  delete banner_texture;
-  delete selected_texture;
-}
+void MenuScene::Quit() {}

@@ -80,13 +80,13 @@ int main() {
     core::input::Update(window);
     scene_manager.HandleInput();
     scene_manager.Update((float)delta_time);
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     scene_manager.Render(window);
     glfwSwapBuffers(window.window);
     last_time = current_time;
   }
-
+  scene_manager.PopScene();
   core::quad::Quit();
   ResourceManager::Quit();
   ImGui_ImplOpenGL3_Shutdown();

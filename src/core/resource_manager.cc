@@ -17,6 +17,7 @@ void ResourceManager::Init() {
 
 TextureHandle ResourceManager::GetTexture(const std::string& tag) {
   if (auto it = texture_atlas.find(tag);it != texture_atlas.end()) {
+    std::print("Found texture with tag '{}'\n", tag);
     return it->second;
   }
   std::print("Texture with tag '{}' not found in atlas\n", tag);
