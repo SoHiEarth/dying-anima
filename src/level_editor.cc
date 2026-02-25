@@ -20,6 +20,8 @@
 #include "core/resource_manager.h"
 #include "core/input.h"
 #include "calculate.h"
+#include "render.h"
+#include "light.h"
 
 entt::entity selected_entity = entt::null;
 glm::dvec2 mouse_position, last_mouse_position;
@@ -54,6 +56,7 @@ void LevelEditor::Init() {
 
 void LevelEditor::Quit() {
   SaveLevel("level.txt", registry);
+  render::Clear();
 }
 
 bool PointInRect(const glm::vec2& point, const Transform& transform) {
@@ -112,6 +115,7 @@ void LevelEditor::HandleInput() {
         sprite.texture_tag = "util.notexture";
         sprite.texture =
             ResourceManager::GetTexture(sprite.texture_tag).texture;
+        sprite.normal = ResourceManager::GetTexture(sprite.texture_tag).texture;
       } else {
         selected_entity = GetEntityAtPosition(world_pos, registry);
       }
@@ -139,49 +143,42 @@ void LevelEditor::Render(GameWindow& window) {
 
   window.SetProjection(ProjectionType::CENTERED);
   GetCamera().SetType(CameraType::WORLD);
-
-  auto sprite_view = registry.view<Transform, Sprite>();
-  for (entt::entity entity : sprite_view) {
-    sprite_view.get<Sprite>(entity).texture->Render(
-        sprite_shader,
-        CalculateModelMatrix(sprite_view.get<Transform>(entity)));
-  }
+  render::Render(registry);
 
   auto& camera = GetCamera();
-  float gridSize = 1.0f;
-  float lineThickness = 0.01f;
+  float lineThickness = 1/window.GetPixelsPerUnit();
   float halfWidth = (window.width / window.GetPixelsPerUnit()) / 2.0f;
   float halfHeight = (window.height / window.GetPixelsPerUnit()) / 2.0f;
   float left = camera.position.x - halfWidth;
   float right = camera.position.x + halfWidth;
   float bottom = camera.position.y - halfHeight;
   float top = camera.position.y + halfHeight;
-  float startX = floor(left / gridSize) * gridSize;
-  float startY = floor(bottom / gridSize) * gridSize;
+  float startX = floor(left);
+  float startY = floor(bottom);
 
   // Vertical lines
-  for (float x = startX; x <= right; x += gridSize) {
+  for (float x = startX; x <= right; x++) {
     Rect line(glm::vec2(x, camera.position.y),
-              glm::vec2(lineThickness, halfHeight * 2.0f),
+              glm::vec2(lineThickness, window.height),
               glm::vec4(0.3f, 0.3f, 0.3f, 1.0f));
     line.Render(rect_shader);
   }
 
   // Horizontal lines
-  for (float y = startY; y <= top; y += gridSize) {
+  for (float y = startY; y <= top; y++) {
     Rect line(glm::vec2(camera.position.x, y),
-              glm::vec2(halfWidth * 2.0f, lineThickness),
+              glm::vec2(window.width, lineThickness),
               glm::vec4(0.3f, 0.3f, 0.3f, 1.0f));
     line.Render(rect_shader);
   }
 
   // Origin lines
   Rect xAxis(glm::vec2(0.0f, camera.position.y),
-             glm::vec2(lineThickness * 2.0f, halfHeight * 2.0f),
+             glm::vec2(lineThickness * 2.0f, window.height),
              glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
   xAxis.Render(rect_shader);
   Rect yAxis(glm::vec2(camera.position.x, 0.0f),
-             glm::vec2(halfWidth * 2.0f, lineThickness * 2.0f),
+             glm::vec2(window.width, lineThickness * 2.0f),
              glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
   yAxis.Render(rect_shader);
 
@@ -206,8 +203,22 @@ void LevelEditor::Render(GameWindow& window) {
       ImGui::DragFloat("Rotation", &transform.rotation, 1.0f);
       auto& sprite = registry.get<Sprite>(selected_entity);
       if (ImGui::InputText("Texture Tag", &sprite.texture_tag)) {
-        sprite.texture =
-            ResourceManager::GetTexture(sprite.texture_tag).texture;
+        sprite.texture = ResourceManager::GetTexture(sprite.texture_tag).texture;
+      }
+      // Check if it has a light component
+      if (registry.any_of<Light>(selected_entity)) {
+        auto& light = registry.get<Light>(selected_entity);
+        ImGui::Combo("Light Type", (int*)&light.type, "DIRECTIONAL\0POINT\0");
+        ImGui::ColorEdit3("Light Color", glm::value_ptr(light.color));
+        ImGui::DragFloat("Light Intensity", &light.intensity, 0.1f, 0.0f);
+        ImGui::DragFloat("Light Radial Falloff", &light.radial_falloff, 0.1f,
+                         0.0f);
+        ImGui::DragFloat("Light Volumetric Intensity",
+                         &light.volumetric_intensity, 0.1f, 0.0f);
+      } else {
+        if (ImGui::Button("Add Light Component")) {
+          registry.emplace<Light>(selected_entity);
+        }
       }
     } else {
       ImGui::Text("No entity selected");

@@ -19,8 +19,7 @@ public:
   glm::mat4 GetView() {
     switch (type) {
     case CameraType::WORLD:
-      return glm::lookAt({position, 20.0f}, glm::vec3(position, 0.0f),
-                         glm::vec3(0.0f, 1.0f, 0.0f));
+        return glm::translate(glm::mat4(1.0f), -glm::vec3(position, 3.0f));
     }
     return glm::mat4(1.0f);
   }

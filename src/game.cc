@@ -29,6 +29,7 @@
 #include "state.h"
 #include "transform.h"
 #include "window.h"
+#include "render.h"
 #include <filesystem>
 
 void GameScene::HandleInput() {
@@ -225,5 +226,6 @@ void GameScene::Quit() {
   SaveManager::SaveGame(registry.get<Transform>(player),
                         registry.get<Health>(player));
   physics::Quit();
+  render::Clear();
   registry.clear();
 }

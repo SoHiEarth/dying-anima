@@ -23,6 +23,8 @@ public:
     // every frame)
     half_width = (width / pixels_per_unit) / 2.0f;
     half_height = (height / pixels_per_unit) / 2.0f;
+    RecalculateCenteredProjection();
+    RecalculateScreenSpaceProjection();
   }
   float GetPixelsPerUnit() const { return pixels_per_unit; }
   void SetProjection(ProjectionType projection) {

@@ -21,6 +21,7 @@
 #include "core/scene.h"
 #include "core/input.h"
 #include "window.h"
+#include "render.h"
 
 void FramebufferSizeCallback(GLFWwindow * /* window */, int width, int height) {
   auto &window = GetGameWindow();
@@ -31,6 +32,7 @@ void FramebufferSizeCallback(GLFWwindow * /* window */, int width, int height) {
   window.RecalculateScreenSpaceProjection();
   assert(width > 0 && height > 0);
   glViewport(0, 0, width, height);
+  render::RecreateFramebuffers(width, height);
 }
 
 int main() {
@@ -51,13 +53,11 @@ int main() {
   glfwMakeContextCurrent(window.window);
   gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
   glfwGetFramebufferSize(window.window, &window.width, &window.height);
-  while (window.IsMinimized()) {
-    glfwGetFramebufferSize(window.window, &window.width, &window.height);
-    glfwPollEvents();
-  }
-  glViewport(0, 0, window.width, window.height);
+  window.SetPixelsPerUnit(window.GetPixelsPerUnit());
   window.RecalculateCenteredProjection();
   window.RecalculateScreenSpaceProjection();
+  assert(window.width > 0 && window.height > 0);
+  glViewport(0, 0, window.width, window.height);
   glfwSetFramebufferSizeCallback(window.window, FramebufferSizeCallback);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -68,6 +68,8 @@ int main() {
   imgui_io.Fonts->AddFontFromFileTTF(ResourceManager::GetFont("Debug").file.c_str(), 18.5f);
   ImGui_ImplGlfw_InitForOpenGL(window.window, true);
   ImGui_ImplOpenGL3_Init("#version 150");
+  render::Init();
+  render::UnbindFramebuffer();
   core::quad::Init();
   
   SceneManager scene_manager;
@@ -85,10 +87,15 @@ int main() {
     scene_manager.Render(window);
     glfwSwapBuffers(window.window);
     last_time = current_time;
+    while (window.IsMinimized()) {
+      glfwGetFramebufferSize(window.window, &window.width, &window.height);
+      glfwPollEvents();
+    }
   }
   scene_manager.PopScene();
   core::quad::Quit();
   ResourceManager::Quit();
+  render::Quit();
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();

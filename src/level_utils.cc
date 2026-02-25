@@ -35,6 +35,7 @@ entt::registry LoadLevel(std::string_view filename) {
       auto& sprite = registry.emplace<Sprite>(entity);
       sprite.texture_tag = sprite_node.attribute("texture_tag").as_string();
       sprite.texture = ResourceManager::GetTexture(sprite.texture_tag).texture;
+      sprite.texture = ResourceManager::GetTexture(sprite.texture_tag).texture;
     }
   }
   return registry;
