@@ -14,6 +14,7 @@ find_package(imgui CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(pugixml CONFIG REQUIRED)
 find_package(EnTT CONFIG REQUIRED)
+find_package(tinyfiledialogs CONFIG REQUIRED)
 
 add_executable(DyingAnima)
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
@@ -26,6 +27,10 @@ file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
 )
 target_sources(DyingAnima PRIVATE ${SOURCE_FILES})
 target_include_directories(DyingAnima PRIVATE include)
+
+# Enable Precompiled Headers for faster builds
+target_precompile_headers(DyingAnima PRIVATE include/pch.h)
+
 target_compile_definitions(DyingAnima PRIVATE
   $<$<CONFIG:Debug>:DEBUG>
   $<$<CONFIG:Release>:NDEBUG>
@@ -51,6 +56,7 @@ target_link_libraries(DyingAnima PRIVATE
   imgui::imgui
   pugixml::pugixml
   EnTT::EnTT
+  tinyfiledialogs::tinyfiledialogs
 )
 set_target_properties(DyingAnima PROPERTIES
   OUTPUT_NAME "Dying Anima"

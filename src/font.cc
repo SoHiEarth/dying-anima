@@ -98,33 +98,35 @@ int Font::GetHeight(std::string_view text) const {
 
 static glm::mat4 last_projection, last_view, last_vp;
 
-void Font::Render(std::string_view text, const glm::vec2 &position,
+void Font::Render(std::string_view text, const glm::vec2& position,
+  const glm::vec3& color, const Shader* shader) const {
+  Render(text, position, glm::vec2(1.0f), color, shader);
+}
+
+void Font::Render(std::string_view text, const glm::vec2 &position, const glm::vec2& scale,
                   const glm::vec3 &color, const Shader *shader) const {
   shader->Use();
   shader->SetUniform("color", color);
   if (last_projection != GetGameWindow().GetProjection()) {
     last_projection = GetGameWindow().GetProjection();
     last_vp = last_projection * GetCamera().GetView();
-  } else if (last_view != GetCamera().GetView()) {
+  }
+  if (last_view != GetCamera().GetView()) {
     last_view = GetCamera().GetView();
     last_vp = GetGameWindow().GetProjection() * last_view;
   }
 
-  shader->SetUniform(
-      "mvp", last_vp * CalculateModelMatrix(position, 0.0f, glm::vec2(1.0f)));
+  shader->SetUniform("mvp", last_vp * CalculateModelMatrix(position, 0.0f, scale));
   glActiveTexture(GL_TEXTURE0);
   glBindVertexArray(vertex_attrib);
-
-  //float x_pos = position.x;
-  //float y_pos = position.y;
   float x_pos = 0.0f;
   float y_pos = 0.0f;
   for (const char &c : text) {
     const auto &ch = characters.at(c);
     float xpos = x_pos + ch.bearing.x;
     float ypos = y_pos - (ch.size.y - ch.bearing.y);
-    float w = (float)ch.size.x;
-    float h = (float)ch.size.y;
+    float w = ch.size.x;
+    float h = ch.size.y;
 
     float vertices[6][5] = {
         {xpos, ypos + h, 0.0f, 0.0f, 0.0f}, {xpos, ypos, 0.0f, 0.0f, 1.0f},
@@ -135,7 +137,7 @@ void Font::Render(std::string_view text, const glm::vec2 &position,
     glBindVertexArray(vertex_attrib);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDrawArrays(GL_TRIANGLES, 0, 6); 
 
     x_pos += (ch.advance >> 6);
   }

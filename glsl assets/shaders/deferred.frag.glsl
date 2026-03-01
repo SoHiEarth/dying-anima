@@ -16,9 +16,9 @@ out vec4 FragColor;
 
 uniform sampler2D color_texture;
 uniform sampler2D normal_texture;
-uniform float aspect_ratio;
 uniform int light_count;
 uniform Light lights[MAX_LIGHTS];
+uniform float aspect_ratio; // width divided by height
 
 void main() {
   vec4 sample = texture(color_texture, TexCoord);
@@ -32,7 +32,7 @@ void main() {
     }
     else if (lights[i].type == 1) {
       vec2 light_offset = TexCoord - lights[i].position;
-      light_offset.x *= aspect_ratio; // Correct for non-square aspect ratio
+      light_offset.x *= aspect_ratio; // Correct for aspect ratio
       vec2 light_direction = normalize(light_offset);
       float distance = length(light_offset);
       float attenuation = lights[i].intensity / (1.0 + lights[i].radial_falloff * distance * distance);

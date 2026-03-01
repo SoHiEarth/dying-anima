@@ -30,7 +30,6 @@ void FramebufferSizeCallback(GLFWwindow * /* window */, int width, int height) {
   window.SetPixelsPerUnit(window.GetPixelsPerUnit());
   window.RecalculateCenteredProjection();
   window.RecalculateScreenSpaceProjection();
-  assert(width > 0 && height > 0);
   glViewport(0, 0, width, height);
   render::RecreateFramebuffers(width, height);
 }
@@ -56,7 +55,6 @@ int main() {
   window.SetPixelsPerUnit(window.GetPixelsPerUnit());
   window.RecalculateCenteredProjection();
   window.RecalculateScreenSpaceProjection();
-  assert(window.width > 0 && window.height > 0);
   glViewport(0, 0, window.width, window.height);
   glfwSetFramebufferSizeCallback(window.window, FramebufferSizeCallback);
   glEnable(GL_BLEND);
@@ -65,13 +63,11 @@ int main() {
   ImGui::CreateContext();
   ImGuiIO &imgui_io = ImGui::GetIO();
   ResourceManager::Init();
-  imgui_io.Fonts->AddFontFromFileTTF(ResourceManager::GetFont("Debug").file.c_str(), 18.5f);
+  imgui_io.Fonts->AddFontFromFileTTF(ResourceManager::GetFont("Debug").file.c_str(), 15.5f);
   ImGui_ImplGlfw_InitForOpenGL(window.window, true);
   ImGui_ImplOpenGL3_Init("#version 150");
   render::Init();
-  render::UnbindFramebuffer();
   core::quad::Init();
-  
   SceneManager scene_manager;
   scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
   while (!glfwWindowShouldClose(window.window)) {
@@ -80,6 +76,27 @@ int main() {
     double delta_time = current_time - last_time;
     glfwPollEvents();
     core::input::Update(window);
+    if (core::input::IsKeyPressedThisFrame(GLFW_KEY_F2)) {
+      // wireframe or filled
+      static bool wireframe = false;
+      wireframe = !wireframe;
+      if (wireframe) {
+        glLineWidth(2.0f);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      } else {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      }
+    }
+    if (core::input::IsKeyPressedThisFrame(GLFW_KEY_F11)) {
+      static bool fullscreen = false;
+      fullscreen = !fullscreen;
+      if (fullscreen) {
+        const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        glfwSetWindowMonitor(window.window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);
+      } else {
+        glfwSetWindowMonitor(window.window, nullptr, 100, 100, 800, 600, 0);
+      }
+    }
     scene_manager.HandleInput();
     scene_manager.Update((float)delta_time);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -90,6 +107,9 @@ int main() {
     while (window.IsMinimized()) {
       glfwGetFramebufferSize(window.window, &window.width, &window.height);
       glfwPollEvents();
+    }
+    if (scene_manager.NoScenes()) {
+      glfwSetWindowShouldClose(window.window, true);
     }
   }
   scene_manager.PopScene();

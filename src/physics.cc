@@ -53,6 +53,5 @@ void physics::SyncTransform(b2BodyId body, Transform &transform) {
 void physics::Quit() {
   if (b2World_IsValid(world)) {
     b2DestroyWorld(world);
-    world = b2WorldId{};
   }
 }

@@ -9,13 +9,14 @@
     "glfw3",
     "glm",
     {
-      "name": "imgui",
-      "features": [
-        "freetype",
-        "glfw-binding",
-        "opengl3-binding"
-      ]
+        "name": "imgui",
+        "features": [
+            "freetype",
+            "glfw-binding",
+            "opengl3-binding"
+        ]
     },
+    "tinyfiledialogs",
     "opengl",
     "pugixml",
     "stb"

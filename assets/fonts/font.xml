@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fonts>
   <font name="Funnel Display" tag="Title" file="Funnel_Display/FunnelDisplay-VariableFont_wght.ttf"/>
-  <font name="Funnel Display" tag="UI" file="Funnel_Display/FunnelDisplay-VariableFont_wght.ttf"/>
   <font name="Google Sans Code" tag="util.nofont" file="Google_Sans_Code/GoogleSansCode-VariableFont_wght.ttf"/>
   <font name="Google Sans Code" tag="Debug" file="Google_Sans_Code/GoogleSansCode-VariableFont_wght.ttf"/>
-  <font name="Tinos" tag="Special" file="Tinos/Tinos-Regular.ttf"/>
+  <font name="Tinos" tag="UI" file="Tinos/Tinos-Regular.ttf"/>
+	<font name="Tinos" tag="Special" file="Tinos/Tinos-Regular.ttf"/>
 </fonts>

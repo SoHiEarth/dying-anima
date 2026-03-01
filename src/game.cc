@@ -7,6 +7,7 @@
 #include <imgui_impl_opengl3.h>
 
 #include <entt/entt.hpp>
+#include <filesystem>
 #include <format>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -19,33 +20,69 @@
 #include "core/resource_manager.h"
 #include "font.h"
 #include "game.h"
+#include "game/pause.h"
 #include "level_utils.h"
 #include "physics.h"
 #include "player.h"
 #include "rect.h"
+#include "render.h"
 #include "saves.h"
 #include "shader.h"
 #include "sprite.h"
 #include "state.h"
 #include "transform.h"
 #include "window.h"
-#include "render.h"
-#include <filesystem>
+
+void GameScene::Init() {
+  physics::Init({0, -9.81f});
+  registry = LoadLevel("level.txt");
+  player = registry.create();
+  auto &player_transform = registry.emplace<Transform>(player);
+  registry.emplace<PlayerSpeed>(player, 2.0f, 4.0f, 0.0625f, 100.0f, 5.0f);
+  auto &player_health = registry.emplace<Health>(player, 100.0f);
+  player_body = registry
+                    .emplace<PhysicsBody>(
+                        player, physics::CreateBody(player_transform, true))
+                    .body;
+  registry.emplace<Sprite>(player, "game.player",
+                           ResourceManager::GetTexture("game.player").texture);
+  if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
+    std::filesystem::create_directory("saves");
+  } else {
+    auto save_data = SaveManager::LoadLatestSave();
+    player_transform = save_data.player_transform;
+    player_health = save_data.player_health;
+  }
+
+  sprite_shader = ResourceManager::GetShader("Sprite").shader;
+  rect_shader = ResourceManager::GetShader("Rect").shader;
+  text_shader = ResourceManager::GetShader("Text").shader;
+  special_font = ResourceManager::GetFont("Special").font;
+  title_font = ResourceManager::GetFont("Title").font;
+  ui_font = ResourceManager::GetFont("UI").font;
+  sprite_shader->Use();
+  sprite_shader->SetUniform("texture1", 0);
+  text_shader->Use();
+  text_shader->SetUniform("character", 0);
+  glfwSwapInterval(0);
+}
+
+void GameScene::Quit() {
+  SaveManager::SaveGame(registry.get<Transform>(player),
+                        registry.get<Health>(player));
+  physics::Quit();
+  render::Clear();
+  registry.clear();
+}
 
 void GameScene::HandleInput() {
   auto &player_speed = registry.get<PlayerSpeed>(player);
   auto &player_body = registry.get<PhysicsBody>(player).body;
 
-  if (core::input::IsKeyPressed(GLFW_KEY_ESCAPE)) {
-    /*
-    if (game_state == GameState::PAUSED)
-      game_state = GameState::RUNNING;
-    else if (game_state == GameState::RUNNING)
-      game_state = GameState::PAUSED;
-    */
-    scene_manager.PopScene();
+  if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
+    scene_manager.PushScene(std::make_unique<PauseScene>(scene_manager));
   }
-  
+
   b2Vec2 velocity = b2Body_GetLinearVelocity(player_body);
   if (core::input::IsKeyPressed(GLFW_KEY_A)) {
     if (velocity.x > -player_speed.max_speed && IsOnGround(player_body))
@@ -79,41 +116,12 @@ void GameScene::HandleInput() {
   }
 }
 
-void GameScene::Init() {
-  physics::Init({0, -9.81f});
-  registry = LoadLevel("level.txt");
-  player = registry.create();
-  auto &player_transform = registry.emplace<Transform>(player);
-  registry.emplace<PlayerSpeed>(player, 2.0f, 4.0f, 0.0625f, 100.0f, 5.0f);
-  auto &player_health = registry.emplace<Health>(player, 100.0f);
-  player_body = registry.emplace<PhysicsBody>(player, physics::CreateBody(player_transform, true)).body;
-  registry.emplace<Sprite>(player, "game.player", ResourceManager::GetTexture("game.player").texture);
-  if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
-    std::filesystem::create_directory("saves");
-  } else {
-    auto save_data = SaveManager::LoadLatestSave();
-    player_transform = save_data.player_transform;
-    player_health = save_data.player_health;
-  }
-
-  sprite_shader = ResourceManager::GetShader("Sprite").shader;
-  rect_shader = ResourceManager::GetShader("Rect").shader;
-  text_shader = ResourceManager::GetShader("Text").shader;
-  special_font = ResourceManager::GetFont("Special").font;
-  title_font = ResourceManager::GetFont("Title").font;
-  ui_font = ResourceManager::GetFont("UI").font;
-  sprite_shader->Use();
-  sprite_shader->SetUniform("texture1", 0);
-  text_shader->Use();
-  text_shader->SetUniform("character", 0);
-  glfwSwapInterval(0);
-}
-
 void GameScene::Update(float dt) {
   float speed = 1.0f - std::pow(0.2f, (float)dt);
   auto &camera_position = GetCamera().position;
   auto &player_transform = registry.get<Transform>(player);
-  camera_position = glm::mix({camera_position.x, camera_position.y, 0.0f}, glm::vec3(player_transform.position, 0.0f), speed);
+  camera_position = glm::mix({camera_position.x, camera_position.y, 0.0f},
+                             glm::vec3(player_transform.position, 0.0f), speed);
 
   physics_accumulator += (float)dt;
   while (physics_accumulator >= physics_time_step) {
@@ -132,11 +140,9 @@ void GameScene::Render(GameWindow &window) {
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
-  glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
 
   window.SetProjection(ProjectionType::CENTERED);
-  GetCamera().SetType(CameraType::WORLD);  
+  GetCamera().SetType(CameraType::WORLD);
   auto sprite_view = registry.view<Transform, Sprite>();
   for (auto entity : sprite_view) {
     sprite_view.get<Sprite>(entity).texture->Render(
@@ -163,10 +169,11 @@ void GameScene::Render(GameWindow &window) {
     frame_count = 0;
   }
 
-  ImGui::Begin("Debug Menu");
+  ImGui::Begin("Telemetry");
   ImGui::Text("FPS: %.2f", fps);
   auto &player_transform = registry.get<Transform>(player);
-  if (ImGui::DragFloat3("Position", glm::value_ptr(player_transform.position))) {
+  if (ImGui::DragFloat3("Position",
+                        glm::value_ptr(player_transform.position))) {
     b2Body_SetTransform(
         player_body,
         b2Vec2(player_transform.position.x, player_transform.position.y),
@@ -189,43 +196,7 @@ void GameScene::Render(GameWindow &window) {
   ImGui::DragFloat("Jump Impulse", &player_speed.jump_impulse, 1.0f, 0.0f);
   ImGui::End();
 
-  /*
-    Rect pause_rect;
-    pause_rect.position = glm::vec2(window.width / 2.0f, window.height / 2.0f);
-    pause_rect.scale = {window.width, window.height};
-    pause_rect.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.5f);
-    pause_rect.Render(rect_shader);
-
-    int x_pos = 30;
-    int y_pos = window.height / 2 + 100;
-    int padding = 10;
-    title_font->Render("PAUSED", glm::vec2(x_pos, y_pos), glm::vec3(1.0f),
-                       text_shader);
-    y_pos -= title_font->GetHeight("PAUSED") + padding;
-    ui_font->Render("Resume", glm::vec2(x_pos, y_pos), glm::vec3(1.0f),
-                    text_shader);
-    y_pos -= ui_font->GetHeight("Resume") + padding;
-    ui_font->Render("Menu", glm::vec2(x_pos, y_pos), glm::vec3(1.0f),
-                    text_shader);
-    y_pos -= ui_font->GetHeight("Menu") + padding;
-    ui_font->Render("Exit", glm::vec2(x_pos, y_pos), glm::vec3(1.0f),
-                    text_shader);
-#ifndef NDEBUG
-    y_pos -= ui_font->GetHeight("Exit") + padding;
-    ui_font->Render("Level Editor", glm::vec2(x_pos, y_pos), glm::vec3(1.0f),
-                    text_shader);
-#endif
-    */
-
   ImGui::Render();
   ImGui::EndFrame();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void GameScene::Quit() {
-  SaveManager::SaveGame(registry.get<Transform>(player),
-                        registry.get<Health>(player));
-  physics::Quit();
-  render::Clear();
-  registry.clear();
 }

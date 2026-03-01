@@ -25,6 +25,7 @@
 #include "state.h"
 #include "game.h"
 #include "level_editor.h"
+#include "game/intro.h"
 
 void MenuScene::Init() {
   font = ResourceManager::GetFont("Special").font;
@@ -48,6 +49,7 @@ void MenuScene::HandleInput() {
     switch (static_cast<AppState>(focus_index)) {
       case AppState::PLAYING:
         scene_manager.PushScene(std::make_unique<GameScene>(scene_manager));
+        scene_manager.PushScene(std::make_unique<IntroScene>(scene_manager));
         break;
       case AppState::EXIT:
         glfwSetWindowShouldClose(GetGameWindow().window, true);

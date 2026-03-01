@@ -2,7 +2,6 @@
 // code block
 
 #include "render.h"
-#include <vector>
 #include "light.h"
 #include "window.h"
 #include "transform.h"
@@ -98,6 +97,8 @@ void render::Render(entt::registry& registry) {
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, normal_framebuffer->colorbuffer);
   deferred_shader->SetUniform("normal_texture", 1);
+  float aspect_ratio = (float)GetGameWindow().width / (float)GetGameWindow().height;
+  deferred_shader->SetUniform("aspect_ratio", aspect_ratio);
   core::quad::Render(core::quad::FULL_QUAD);
   UnbindFramebuffer();
   fullscreen_shader->Use();
@@ -156,6 +157,7 @@ void render::Init() {
   deferred_shader = ResourceManager::GetShader("Deferred").shader;
   fullscreen_shader = ResourceManager::GetShader("Fullscreen").shader;
   sprite_shader = ResourceManager::GetShader("Sprite").shader;
+  render::UnbindFramebuffer();
 }
 
 void render::Clear() {

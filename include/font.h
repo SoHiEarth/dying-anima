@@ -18,6 +18,9 @@ struct Font {
   ~Font();
   int GetWidth(std::string_view text) const;
   int GetHeight(std::string_view text) const;
+  // For compatibility, scale is glm::vec2(1.0f)
   void Render(std::string_view text, const glm::vec2 &position,
+              const glm::vec3 &color, const Shader *shader) const;
+  void Render(std::string_view text, const glm::vec2 &position, const glm::vec2 &scale,
               const glm::vec3 &color, const Shader *shader) const;
 };
