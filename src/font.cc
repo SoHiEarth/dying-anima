@@ -116,17 +116,21 @@ void Font::Render(std::string_view text, const glm::vec2 &position, const glm::v
     last_vp = GetGameWindow().GetProjection() * last_view;
   }
 
-  shader->SetUniform("mvp", last_vp * CalculateModelMatrix(position, 0.0f, scale));
+  shader->SetUniform(
+      "mvp",
+      last_vp * glm::translate(glm::mat4(1.0f), glm::vec3(position, 0.0f)));
   glActiveTexture(GL_TEXTURE0);
   glBindVertexArray(vertex_attrib);
-  float x_pos = 0.0f;
-  float y_pos = 0.0f;
+  float total_width = GetWidth(text) * scale.x;
+  float total_height = GetHeight(text) * scale.y;
+  float x_pos = -total_width / 2.0f;
+  float y_pos = -total_height / 2.0f;
   for (const char &c : text) {
     const auto &ch = characters.at(c);
-    float xpos = x_pos + ch.bearing.x;
-    float ypos = y_pos - (ch.size.y - ch.bearing.y);
-    float w = ch.size.x;
-    float h = ch.size.y;
+    float xpos = x_pos + ch.bearing.x * scale.x;
+    float ypos = y_pos - (ch.size.y - ch.bearing.y) * scale.y;
+    float w = ch.size.x * scale.x;
+    float h = ch.size.y * scale.y;
 
     float vertices[6][5] = {
         {xpos, ypos + h, 0.0f, 0.0f, 0.0f}, {xpos, ypos, 0.0f, 0.0f, 1.0f},
@@ -139,7 +143,55 @@ void Font::Render(std::string_view text, const glm::vec2 &position, const glm::v
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
     glDrawArrays(GL_TRIANGLES, 0, 6); 
 
-    x_pos += (ch.advance >> 6);
+    x_pos += (ch.advance >> 6) * scale.x;
+  }
+  glBindVertexArray(0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Font::RenderUI(std::string_view text, const glm::vec2 &position,
+                  const glm::vec2 &scale, const glm::vec3 &color,
+                  const Shader *shader) const {
+  shader->Use();
+  shader->SetUniform("color", color);
+  if (last_projection != GetGameWindow().GetProjection()) {
+    last_projection = GetGameWindow().GetProjection();
+    last_vp = last_projection * GetCamera().GetView();
+  }
+  if (last_view != GetCamera().GetView()) {
+    last_view = GetCamera().GetView();
+    last_vp = GetGameWindow().GetProjection() * last_view;
+  }
+
+  shader->SetUniform(
+      "mvp",
+      last_vp * glm::translate(glm::mat4(1.0f), glm::vec3(position, 0.0f)));
+  glActiveTexture(GL_TEXTURE0);
+  glBindVertexArray(vertex_attrib);
+  float total_width = GetWidth(text) * scale.x;
+  float total_height = GetHeight(text) * scale.y;
+  float x_pos = 0;
+  float y_pos = 0;
+  for (const char &c : text) {
+    const auto &ch = characters.at(c);
+    float xpos = x_pos + ch.bearing.x * scale.x;
+    float ypos = y_pos - (ch.size.y - ch.bearing.y) * scale.y;
+    float w = ch.size.x * scale.x;
+    float h = ch.size.y * scale.y;
+
+    float vertices[6][5] = {{xpos, ypos + h, 0.0f, 0.0f, 0.0f},
+                            {xpos, ypos, 0.0f, 0.0f, 1.0f},
+                            {xpos + w, ypos, 0.0f, 1.0f, 1.0f},
+                            {xpos, ypos + h, 0.0f, 0.0f, 0.0f},
+                            {xpos + w, ypos, 0.0f, 1.0f, 1.0f},
+                            {xpos + w, ypos + h, 0.0f, 1.0f, 0.0f}};
+    glBindTexture(GL_TEXTURE_2D, ch.texture);
+    glBindVertexArray(vertex_attrib);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    x_pos += (ch.advance >> 6) * scale.x;
   }
   glBindVertexArray(0);
   glBindTexture(GL_TEXTURE_2D, 0);

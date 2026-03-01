@@ -1,29 +1,30 @@
 #include "game/pause.h"
+
+#include "camera.h"
+#include "core/input.h"
 #include "core/resource_manager.h"
 #include "rect.h"
-#include "core/input.h"
-#include "camera.h"
 
 void PauseScene::Init() {
   rect_shader = ResourceManager::GetShader("Rect").shader;
   text_shader = ResourceManager::GetShader("Text").shader;
   title_font = ResourceManager::GetFont("Title").font;
   ui_font = ResourceManager::GetFont("UI").font;
-  glfwSwapInterval(1); // Save resources
+  glfwSwapInterval(1);  // Save resources
 }
 
 void PauseScene::Quit() {
-  glfwSwapInterval(0); // Psycho mode
+  glfwSwapInterval(0);  // Psycho mode
 }
 
 void PauseScene::HandleInput() {
-	if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
-			scene_manager.PopScene();
-		}
+  if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
+    scene_manager.PopScene();
+  }
 }
 
 void PauseScene::Update(float dt) {
-	// No update logic needed for the pause scene
+  // No update logic needed for the pause scene
 }
 
 void PauseScene::Render(GameWindow& window) {
@@ -38,20 +39,26 @@ void PauseScene::Render(GameWindow& window) {
   int x_pos = 30;
   int y_pos = window.height / 2 + 100;
   int padding = 10;
-  title_font->Render("PAUSED", glm::vec2(x_pos, y_pos), glm::vec3(1.0f),
-                     text_shader);
+  title_font->RenderUI("PAUSED", glm::vec2(x_pos, y_pos), glm::vec2(1.0f),
+                       glm::vec3(1.0f),
+                       text_shader);
   y_pos -= title_font->GetHeight("PAUSED") + padding;
-  ui_font->Render("Resume", glm::vec2(x_pos, y_pos), glm::vec3(1.0f),
+  constexpr float scale = 0.75f;
+  ui_font->RenderUI("Resume", glm::vec2(x_pos, y_pos), glm::vec2(scale), 
+                  glm::vec3(1.0f),
                   text_shader);
   y_pos -= ui_font->GetHeight("Resume") + padding;
-  ui_font->Render("Menu", glm::vec2(x_pos, y_pos), glm::vec3(1.0f),
+  ui_font->RenderUI("Menu", glm::vec2(x_pos, y_pos), glm::vec2(scale),
+                  glm::vec3(1.0f),
                   text_shader);
   y_pos -= ui_font->GetHeight("Menu") + padding;
-  ui_font->Render("Exit", glm::vec2(x_pos, y_pos), glm::vec3(1.0f),
+  ui_font->RenderUI("Exit", glm::vec2(x_pos, y_pos), glm::vec2(scale),
+                  glm::vec3(1.0f),
                   text_shader);
 #ifndef NDEBUG
   y_pos -= ui_font->GetHeight("Exit") + padding;
-  ui_font->Render("Level Editor", glm::vec2(x_pos, y_pos), glm::vec3(1.0f),
+  ui_font->RenderUI("Level Editor", glm::vec2(x_pos, y_pos), glm::vec2(scale),
+                  glm::vec3(1.0f),
                   text_shader);
 #endif
 }

@@ -26,6 +26,8 @@
 #include "game.h"
 #include "level_editor.h"
 #include "game/intro.h"
+#include "game/progression.h"
+#include <algorithm>
 
 void MenuScene::Init() {
   font = ResourceManager::GetFont("Special").font;
@@ -49,7 +51,12 @@ void MenuScene::HandleInput() {
     switch (static_cast<AppState>(focus_index)) {
       case AppState::PLAYING:
         scene_manager.PushScene(std::make_unique<GameScene>(scene_manager));
-        scene_manager.PushScene(std::make_unique<IntroScene>(scene_manager));
+        if (std::find(game::save_data.completion_markers.begin(),
+                      game::save_data.completion_markers.end(),
+                      Progression::INTRO_COMPLETE_MARKER) ==
+            game::save_data.completion_markers.end()) {
+          scene_manager.PushScene(std::make_unique<IntroScene>(scene_manager));
+        }
         break;
       case AppState::EXIT:
         glfwSetWindowShouldClose(GetGameWindow().window, true);
@@ -104,7 +111,7 @@ void MenuScene::Render(GameWindow& window) {
         sprite_shader, CalculateModelMatrix(center_pos, 0.0f, {width, height}));
     core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
   }
-  font->Render("Play", glm::vec2(x_pos, menu_y), glm::vec3(1.0f), text_shader);
+  font->RenderUI("Play", glm::vec2(x_pos, menu_y), glm::vec2(1.0f), glm::vec3(1.0f), text_shader);
   x_pos += font->GetWidth("Play") + padding;
 
   if (focus_index == static_cast<int>(AppState::EXIT)) {
@@ -116,7 +123,8 @@ void MenuScene::Render(GameWindow& window) {
         sprite_shader, CalculateModelMatrix(center_pos, 0.0f, {width, height}));
     core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
   }
-  font->Render("Quit", glm::vec2(x_pos, menu_y), glm::vec3(1.0f), text_shader);
+  font->RenderUI("Quit", glm::vec2(x_pos, menu_y), glm::vec2(1.0f),
+               glm::vec3(1.0f), text_shader);
 
 #ifndef NDEBUG
   x_pos += font->GetWidth("Quit") + padding;
@@ -129,7 +137,8 @@ void MenuScene::Render(GameWindow& window) {
         sprite_shader, CalculateModelMatrix(center_pos, 0.0f, {width, height}));
     core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
   }
-  font->Render("Level Editor", glm::vec2(x_pos, menu_y), glm::vec3(1.0f),
+  font->RenderUI("Level Editor", glm::vec2(x_pos, menu_y), glm::vec2(1.0f),
+               glm::vec3(1.0f),
                text_shader);
 #endif
 }

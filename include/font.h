@@ -23,4 +23,7 @@ struct Font {
               const glm::vec3 &color, const Shader *shader) const;
   void Render(std::string_view text, const glm::vec2 &position, const glm::vec2 &scale,
               const glm::vec3 &color, const Shader *shader) const;
+  void RenderUI(std::string_view text, const glm::vec2 &position,
+              const glm::vec2 &scale, const glm::vec3 &color,
+              const Shader *shader) const;
 };

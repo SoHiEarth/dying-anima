@@ -15,8 +15,9 @@ struct IntroScene : public Scene {
   std::vector<std::string> intro_text = {
     "In The City of Mer,",
     "the city of lost souls - named \"Anima\",",
-    "awoke a hero.\nA hero who was born early.",
-    "The City's name was not Mer, but the passage of time eroded its name."
+    "awoke a hero.",
+    "The City's name was not Mer,",
+    "but the passage of time eroded its name."
   };
   using Scene::Scene;
 	void Init() override;

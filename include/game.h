@@ -6,6 +6,11 @@
 #include "transform.h"
 #include "player.h"
 #include <entt/entt.hpp>
+#include "saves.h"
+
+namespace game {
+extern SaveData save_data;
+}
 
 struct GameScene : public Scene {
  public:

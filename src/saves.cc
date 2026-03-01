@@ -4,14 +4,18 @@
 #include <iostream>
 #include <pugixml.hpp>
 
-void SaveManager::SaveGame(const Transform &player_transform,
-                           const Health &player_health) {
+void SaveManager::SaveGame(const SaveData& data) {
   pugi::xml_document doc;
   auto root = doc.append_child("SaveData");
   auto player_node = root.append_child("Player");
-  player_node.append_attribute("pos.x") = player_transform.position.x;
-  player_node.append_attribute("pos.y") = player_transform.position.y;
-  player_node.append_attribute("Health") = player_health.health;
+  player_node.append_attribute("pos.x") = data.player_transform.position.x;
+  player_node.append_attribute("pos.y") = data.player_transform.position.y;
+  player_node.append_attribute("Health") = data.player_health.health;
+  auto comp_marker_node = root.append_child("Completion");
+  for (const auto &marker : data.completion_markers) {
+    auto marker_node = comp_marker_node.append_child("Marker");
+    marker_node.append_attribute("name") = marker.c_str();
+  }
   if (!std::filesystem::exists("saves")) {
     std::filesystem::create_directory("saves");
   }
@@ -28,7 +32,6 @@ void SaveManager::SaveGame(const Transform &player_transform,
 
 SaveData SaveManager::LoadGame(std::string_view file_name) {
   SaveData data{};
-  data.file_name = std::string(file_name);
   pugi::xml_document doc;
   if (!doc.load_file(file_name.data())) {
     throw std::runtime_error("Failed to load save file");
@@ -41,7 +44,12 @@ SaveData SaveManager::LoadGame(std::string_view file_name) {
         player_node.attribute("pos.y").as_float();
     data.player_health.health = player_node.attribute("Health").as_float();
   }
+  auto comp_marker_node = doc.child("SaveData").child("Completion");
+  for (auto marker : comp_marker_node.children("Marker")) {
+    data.completion_markers.push_back(marker.attribute("name").as_string());
+  }
   std::cout << "Loaded game from " << file_name << std::endl;
+  data.valid = true;
   return data;
 }
 

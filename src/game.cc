@@ -33,6 +33,8 @@
 #include "transform.h"
 #include "window.h"
 
+SaveData game::save_data{};
+
 void GameScene::Init() {
   physics::Init({0, -9.81f});
   registry = LoadLevel("level.txt");
@@ -48,10 +50,12 @@ void GameScene::Init() {
                            ResourceManager::GetTexture("game.player").texture);
   if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
     std::filesystem::create_directory("saves");
-  } else {
-    auto save_data = SaveManager::LoadLatestSave();
-    player_transform = save_data.player_transform;
-    player_health = save_data.player_health;
+  }
+
+  if (!game::save_data.valid) {
+    game::save_data = SaveManager::LoadLatestSave();
+    player_transform = game::save_data.player_transform;
+    player_health = game::save_data.player_health;
   }
 
   sprite_shader = ResourceManager::GetShader("Sprite").shader;
@@ -68,8 +72,11 @@ void GameScene::Init() {
 }
 
 void GameScene::Quit() {
-  SaveManager::SaveGame(registry.get<Transform>(player),
-                        registry.get<Health>(player));
+  auto save_data = SaveManager::LoadLatestSave();
+  save_data.player_transform = registry.get<Transform>(player);
+  save_data.player_health = registry.get<Health>(player);
+  save_data.completion_markers = game::save_data.completion_markers;
+  SaveManager::SaveGame(save_data);
   physics::Quit();
   render::Clear();
   registry.clear();
