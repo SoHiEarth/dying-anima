@@ -31,7 +31,6 @@ void IntroScene::HandleInput() {
 void IntroScene::Update(float dt) {
   static float timer = 0.0f;
   static float time_since_sentence_complete = 0.0f;
-  std::print("Timer: {} Since Complete: {} Text: {}\n", timer, time_since_sentence_complete, current_text);
   timer += dt;
   if (current_text.size() == intro_text[text_index].size()) {
     time_since_sentence_complete += dt;

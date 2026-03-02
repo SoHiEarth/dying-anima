@@ -12,6 +12,8 @@ void physics::SetGravity(const glm::vec2 &gravity) {
   b2World_SetGravity(world, {gravity.x, gravity.y});
 }
 
+#define GRACE_SCALE 0.025f
+#define SCALE_MULTIPLIER 1.0f - GRACE_SCALE
 b2BodyId physics::CreateBody(const glm::vec2 &position,
                              const glm::vec2 &scale, float angle,
                              bool is_dynamic) {
@@ -25,7 +27,9 @@ b2BodyId physics::CreateBody(const glm::vec2 &position,
   body_def.rotation = b2MakeRot(angle);
   body_def.fixedRotation = true;
   auto body = b2CreateBody(world, &body_def);
-  auto shape = b2MakeBox(scale.x / 2.0f, scale.y / 2.0f);
+  auto shape = b2MakeBox(
+    (scale.x / 2.0f) * SCALE_MULTIPLIER,
+    (scale.y / 2.0f) * SCALE_MULTIPLIER);
   auto shape_def = b2DefaultShapeDef();
   shape_def.density = 1.0F;
   shape_def.material.friction = 0.3F;
@@ -36,6 +40,22 @@ b2BodyId physics::CreateBody(const glm::vec2 &position,
 b2BodyId physics::CreateBody(Transform transform, bool is_dynamic) {
   return CreateBody(transform.position, transform.scale,
                            transform.rotation, is_dynamic);
+}
+
+PhysicsBody physics::CreatePhysicsBody(Transform transform, bool is_dynamic) {
+  PhysicsBody physics_body;
+  physics_body.body = CreateBody(transform, is_dynamic);
+  physics_body.is_dynamic = is_dynamic;
+  return physics_body;
+}
+
+PhysicsBody physics::CreatePhysicsBody(const glm::vec2 &position,
+                                       const glm::vec2 &scale, float angle,
+                                       bool is_dynamic) {
+  PhysicsBody physics_body;
+  physics_body.body = CreateBody(position, scale, angle, is_dynamic);
+  physics_body.is_dynamic = is_dynamic;
+  return physics_body;
 }
 
 void physics::SyncPosition(b2BodyId body, glm::vec2 &position) {
@@ -49,6 +69,8 @@ void physics::SyncTransform(b2BodyId body, Transform &transform) {
   transform.position = { b2_position.x, b2_position.y };
   transform.rotation = b2Rot_GetAngle(b2Body_GetRotation(body));
 }
+
+bool physics::WorldValid() { return b2World_IsValid(world); }
 
 void physics::Quit() {
   if (b2World_IsValid(world)) {

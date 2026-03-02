@@ -24,9 +24,10 @@ void PauseScene::HandleInput() {
 }
 
 void PauseScene::Update(float dt) {
-  // No update logic needed for the pause scene
+  time_since_open += dt;
 }
 
+float anim_full_time = 0.4f;
 void PauseScene::Render(GameWindow& window) {
   window.SetProjection(ProjectionType::SCREEN_SPACE);
   GetCamera().SetType(CameraType::UI);
@@ -36,7 +37,7 @@ void PauseScene::Render(GameWindow& window) {
   pause_rect.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.5f);
   pause_rect.Render(rect_shader);
 
-  int x_pos = 30;
+  int x_pos = 30 * (std::min(time_since_open, anim_full_time) / anim_full_time);
   int y_pos = window.height / 2 + 100;
   int padding = 10;
   title_font->RenderUI("PAUSED", glm::vec2(x_pos, y_pos), glm::vec2(1.0f),

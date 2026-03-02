@@ -18,6 +18,7 @@ struct PauseScene : public Scene {
 	Font* ui_font;
   Shader* rect_shader;
   Shader* text_shader;
+  float time_since_open = 0.0f;
 };
 
 #endif  // PAUSE_H

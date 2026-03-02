@@ -7,6 +7,9 @@
 #include <pugixml.hpp>
 #include <print>
 #include <sstream>
+#include "light.h"
+#include "render.h"
+#include "game/enemy.h"
 
 entt::registry LoadLevel(std::string_view filename) {
   pugi::xml_document doc;
@@ -37,6 +40,50 @@ entt::registry LoadLevel(std::string_view filename) {
       sprite.texture = ResourceManager::GetTexture(sprite.texture_tag).texture;
       sprite.texture = ResourceManager::GetTexture(sprite.texture_tag).texture;
     }
+    {
+      auto physics_node = object_node.child("Physics");
+      if (physics_node) {
+        auto& physics = registry.emplace<PhysicsBody>(entity);
+        auto& transform = registry.get<Transform>(entity);
+        bool is_dynamic = physics_node.attribute("is_dynamic").as_bool();
+        if (physics::WorldValid()) {
+          physics.body = physics::CreateBody(transform, is_dynamic);
+        }
+        physics.is_dynamic = is_dynamic;
+      }
+    }
+    {
+      auto light_node = object_node.child("Light");
+      if (light_node) {
+        auto& light = registry.emplace<Light>(entity);
+        light.type =
+            static_cast<LightType>(light_node.attribute("type").as_int());
+        light.intensity = light_node.attribute("intensity").as_float();
+        light.radial_falloff =
+            light_node.attribute("radial_falloff").as_float();
+        light.volumetric_intensity =
+            light_node.attribute("volumetric_intensity").as_float();
+        light.color.r = light_node.attribute("color.r").as_float();
+        light.color.g = light_node.attribute("color.g").as_float();
+        light.color.b = light_node.attribute("color.b").as_float();
+        render::AddLight(entity);
+      }
+    }
+    {
+      auto enemy_node = object_node.child("PlayerDamager");
+      if (enemy_node) {
+        auto& enemy = registry.emplace<PlayerDamager>(entity);
+        enemy.damage = enemy_node.attribute("damage").as_float();
+        enemy.hitbox_radius = enemy_node.attribute("hitbox_radius").as_float();
+        enemy.knockback = enemy_node.attribute("knockback").as_float();
+        enemy.knockback_direction.x =
+            enemy_node.attribute("knockback_direction.x").as_float();
+        enemy.knockback_direction.y =
+            enemy_node.attribute("knockback_direction.y").as_float();
+        enemy.time_until_next_hit =
+            enemy_node.attribute("time_until_next_hit").as_float();
+      }
+    }
   }
   return registry;
 }
@@ -60,6 +107,37 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
       const auto& sprite = view.get<Sprite>(entity);
       auto sprite_node = object_node.append_child("Sprite");
       sprite_node.append_attribute("texture_tag") = sprite.texture_tag.c_str();
+    }
+    if (registry.try_get<PhysicsBody>(entity)) {
+      auto physics_node = object_node.append_child("Physics");
+      physics_node.append_attribute("is_dynamic") = registry.get<PhysicsBody>(entity).is_dynamic;
+    }
+    if (registry.try_get<Light>(entity)) {
+      const auto& light = registry.get<Light>(entity);
+      auto light_node = object_node.append_child("Light");
+      light_node.append_attribute("type") = static_cast<int>(light.type);
+      light_node.append_attribute("intensity") = light.intensity;
+      light_node.append_attribute("radial_falloff") = light.radial_falloff;
+      light_node.append_attribute("volumetric_intensity") =
+          light.volumetric_intensity;
+      light_node.append_attribute("color.r") = light.color.r;
+      light_node.append_attribute("color.g") = light.color.g;
+      light_node.append_attribute("color.b") = light.color.b;
+    }
+    
+    // Custom Game components
+    if (registry.try_get<PlayerDamager>(entity)) {
+      const auto& enemy = registry.get<PlayerDamager>(entity);
+      auto enemy_node = object_node.append_child("PlayerDamager");
+      enemy_node.append_attribute("damage") = enemy.damage;
+      enemy_node.append_attribute("hitbox_radius") = enemy.hitbox_radius;
+      enemy_node.append_attribute("knockback") = enemy.knockback;
+      enemy_node.append_attribute("knockback_direction.x") =
+          enemy.knockback_direction.x;
+      enemy_node.append_attribute("knockback_direction.y") =
+          enemy.knockback_direction.y;
+      enemy_node.append_attribute("time_until_next_hit") =
+          enemy.time_until_next_hit;
     }
   }
   int object_count = std::distance(root.children("Object").begin(),

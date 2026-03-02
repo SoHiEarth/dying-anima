@@ -97,7 +97,12 @@ int main() {
         glfwSetWindowMonitor(window.window, nullptr, 100, 100, 800, 600, 0);
       }
     }
-    scene_manager.HandleInput();
+    static float time_accumulator = 0.0f;
+    time_accumulator += (float)delta_time;
+    if (time_accumulator >= 1.0f / 60.0f) {
+      time_accumulator = 0.0f;
+      scene_manager.HandleInput();
+    }    
     scene_manager.Update((float)delta_time);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);

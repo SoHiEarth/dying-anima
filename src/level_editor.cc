@@ -19,10 +19,12 @@
 #include "rect.h"
 #include "render.h"
 #include "shader.h"
+#include "physics.h"
 #include "sprite.h"
 #include "tinyfiledialogs/tinyfiledialogs.h"
 #include "transform.h"
 #include "window.h"
+#include "game/enemy.h"
 
 enum class Toolkit { SELECT, MOVE };
 
@@ -268,6 +270,9 @@ void LevelEditor::Render(GameWindow& window) {
               SaveLevel(current_scene_path, registry);
             }
           }
+          else {
+            SaveLevel(current_scene_path, registry);
+          }
         }
         ImGui::EndMenu();
       }
@@ -292,6 +297,14 @@ void LevelEditor::Render(GameWindow& window) {
     ImGui::SeparatorText("Options");
     ImGui::Checkbox("Enable Grid", &enable_grid);
     ImGui::Checkbox("Enable Spotlight", &enable_spotlight);
+    if (ImGui::Button("Add Physics Bodies to All Transforms")) {
+      for (auto entity : registry.view<Transform>()) {
+        if (!registry.any_of<PhysicsBody>(entity)) {
+          auto& transform = registry.get<Transform>(entity);
+          registry.emplace<PhysicsBody>(entity); // Do not add b2BodyId because b2World is not initialized
+        }
+      }
+    }
     ImGui::SeparatorText("Entity Info");
     if (registry.try_get<Transform>(selected_entity) == nullptr) {
       selected_entity = entt::null;
@@ -301,10 +314,29 @@ void LevelEditor::Render(GameWindow& window) {
       ImGui::DragFloat2("Position", glm::value_ptr(transform.position), 0.1f);
       ImGui::DragFloat2("Scale", glm::value_ptr(transform.scale), 0.1f);
       ImGui::DragFloat("Rotation", &transform.rotation, 1.0f);
-      auto& sprite = registry.get<Sprite>(selected_entity);
-      if (ImGui::InputText("Texture Tag", &sprite.texture_tag)) {
-        sprite.texture =
-            ResourceManager::GetTexture(sprite.texture_tag).texture;
+      if (registry.any_of<Sprite>(selected_entity)) {
+        auto& sprite = registry.get<Sprite>(selected_entity);
+        if (ImGui::InputText("Color Tag", &sprite.texture_tag)) {
+          sprite.texture =
+              ResourceManager::GetTexture(sprite.texture_tag).texture;
+        }
+        static std::string normal_texture_tag = sprite.texture_tag;
+        if (ImGui::InputText("Normal Map Tag", &normal_texture_tag)) {
+          sprite.normal =
+              ResourceManager::GetTexture(normal_texture_tag).texture;
+        }
+      }
+      // Check if it has a physics body component
+      if (registry.any_of<PhysicsBody>(selected_entity)) {
+        auto& physics_body = registry.get<PhysicsBody>(selected_entity);
+        ImGui::Text("Has Physics Body Component");
+        if (ImGui::Button("Remove Physics Body Component")) {
+          registry.remove<PhysicsBody>(selected_entity);
+        }
+      } else {
+        if (ImGui::Button("Add Physics Body Component")) {
+          registry.emplace<PhysicsBody>(selected_entity);
+        }
       }
       // Check if it has a light component
       if (registry.any_of<Light>(selected_entity)) {
@@ -320,9 +352,30 @@ void LevelEditor::Render(GameWindow& window) {
                              &light.volumetric_intensity, 0.1f, 0.0f);
           }
         }
+        if (ImGui::Button("Remove Light Component")) {
+          registry.remove<Light>(selected_entity);
+        }
       } else {
         if (ImGui::Button("Add Light Component")) {
           registry.emplace<Light>(selected_entity);
+        }
+      }
+
+      if (registry.any_of<PlayerDamager>(selected_entity)) {
+        auto& damager = registry.get<PlayerDamager>(selected_entity);
+        ImGui::DragInt("Damage", &damager.damage, 1.0f, 0);
+        ImGui::DragFloat("Hitbox Radius", &damager.hitbox_radius, 0.1f, 0.0f);
+        ImGui::DragFloat("Knockback", &damager.knockback, 0.1f, 0.0f);
+        ImGui::DragFloat2("Knockback Direction",
+                          glm::value_ptr(damager.knockback_direction), 0.1f);
+        ImGui::DragFloat("Time Until Next Hit", &damager.time_until_next_hit,
+                         0.1f, 0.0f);
+        if (ImGui::Button("Remove PlayerDamager Component")) {
+          registry.remove<PlayerDamager>(selected_entity);
+        }
+      } else {
+        if (ImGui::Button("Add PlayerDamager Component")) {
+          registry.emplace<PlayerDamager>(selected_entity);
         }
       }
     } else {
