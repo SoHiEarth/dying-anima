@@ -70,12 +70,23 @@ int main() {
   core::quad::Init();
   SceneManager scene_manager;
   scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
+  scene_manager.ProcessSceneChanges();
+  
+  double last_time = glfwGetTime();
+  constexpr double MAX_DELTA_TIME = 0.1;
+  
   while (!glfwWindowShouldClose(window.window)) {
-    static double last_time = glfwGetTime();
     double current_time = glfwGetTime();
     double delta_time = current_time - last_time;
+    last_time = current_time;
+    
+    if (delta_time > MAX_DELTA_TIME) {
+      delta_time = MAX_DELTA_TIME;
+    }
+    
     glfwPollEvents();
     core::input::Update(window);
+    #ifndef NDEBUG
     if (core::input::IsKeyPressedThisFrame(GLFW_KEY_F2)) {
       // wireframe or filled
       static bool wireframe = false;
@@ -87,6 +98,7 @@ int main() {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       }
     }
+    #endif
     if (core::input::IsKeyPressedThisFrame(GLFW_KEY_F11)) {
       static bool fullscreen = false;
       fullscreen = !fullscreen;
@@ -97,25 +109,21 @@ int main() {
         glfwSetWindowMonitor(window.window, nullptr, 100, 100, 800, 600, 0);
       }
     }
-    static float time_accumulator = 0.0f;
-    time_accumulator += (float)delta_time;
-    if (time_accumulator >= 1.0f / 60.0f) {
-      time_accumulator = 0.0f;
-      scene_manager.HandleInput();
-    }    
-    scene_manager.Update((float)delta_time);
+    scene_manager.Update(delta_time);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     scene_manager.Render(window);
     glfwSwapBuffers(window.window);
-    last_time = current_time;
+    
     while (window.IsMinimized()) {
       glfwGetFramebufferSize(window.window, &window.width, &window.height);
       glfwPollEvents();
+      last_time = glfwGetTime();
     }
     if (scene_manager.NoScenes()) {
       glfwSetWindowShouldClose(window.window, true);
     }
+    scene_manager.ProcessSceneChanges();
   }
   scene_manager.PopScene();
   core::quad::Quit();

@@ -9,8 +9,7 @@ struct PauseScene : public Scene {
   using Scene::Scene;
 	void Init() override;
 	void Quit() override;
-	void HandleInput() override;
-	void Update(float dt) override;
+  void Update(double dt) override;
   void Render(GameWindow& window) override;
         bool IsTransparent() override { return true; }
  private:
@@ -18,7 +17,7 @@ struct PauseScene : public Scene {
 	Font* ui_font;
   Shader* rect_shader;
   Shader* text_shader;
-  float time_since_open = 0.0f;
+  double time_since_open = 0.0f;
 };
 
 #endif  // PAUSE_H

@@ -42,8 +42,7 @@ void MenuScene::Init() {
 }
 
 int focus_index = 0;
-
-void MenuScene::HandleInput() {
+void MenuScene::Update(double dt) {
   if (core::input::IsKeyPressed(GLFW_KEY_ESCAPE)) {
     scene_manager.PopScene();
   }
@@ -78,8 +77,6 @@ void MenuScene::HandleInput() {
     focus_index = std::min(focus_index + 1, max_focus);
   }
 }
-
-void MenuScene::Update(float dt) {}
 
 void MenuScene::Render(GameWindow& window) {
   window.SetProjection(ProjectionType::SCREEN_SPACE);

@@ -86,7 +86,7 @@ int Font::GetWidth(std::string_view text) const {
 
 int Font::GetHeight(std::string_view text) const {
   int height = 0;
-  for (const char &c : text) {
+  for (auto &c : text) {
     const auto &ch = characters.at(c);
     int h = ch.size.y;
     if (h > height) {

@@ -157,7 +157,7 @@ void LevelEditor::Quit() {
   render::Clear();
 }
 
-void LevelEditor::HandleInput() {
+void LevelEditor::Update(double dt) {
   if (enable_spotlight) {
     if (!registry.valid(spotlight)) {
       spotlight = registry.create();
@@ -229,8 +229,6 @@ void LevelEditor::HandleInput() {
     }
   }
 }
-
-void LevelEditor::Update(float dt) {}
 
 void LevelEditor::Render(GameWindow& window) {
   ImGui_ImplOpenGL3_NewFrame();

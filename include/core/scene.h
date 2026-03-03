@@ -15,8 +15,7 @@ struct Scene {
   virtual ~Scene() = default;
   virtual void Init() {}
   virtual void Quit() {}
-  virtual void HandleInput() {}
-  virtual void Update(float dt) {}
+  virtual void Update(double dt) {}
   virtual void Render(GameWindow& window) {}
   virtual bool IsTransparent() { return false; };
 
@@ -24,26 +23,25 @@ struct Scene {
    SceneManager& scene_manager;
 };
 
+enum class SceneChange {
+  NONE,
+  PUSH,
+  POP
+};
+
 struct SceneManager {
  public:
   void PushScene(std::unique_ptr<Scene> scene) {
     if (scene == nullptr) return;
-    scenes.push_back(std::move(scene));
-    scenes.back()->Init();
+    pending_changes.push_back({SceneChange::PUSH, std::move(scene)});
   }
   void PopScene() {
-    if (scenes.empty()) return;
-    scenes.back()->Quit();
-    scenes.pop_back();
+    pending_changes.push_back({SceneChange::POP, nullptr});
   }
   bool NoScenes() const {
     return scenes.empty();
   }
-  void HandleInput() {
-    if (scenes.empty()) return;
-    scenes.back()->HandleInput();
-  }
-  void Update(float dt) {
+  void Update(double dt) {
     if (scenes.empty()) return;
     scenes.back()->Update(dt);
   } 
@@ -60,8 +58,27 @@ struct SceneManager {
       scenes[i]->Render(window);
     }
   }
+  void ProcessSceneChanges() {
+    for (auto& [type, scene] : pending_changes) {
+      switch (type) {
+        case SceneChange::PUSH:
+          scenes.push_back(std::move(scene));
+          scenes.back()->Init();
+          break;
+        case SceneChange::POP:
+          if (scenes.empty()) return;
+          scenes.back()->Quit();
+          scenes.pop_back();
+          break;
+        default:
+          break;
+      }
+    }
+    pending_changes.clear();
+  }
  private:
   std::vector<std::unique_ptr<Scene>> scenes;
+  std::vector<std::pair<SceneChange, std::unique_ptr<Scene>>> pending_changes;
 };
 
 #endif

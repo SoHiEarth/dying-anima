@@ -13,7 +13,7 @@ struct Character {
 struct Font {
   unsigned int vertex_attrib;
   unsigned int vertex_buffer;
-  std::map<char, Character> characters;
+  std::map<char, Character> characters{};
   Font(std::string_view font_path);
   ~Font();
   int GetWidth(std::string_view text) const;

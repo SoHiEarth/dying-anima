@@ -22,8 +22,7 @@ struct IntroScene : public Scene {
   using Scene::Scene;
 	void Init() override;
 	void Quit() override;
-	void HandleInput() override;
-	void Update(float dt) override;
+  void Update(double dt) override;
   void Render(GameWindow& window) override;
   bool IsTransparent() { return true; };
 };

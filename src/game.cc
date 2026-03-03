@@ -87,7 +87,7 @@ void GameScene::Quit() {
   registry.clear();
 }
 
-void GameScene::HandleInput() {
+void GameScene::Update(double dt) {
   auto &player_speed = registry.get<PlayerSpeed>(player);
   auto &player_body = registry.get<PhysicsBody>(player).body;
 
@@ -100,20 +100,24 @@ void GameScene::HandleInput() {
   if (IsOnGround(player_body)) {
     speed_multiplier = 1.0f;
   } else {
-    speed_multiplier = 0.5f; // Air control is reduced
+    speed_multiplier = 0.5f;  // Air control is reduced
   }
 
   if (core::input::IsKeyPressed(GLFW_KEY_A)) {
     if (velocity.x > 0) {
       velocity.x *= player_speed.deceleration;
     }
-    velocity.x = std::max(velocity.x - player_speed.speed, -player_speed.max_speed) * speed_multiplier;
+    velocity.x =
+        std::max(velocity.x - player_speed.speed, -player_speed.max_speed) *
+        speed_multiplier;
   }
   if (core::input::IsKeyPressed(GLFW_KEY_D)) {
     if (velocity.x < 0) {
       velocity.x *= player_speed.deceleration;
     }
-    velocity.x = std::min(velocity.x + player_speed.speed, player_speed.max_speed) * speed_multiplier;
+    velocity.x =
+        std::min(velocity.x + player_speed.speed, player_speed.max_speed) *
+        speed_multiplier;
   }
   if (!core::input::IsKeyPressed(GLFW_KEY_A) &&
       !core::input::IsKeyPressed(GLFW_KEY_D)) {
@@ -122,9 +126,11 @@ void GameScene::HandleInput() {
 
   if (core::input::IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
     if (velocity.x > 0)
-      velocity.x = std::min(velocity.x * player_speed.boost_speed, player_speed.max_boost_speed);
+      velocity.x = std::min(velocity.x * player_speed.boost_speed,
+                            player_speed.max_boost_speed);
     else if (velocity.x < 0)
-      velocity.x = std::max(velocity.x * player_speed.boost_speed, -player_speed.max_boost_speed);
+      velocity.x = std::max(velocity.x * player_speed.boost_speed,
+                            -player_speed.max_boost_speed);
   }
   b2Body_SetLinearVelocity(player_body, velocity);
 
@@ -133,10 +139,10 @@ void GameScene::HandleInput() {
                               b2Vec2(0.0f, player_speed.jump_impulse),
                               b2Body_GetLocalCenterOfMass(player_body), true);
   }
-}
 
-void GameScene::Update(float dt) {
-  float speed = 1.0f - std::pow(0.2f, (float)dt);
+  // Frame-independent camera smoothing
+  constexpr float camera_smoothing = 5.0f; // Smoothing factor
+  float speed = 1.0f - std::exp(-camera_smoothing * (float)dt);
   auto &camera_position = GetCamera().position;
   auto &player_transform = registry.get<Transform>(player);
   camera_position = glm::mix({camera_position.x, camera_position.y, 0.0f},

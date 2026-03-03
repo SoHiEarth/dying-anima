@@ -18,8 +18,7 @@ struct GameScene : public Scene {
   std::string Name() override { return "GameScene"; };
   void Init() override;
   void Quit() override;
-  void HandleInput() override;
-  void Update(float dt) override;
+  void Update(double dt) override;
   void Render(GameWindow& window) override;
   bool IsTransparent() { return false; };
   entt::registry registry;

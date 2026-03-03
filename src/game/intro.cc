@@ -22,15 +22,10 @@ void IntroScene::Quit() {
 }
 
 bool update_text = false;
-void IntroScene::HandleInput() {
-  if (core::input::IsKeyPressedThisFrame(GLFW_KEY_SPACE)) {
-    update_text = true;
-	}
-}
 
-void IntroScene::Update(float dt) {
-  static float timer = 0.0f;
-  static float time_since_sentence_complete = 0.0f;
+void IntroScene::Update(double dt) {
+  static double timer = 0.0f;
+  static double time_since_sentence_complete = 0.0f;
   timer += dt;
   if (current_text.size() == intro_text[text_index].size()) {
     time_since_sentence_complete += dt;
@@ -51,7 +46,7 @@ void IntroScene::Update(float dt) {
     current_text = intro_text[text_index].substr(0, character_index);
   }
 
-	if (update_text) {
+  if (core::input::IsKeyPressedThisFrame(GLFW_KEY_SPACE) || update_text) {
     text_index++;
     update_text = false;
     if (text_index >= intro_text.size()) {
