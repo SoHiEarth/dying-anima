@@ -1,5 +1,5 @@
 #include "game/enemy.h"
-#include "player.h"
+#include "game/player.h"
 #include "transform.h"
 
 void game::UpdatePlayerDamagers(entt::registry& registry, float delta_time) {

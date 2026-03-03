@@ -42,6 +42,22 @@ b2BodyId physics::CreateBody(Transform transform, bool is_dynamic) {
                            transform.rotation, is_dynamic);
 }
 
+b2BodyId physics::CreateChainBody(const std::vector<glm::vec2> &vertices) {
+  auto body_def = b2DefaultBodyDef();
+  body_def.type = b2_staticBody;
+  auto body = b2CreateBody(world, &body_def);
+  std::vector<b2Vec2> b2_vertices;
+  for (const auto& vertex : vertices) {
+    b2_vertices.push_back({vertex.x, vertex.y});
+  }
+  
+  auto chain_def = b2DefaultChainDef();
+  chain_def.points = b2_vertices.data();
+  chain_def.count = static_cast<int>(b2_vertices.size());
+  b2CreateChain(body, &chain_def);
+  return body;
+}
+
 PhysicsBody physics::CreatePhysicsBody(Transform transform, bool is_dynamic) {
   PhysicsBody physics_body;
   physics_body.body = CreateBody(transform, is_dynamic);

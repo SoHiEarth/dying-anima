@@ -23,7 +23,7 @@
 #include "game/pause.h"
 #include "level_utils.h"
 #include "physics.h"
-#include "player.h"
+#include "game/player.h"
 #include "rect.h"
 #include "render.h"
 #include "saves.h"
@@ -33,6 +33,7 @@
 #include "transform.h"
 #include "window.h"
 #include "game/enemy.h"
+#include "game/spawn.h"
 
 SaveData game::save_data{};
 
@@ -41,6 +42,14 @@ void GameScene::Init() {
   registry = LoadLevel("level.txt");
   player = registry.create();
   auto &player_transform = registry.emplace<Transform>(player);
+  player_transform.z_index = 2.0f;
+  // find a spawn point
+  auto view = registry.view<PlayerSpawn>();
+  for (auto entity : view) {
+    auto &spawn_transform = registry.get<Transform>(entity);
+    player_transform.position = spawn_transform.position;
+    break; // Just take the first spawn point we find
+  }
   registry.emplace<PlayerSpeed>(player);
   auto &player_health = registry.emplace<Health>(player, 100.0f);
   player_body = registry
@@ -107,17 +116,15 @@ void GameScene::Update(double dt) {
     if (velocity.x > 0) {
       velocity.x *= player_speed.deceleration;
     }
-    velocity.x =
-        std::max(velocity.x - player_speed.speed, -player_speed.max_speed) *
-        speed_multiplier;
+    velocity.x = std::max(velocity.x - player_speed.speed * speed_multiplier,
+      -player_speed.max_speed);
   }
   if (core::input::IsKeyPressed(GLFW_KEY_D)) {
     if (velocity.x < 0) {
       velocity.x *= player_speed.deceleration;
     }
-    velocity.x =
-        std::min(velocity.x + player_speed.speed, player_speed.max_speed) *
-        speed_multiplier;
+    velocity.x = std::min(velocity.x + player_speed.speed * speed_multiplier,
+                          player_speed.max_speed);
   }
   if (!core::input::IsKeyPressed(GLFW_KEY_A) &&
       !core::input::IsKeyPressed(GLFW_KEY_D)) {
@@ -142,7 +149,7 @@ void GameScene::Update(double dt) {
 
   // Frame-independent camera smoothing
   constexpr float camera_smoothing = 5.0f; // Smoothing factor
-  float speed = 1.0f - std::exp(-camera_smoothing * (float)dt);
+  float speed = std::min(1.0f, 1.0f - std::exp(-camera_smoothing * (float)dt));
   auto &camera_position = GetCamera().position;
   auto &player_transform = registry.get<Transform>(player);
   camera_position = glm::mix({camera_position.x, camera_position.y, 0.0f},
@@ -150,14 +157,13 @@ void GameScene::Update(double dt) {
 
   physics_accumulator += (float)dt;
   while (physics_accumulator >= physics_time_step) {
-    b2World_Step(physics::world, 1.0f / 60.0f, 4);
+    b2World_Step(physics::world, physics_time_step, 4);
     physics_accumulator -= physics_time_step;
   }
   auto physics_view = registry.view<Transform, PhysicsBody>();
-  for (auto entity : physics_view) {
-    physics::SyncPosition(physics_view.get<PhysicsBody>(entity).body,
-                          physics_view.get<Transform>(entity).position);
-  }
+  physics_view.each([](auto entity, Transform& transform, PhysicsBody& physicsBody) {
+    physics::SyncPosition(physicsBody.body, transform.position);
+  });
   game::UpdatePlayerDamagers(registry, dt);
 }
 
@@ -211,6 +217,9 @@ void GameScene::Render(GameWindow &window) {
     for (auto entity : registry.view<Transform>()) {
       if (!registry.any_of<PhysicsBody>(entity)) {
         auto &transform = registry.get<Transform>(entity);
+        if (transform.scale.x == 0 || transform.scale.y == 0) {
+          continue; // Skip entities with zero scale
+        }
         auto body = physics::CreateBody(transform, false);
         registry.emplace<PhysicsBody>(entity, body);
       }

@@ -10,6 +10,7 @@
 #include "light.h"
 #include "render.h"
 #include "game/enemy.h"
+#include "game/spawn.h"
 
 entt::registry LoadLevel(std::string_view filename) {
   pugi::xml_document doc;
@@ -38,7 +39,6 @@ entt::registry LoadLevel(std::string_view filename) {
       auto& sprite = registry.emplace<Sprite>(entity);
       sprite.texture_tag = sprite_node.attribute("texture_tag").as_string();
       sprite.texture = ResourceManager::GetTexture(sprite.texture_tag).texture;
-      sprite.texture = ResourceManager::GetTexture(sprite.texture_tag).texture;
     }
     {
       auto physics_node = object_node.child("Physics");
@@ -46,6 +46,7 @@ entt::registry LoadLevel(std::string_view filename) {
         auto& physics = registry.emplace<PhysicsBody>(entity);
         auto& transform = registry.get<Transform>(entity);
         bool is_dynamic = physics_node.attribute("is_dynamic").as_bool();
+        bool is_chained = physics_node.attribute("is_chained").as_bool();
         if (physics::WorldValid()) {
           physics.body = physics::CreateBody(transform, is_dynamic);
         }
@@ -84,6 +85,25 @@ entt::registry LoadLevel(std::string_view filename) {
             enemy_node.attribute("time_until_next_hit").as_float();
       }
     }
+    {
+      auto spawn_node = object_node.child("PlayerSpawn");
+      if (spawn_node) {
+        registry.emplace<PlayerSpawn>(entity);
+      }
+    }
+  }
+  // Chain physics bodies if marked as chained
+  auto view = registry.view<Transform, PhysicsBody>();
+  std::vector<glm::vec2> chain_points;
+  for (auto entity : view) {
+    auto& physics = view.get<PhysicsBody>(entity);
+    if (physics.is_chained) {
+      auto& transform = view.get<Transform>(entity);
+      chain_points.push_back(transform.position);
+    }
+  }
+  if (!chain_points.empty()) {
+    physics::CreateChainBody(chain_points);
   }
   return registry;
 }
@@ -111,6 +131,7 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
     if (registry.try_get<PhysicsBody>(entity)) {
       auto physics_node = object_node.append_child("Physics");
       physics_node.append_attribute("is_dynamic") = registry.get<PhysicsBody>(entity).is_dynamic;
+      physics_node.append_attribute("is_chained") = registry.get<PhysicsBody>(entity).is_chained;
     }
     if (registry.try_get<Light>(entity)) {
       const auto& light = registry.get<Light>(entity);
@@ -138,6 +159,10 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
           enemy.knockback_direction.y;
       enemy_node.append_attribute("time_until_next_hit") =
           enemy.time_until_next_hit;
+    }
+
+    if (registry.all_of<PlayerSpawn>(entity)) {
+      object_node.append_child("PlayerSpawn");
     }
   }
   int object_count = std::distance(root.children("Object").begin(),

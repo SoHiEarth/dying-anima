@@ -10,6 +10,9 @@ void Init();
 TextureHandle GetTexture(const std::string& tag);
 ShaderHandle GetShader(const std::string& tag);
 FontHandle GetFont(const std::string& tag);
+void ReloadTextures();
+void ReloadShaders();
+void ReloadFonts();
 void Quit();
 } // namespace ResourceManager
 

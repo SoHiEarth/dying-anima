@@ -26,6 +26,7 @@
 #include "window.h"
 #include "menu.h"
 #include "game/enemy.h"
+#include "game/spawn.h"
 
 enum class Toolkit { SELECT, MOVE };
 
@@ -306,6 +307,20 @@ void LevelEditor::Render(GameWindow& window) {
     ImGui::SeparatorText("Toolkit");
     ImGui::RadioButton("Select", (int*)&current_tool, (int)Toolkit::SELECT);
     ImGui::RadioButton("Move", (int*)&current_tool, (int)Toolkit::MOVE);
+    ImGui::SeparatorText("Resource Manager");
+    ImGui::Text("Textures:");
+    if (ImGui::Button("Reload Textures")) {
+      ResourceManager::Quit();
+      ResourceManager::Init();
+    }
+    for (const auto& [key, value] : ResourceManager::texture_atlas) {
+      if (ImGui::CollapsingHeader(key.c_str())) {
+        ImGui::Image(value.texture->id,
+                     ImVec2((float)value.texture->width, (float)value.texture->height));
+        ImGui::Text("Dimensions: %dx%d", value.texture->width, value.texture->height);
+        ImGui::Text("File: %s", value.texture->path.c_str());
+      }
+    }
     ImGui::SeparatorText("Renderer");
     ImGui::Text("Position: (%.2f, %.2f)", camera.position.x, camera.position.y);
     ImGui::Text("Window PPU: %.2f", window.GetPixelsPerUnit());
@@ -330,6 +345,7 @@ void LevelEditor::Render(GameWindow& window) {
     if (selected_entity != entt::null) {
       auto& transform = registry.get<Transform>(selected_entity);
       ImGui::DragFloat2("Position", glm::value_ptr(transform.position), 0.1f);
+      ImGui::DragFloat("Z Index", &transform.z_index, 0.1f);
       ImGui::DragFloat2("Scale", glm::value_ptr(transform.scale), 0.1f);
       ImGui::DragFloat("Rotation", &transform.rotation, 1.0f);
       if (registry.any_of<Sprite>(selected_entity)) {
@@ -347,7 +363,8 @@ void LevelEditor::Render(GameWindow& window) {
       // Check if it has a physics body component
       if (registry.any_of<PhysicsBody>(selected_entity)) {
         auto& physics_body = registry.get<PhysicsBody>(selected_entity);
-        ImGui::Text("Has Physics Body Component");
+        ImGui::Checkbox("Is Dynamic", &physics_body.is_dynamic);
+        ImGui::Checkbox("Is Chained", &physics_body.is_chained);
         if (ImGui::Button("Remove Physics Body Component")) {
           registry.remove<PhysicsBody>(selected_entity);
         }
@@ -395,6 +412,21 @@ void LevelEditor::Render(GameWindow& window) {
         if (ImGui::Button("Add PlayerDamager Component")) {
           registry.emplace<PlayerDamager>(selected_entity);
         }
+      }
+
+      if (registry.any_of<PlayerSpawn>(selected_entity)) {
+        if (ImGui::Button("Remove PlayerSpawn Component")) {
+          registry.remove<PlayerSpawn>(selected_entity);
+        }
+      } else {
+        if (ImGui::Button("Add PlayerSpawn Component")) {
+          registry.emplace<PlayerSpawn>(selected_entity);
+        }
+      }
+
+      if (ImGui::Button("Delete Entity")) {
+        registry.destroy(selected_entity);
+        selected_entity = entt::null;
       }
     } else {
       ImGui::Text("No entity selected");

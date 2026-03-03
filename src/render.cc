@@ -46,29 +46,39 @@ void render::AddLight(entt::entity entity) {
 }
 
 void render::Render(entt::registry& registry) {
+  std::vector<entt::entity> sorted_entities;  // For sorting by z-index
+  auto sprite_view = registry.view<Transform, Sprite>();
+  for (auto entity : sprite_view) {
+    sorted_entities.push_back(entity);
+  }
+  std::sort(sorted_entities.begin(), sorted_entities.end(), [&registry](entt::entity a, entt::entity b) {
+    return registry.get<Transform>(a).z_index < registry.get<Transform>(b).z_index;
+  });
+
   BindFramebuffer(color_framebuffer);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
-  auto sprite_view = registry.view<Transform, Sprite>();
-  for (auto entity : sprite_view) {
-    if (sprite_view.get<Sprite>(entity).texture) {
-      sprite_view.get<Sprite>(entity).texture->Render(
+  for (auto entity : sorted_entities) {
+    if (registry.get<Sprite>(entity).texture) {
+      registry.get<Sprite>(entity).texture->Render(
           sprite_shader,
-          CalculateModelMatrix(sprite_view.get<Transform>(entity)));
+          CalculateModelMatrix(registry.get<Transform>(entity)));
     }
   }
   UnbindFramebuffer();
+  
   BindFramebuffer(normal_framebuffer);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
-  for (auto entity : sprite_view) {
-    if (sprite_view.get<Sprite>(entity).normal) {
-      sprite_view.get<Sprite>(entity).normal->Render(
+  for (auto entity : sorted_entities) {
+    if (registry.get<Sprite>(entity).normal) {
+      registry.get<Sprite>(entity).normal->Render(
           sprite_shader,
-          CalculateModelMatrix(sprite_view.get<Transform>(entity)));
+          CalculateModelMatrix(registry.get<Transform>(entity)));
     }
   }
   UnbindFramebuffer();
+  
   BindFramebuffer(default_framebuffer);
   glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);

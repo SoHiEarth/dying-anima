@@ -50,6 +50,31 @@ FontHandle ResourceManager::GetFont(const std::string& tag) {
   }
 }
 
+// Will destroy all existing textures. Reaquire textures again.
+void ResourceManager::ReloadTextures() {
+  for (auto &[_, entry] : texture_atlas) {
+    delete entry.texture;
+  }
+  texture_atlas.clear();
+  texture_atlas = LoadTextureAtlas("assets/textures/texture.xml");
+}
+
+void ResourceManager::ReloadShaders() {
+  for (auto &[_, entry] : shader_atlas) {
+    delete entry.shader;
+  }
+  shader_atlas.clear();
+  shader_atlas = LoadShaderAtlas("assets/shaders/shader.xml");
+}
+
+void ResourceManager::ReloadFonts() {
+  for (auto &[_, entry] : font_atlas) {
+    delete entry.font;
+  }
+  font_atlas.clear();
+  font_atlas = LoadFontAtlas("assets/fonts/font.xml");
+}
+
 void ResourceManager::Quit() {
   for (auto &[_, entry] : texture_atlas) {
     delete entry.texture;
