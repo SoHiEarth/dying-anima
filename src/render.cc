@@ -19,6 +19,7 @@ Framebuffer* normal_framebuffer = nullptr;
 Shader* deferred_shader = nullptr;
 Shader* fullscreen_shader = nullptr;
 Shader* sprite_shader = nullptr;
+float render::exposure = 1.0f;
 std::vector<entt::entity> lights;
 
 Framebuffer::Framebuffer(int w, int h, unsigned int i)
@@ -99,6 +100,7 @@ void render::Render(entt::registry& registry) {
   deferred_shader->SetUniform("normal_texture", 1);
   float aspect_ratio = (float)GetGameWindow().width / (float)GetGameWindow().height;
   deferred_shader->SetUniform("aspect_ratio", aspect_ratio);
+  deferred_shader->SetUniform("exposure", exposure);
   core::quad::Render(core::quad::FULL_QUAD);
   UnbindFramebuffer();
   fullscreen_shader->Use();

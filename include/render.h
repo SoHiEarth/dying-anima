@@ -20,5 +20,6 @@ void BindFramebuffer(Framebuffer* framebuffer);
 void UnbindFramebuffer();
 void DeleteFramebuffer(Framebuffer*& framebuffer);
 void Clear();
+extern float exposure;
 }
 #endif  // RENDER_H

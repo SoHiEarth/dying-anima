@@ -26,4 +26,8 @@ struct Font {
   void RenderUI(std::string_view text, const glm::vec2 &position,
               const glm::vec2 &scale, const glm::vec3 &color,
               const Shader *shader) const;
+  // Render with exact pixel height (width scales proportionally)
+  void RenderUIAtHeight(std::string_view text, const glm::vec2 &position,
+                        float height_pixels, const glm::vec3 &color,
+                        const Shader *shader) const;
 };

@@ -37,7 +37,7 @@
 SaveData game::save_data{};
 
 void GameScene::Init() {
-  physics::Init({0, -9.81f});
+  physics::Init({0, -19.81f});
   registry = LoadLevel("level.txt");
   player = registry.create();
   auto &player_transform = registry.emplace<Transform>(player);
@@ -100,7 +100,7 @@ void GameScene::Update(double dt) {
   if (IsOnGround(player_body)) {
     speed_multiplier = 1.0f;
   } else {
-    speed_multiplier = 0.5f;  // Air control is reduced
+    speed_multiplier = player_speed.air_control_multiplier;  // Air control is reduced
   }
 
   if (core::input::IsKeyPressed(GLFW_KEY_A)) {
@@ -190,7 +190,8 @@ void GameScene::Render(GameWindow &window) {
     frame_count = 0;
   }
 
-  ImGui::Begin("Telemetry");
+  ImGui::Begin("Telemetry & More");
+  ImGui::DragFloat("render::exposure", &render::exposure, 0.01f, 0.0f, 10.0f);
   ImGui::Text("FPS: %.2f", fps);
   auto &player_transform = registry.get<Transform>(player);
   if (ImGui::DragFloat3("Position",
@@ -224,6 +225,8 @@ void GameScene::Render(GameWindow &window) {
 
   ImGui::Begin("Player Tweaker");
   auto &player_speed = registry.get<PlayerSpeed>(player);
+  ImGui::DragFloat("Air Control Multiplier",
+                   &player_speed.air_control_multiplier, 0.01f, 0.0f, 1.0f);
   ImGui::DragFloat("Max Speed", &player_speed.max_speed, 0.1f, 0.0f);
   ImGui::DragFloat("Max Boost Speed", &player_speed.max_boost_speed, 0.1f, 0.0f);
   ImGui::DragFloat("Speed", &player_speed.speed, 0.01f, 0.0f);

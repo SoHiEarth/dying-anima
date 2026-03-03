@@ -196,3 +196,12 @@ void Font::RenderUI(std::string_view text, const glm::vec2 &position,
   glBindVertexArray(0);
   glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+void Font::RenderUIAtHeight(std::string_view text, const glm::vec2 &position,
+                            float height_pixels, const glm::vec3 &color,
+                            const Shader *shader) const {
+  float natural_height = static_cast<float>(GetHeight(text));
+  if (natural_height == 0.0f) return;
+  float scale = height_pixels / natural_height;
+  RenderUI(text, position, glm::vec2(scale), color, shader);
+}

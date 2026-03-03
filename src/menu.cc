@@ -27,6 +27,7 @@
 #include "level_editor.h"
 #include "game/intro.h"
 #include "game/progression.h"
+#include "ui/elements.h"
 #include <algorithm>
 
 void MenuScene::Init() {
@@ -43,12 +44,13 @@ void MenuScene::Init() {
 
 int focus_index = 0;
 void MenuScene::Update(double dt) {
-  if (core::input::IsKeyPressed(GLFW_KEY_ESCAPE)) {
+  if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
     scene_manager.PopScene();
   }
-  if (core::input::IsKeyPressed(GLFW_KEY_ENTER)) {
+  if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ENTER)) {
     switch (static_cast<AppState>(focus_index)) {
       case AppState::PLAYING:
+        scene_manager.PopScene();
         scene_manager.PushScene(std::make_unique<GameScene>(scene_manager));
         if (std::find(game::save_data.completion_markers.begin(),
                       game::save_data.completion_markers.end(),
@@ -61,6 +63,7 @@ void MenuScene::Update(double dt) {
         glfwSetWindowShouldClose(GetGameWindow().window, true);
         break;
       case AppState::LEVEL_EDITOR:
+        scene_manager.PopScene();
         scene_manager.PushScene(std::make_unique<LevelEditor>(scene_manager));
         break;
     }

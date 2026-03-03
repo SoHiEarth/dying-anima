@@ -11,7 +11,7 @@ struct PauseScene : public Scene {
 	void Quit() override;
   void Update(double dt) override;
   void Render(GameWindow& window) override;
-        bool IsTransparent() override { return true; }
+  bool IsTransparent() override { return true; }
  private:
   Font* title_font;
 	Font* ui_font;

@@ -24,6 +24,7 @@
 #include "tinyfiledialogs/tinyfiledialogs.h"
 #include "transform.h"
 #include "window.h"
+#include "menu.h"
 #include "game/enemy.h"
 
 enum class Toolkit { SELECT, MOVE };
@@ -158,6 +159,25 @@ void LevelEditor::Quit() {
 }
 
 void LevelEditor::Update(double dt) {
+  if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
+    // add menu
+    scene_manager.PopScene();
+    scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
+  }
+  if (core::input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL) &&
+      core::input::IsKeyPressed(GLFW_KEY_S)) {
+    if (current_scene_path.empty()) {
+      auto level =
+          tinyfd_saveFileDialog("Save Scene", "scene", 0, nullptr, nullptr);
+      if (level) {
+        current_scene_path = level;
+        SaveLevel(current_scene_path, registry);
+      }
+    }
+    else {
+      SaveLevel(current_scene_path, registry);
+    }
+  }
   if (enable_spotlight) {
     if (!registry.valid(spotlight)) {
       spotlight = registry.create();

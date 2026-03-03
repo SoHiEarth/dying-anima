@@ -19,6 +19,7 @@ uniform sampler2D normal_texture;
 uniform float aspect_ratio;
 uniform int light_count;
 uniform Light lights[MAX_LIGHTS];
+uniform float exposure;
 
 void main() {
   vec4 sample = texture(color_texture, TexCoord);
@@ -43,5 +44,8 @@ void main() {
     }
   }
 
-  FragColor = vec4(total_lighting, 1.0);
+  const float gamma = 2.2;
+  vec3 mapped = vec3(1.0) - exp(-total_lighting * exposure);
+  mapped = pow(mapped, vec3(1.0 / gamma));
+  FragColor = vec4(mapped, 1.0);
 }
