@@ -12,14 +12,12 @@ struct Framebuffer {
 namespace render {
 void Init();
 void Quit();
-void AddLight(entt::entity entity);
 void Render(entt::registry& registry);
 void RecreateFramebuffers(int width, int height);
-Framebuffer* CreateFramebuffer(int width, int height);
-void BindFramebuffer(Framebuffer* framebuffer);
+std::shared_ptr<Framebuffer> CreateFramebuffer(int width, int height);
+void BindFramebuffer(std::shared_ptr<Framebuffer> framebuffer);
 void UnbindFramebuffer();
-void DeleteFramebuffer(Framebuffer*& framebuffer);
-void Clear();
+void DeleteFramebuffer(std::shared_ptr<Framebuffer> framebuffer);
 extern float exposure;
 }
 #endif  // RENDER_H

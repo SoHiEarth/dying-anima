@@ -92,7 +92,6 @@ void GameScene::Quit() {
   save_data.completion_markers = game::save_data.completion_markers;
   SaveManager::SaveGame(save_data);
   physics::Quit();
-  render::Clear();
   registry.clear();
 }
 

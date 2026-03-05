@@ -8,5 +8,5 @@ struct Rect {
   glm::vec2 position;
   glm::vec2 scale;
   glm::vec4 color;
-  void Render(const Shader *shader);
+  void Render(const std::shared_ptr<Shader> shader);
 };

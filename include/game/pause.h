@@ -13,10 +13,10 @@ struct PauseScene : public Scene {
   void Render(GameWindow& window) override;
   bool IsTransparent() override { return true; }
  private:
-  Font* title_font;
-	Font* ui_font;
-  Shader* rect_shader;
-  Shader* text_shader;
+  std::shared_ptr<Font> title_font;
+	std::shared_ptr<Font> ui_font;
+  std::shared_ptr<Shader> rect_shader;
+        std::shared_ptr<Shader> text_shader;
   double time_since_open = 0.0f;
 };
 

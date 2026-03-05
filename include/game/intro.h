@@ -3,15 +3,16 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 #include "core/scene.h"
 #include "font.h"
 #include "shader.h"
 
 struct IntroScene : public Scene {
   std::string Name() override { return "IntroScene"; };
-	Shader* text_shader;
-  Shader* rect_shader;
-  Font* font;
+	std::shared_ptr<Shader> text_shader;
+  std::shared_ptr<Shader> rect_shader;
+  std::shared_ptr<Font> font;
   std::vector<std::string> intro_text = {
     "In The City of Mer,",
     "the city of lost souls - named \"Anima\",",

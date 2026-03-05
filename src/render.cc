@@ -12,15 +12,14 @@
 #include "core/quad.h"
 #include "camera.h"
 
-std::vector<Framebuffer*> framebuffers;
-Framebuffer* default_framebuffer = nullptr;
-Framebuffer* color_framebuffer = nullptr;
-Framebuffer* normal_framebuffer = nullptr;
-Shader* deferred_shader = nullptr;
-Shader* fullscreen_shader = nullptr;
-Shader* sprite_shader = nullptr;
+std::vector<std::shared_ptr<Framebuffer>> framebuffers;
+std::shared_ptr<Framebuffer> default_framebuffer;
+std::shared_ptr<Framebuffer> color_framebuffer;
+std::shared_ptr<Framebuffer> normal_framebuffer;
+std::shared_ptr<Shader> deferred_shader;
+std::shared_ptr<Shader> fullscreen_shader;
+std::shared_ptr<Shader> sprite_shader;
 float render::exposure = 1.0f;
-std::vector<entt::entity> lights;
 
 Framebuffer::Framebuffer(int w, int h, unsigned int i)
     : width(w), height(h), id(i) {
@@ -39,10 +38,6 @@ Framebuffer::Framebuffer(int w, int h, unsigned int i)
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
     throw std::runtime_error("Error: Framebuffer is not complete!\n");
 	}
-}
-
-void render::AddLight(entt::entity entity) {
-	lights.push_back(entity);
 }
 
 void render::Render(entt::registry& registry) {
@@ -133,12 +128,12 @@ void render::RecreateFramebuffers(int width, int height) {
   }
 }
 
-Framebuffer* render::CreateFramebuffer(int width, int height) {
-  framebuffers.push_back(new Framebuffer{width, height, 0});
+std::shared_ptr<Framebuffer> render::CreateFramebuffer(int width, int height) {
+  framebuffers.push_back(std::make_shared<Framebuffer>(width, height, 0));
 	return framebuffers.back();
 }
 
-void render::BindFramebuffer(Framebuffer* framebuffer) {
+void render::BindFramebuffer(std::shared_ptr<Framebuffer> framebuffer) {
   if (framebuffer) {
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->id);
   }
@@ -148,7 +143,7 @@ void render::UnbindFramebuffer() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void render::DeleteFramebuffer(Framebuffer*& framebuffer) {
+void render::DeleteFramebuffer(std::shared_ptr<Framebuffer> framebuffer) {
 	if (framebuffer) {
     glDeleteTextures(1, &framebuffer->colorbuffer);
 		glDeleteFramebuffers(1, &framebuffer->id);
@@ -170,10 +165,6 @@ void render::Init() {
   fullscreen_shader = ResourceManager::GetShader("Fullscreen").shader;
   sprite_shader = ResourceManager::GetShader("Sprite").shader;
   render::UnbindFramebuffer();
-}
-
-void render::Clear() {
-	lights.clear();
 }
 
 void render::Quit() {

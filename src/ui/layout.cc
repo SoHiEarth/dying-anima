@@ -1,8 +1,9 @@
 #include "ui/elements.h"
 #include "window.h"
 
-void ui::Layout::AddElement(std::unique_ptr<ui::Element> element) {
+ui::Element* ui::Layout::AddElement(std::unique_ptr<ui::Element> element) {
   elements.push_back(std::move(element));
+  return elements.back().get();
 }
 
 void ui::Layout::Clear() { elements.clear(); }
@@ -15,7 +16,8 @@ void ui::Layout::Update(const glm::ivec2& mouse_pos, bool mouse_pressed) {
   }
 }
 
-void ui::Layout::Render(const Shader* text_shader, const Shader* rect_shader) {
+void ui::Layout::Render(const std::shared_ptr<Shader> text_shader,
+                        const std::shared_ptr<Shader> rect_shader) {
   for (const auto& element : elements) {
     element->Render(text_shader, rect_shader);
   }

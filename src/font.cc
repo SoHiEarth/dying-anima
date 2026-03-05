@@ -99,12 +99,13 @@ int Font::GetHeight(std::string_view text) const {
 static glm::mat4 last_projection, last_view, last_vp;
 
 void Font::Render(std::string_view text, const glm::vec2& position,
-  const glm::vec3& color, const Shader* shader) const {
+                  const glm::vec3 &color,
+                  const std::shared_ptr<Shader> shader) const {
   Render(text, position, glm::vec2(1.0f), color, shader);
 }
 
-void Font::Render(std::string_view text, const glm::vec2 &position, const glm::vec2& scale,
-                  const glm::vec3 &color, const Shader *shader) const {
+void Font::Render(std::string_view text, const glm::vec2 &position, const glm::vec2& scale, const glm::vec3 &color,
+                  const std::shared_ptr<Shader> shader) const {
   shader->Use();
   shader->SetUniform("color", color);
   if (last_projection != GetGameWindow().GetProjection()) {
@@ -151,7 +152,7 @@ void Font::Render(std::string_view text, const glm::vec2 &position, const glm::v
 
 void Font::RenderUI(std::string_view text, const glm::vec2 &position,
                   const glm::vec2 &scale, const glm::vec3 &color,
-                  const Shader *shader) const {
+                    const std::shared_ptr<Shader> shader) const {
   shader->Use();
   shader->SetUniform("color", color);
   if (last_projection != GetGameWindow().GetProjection()) {
@@ -197,11 +198,15 @@ void Font::RenderUI(std::string_view text, const glm::vec2 &position,
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+float Font::GetWidthScale(std::string_view text, float height) const {
+  float natural_height = static_cast<float>(GetHeight(text));
+  if (natural_height == 0.0f) return 0.0f;
+  return height / natural_height;
+}
+
 void Font::RenderUIAtHeight(std::string_view text, const glm::vec2 &position,
                             float height_pixels, const glm::vec3 &color,
-                            const Shader *shader) const {
-  float natural_height = static_cast<float>(GetHeight(text));
-  if (natural_height == 0.0f) return;
-  float scale = height_pixels / natural_height;
-  RenderUI(text, position, glm::vec2(scale), color, shader);
+                            const std::shared_ptr<Shader> shader) const {
+  RenderUI(text, position, glm::vec2(GetWidthScale(text, height_pixels)), color,
+           shader);
 }

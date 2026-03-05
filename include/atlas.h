@@ -4,23 +4,24 @@
 #include "texture.h"
 #include <map>
 #include <string>
+#include <memory>
 
 struct FontHandle {
   std::string name;
   std::string file;
-  Font *font = nullptr;
+  std::shared_ptr<Font> font;
 };
 
 struct ShaderHandle {
   std::string name;
   std::string vertex_file;
   std::string fragment_file;
-  Shader *shader = nullptr;
+  std::shared_ptr<Shader> shader;
 };
 
 struct TextureHandle {
   std::string path;
-  Texture *texture = nullptr;
+  std::shared_ptr<Texture> texture;
 };
 
 #define FONT_ATLAS std::map<std::string, FontHandle>

@@ -67,7 +67,6 @@ entt::registry LoadLevel(std::string_view filename) {
         light.color.r = light_node.attribute("color.r").as_float();
         light.color.g = light_node.attribute("color.g").as_float();
         light.color.b = light_node.attribute("color.b").as_float();
-        render::AddLight(entity);
       }
     }
     {

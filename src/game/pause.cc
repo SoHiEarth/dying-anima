@@ -9,7 +9,6 @@
 #include "ui/elements.h"
 
 double anim_full_time = 0.4f;
-constexpr float ui_scale = 0.75f;  // Moved scale constant to file scope
 std::unique_ptr<ui::VerticalLayout> layout;
 
 glm::ivec2 GetMousePos() {
@@ -28,17 +27,17 @@ void PauseScene::Init() {
   layout->SetSpacing(20);
   layout->SetPadding(20, 20, 20, 20);
   layout->AddElement(std::make_unique<ui::Label>("PAUSED", title_font));
-  layout->AddElement(std::make_unique<ui::Button>("Resume", ui_font, [this]() { scene_manager.PopScene(); }));
-  layout->AddElement(std::make_unique<ui::Button>("Menu", ui_font, [this]() {
+  auto resume_button = layout->AddElement(std::make_unique<ui::Button>("Resume", ui_font, [this]() { scene_manager.PopScene(); }));
+  auto menu_button = layout->AddElement(std::make_unique<ui::Button>("Menu", ui_font, [this]() {
     scene_manager.PopScene();
     scene_manager.PopScene();  // Pop the game scene
     scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
   }));
-  layout->AddElement(std::make_unique<ui::Button>("Exit", ui_font, []() {
+  auto exit_button = layout->AddElement(std::make_unique<ui::Button>("Exit", ui_font, []() {
     glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
   }));
 #ifndef NDEBUG
-  layout->AddElement(std::make_unique<ui::Button>("Level Editor", ui_font, [this]() {
+  auto level_editor_button = layout->AddElement(std::make_unique<ui::Button>("Level Editor", ui_font, [this]() {
     scene_manager.PopScene();
     scene_manager.PopScene();  // Pop the game scene
     scene_manager.PushScene(std::make_unique<LevelEditor>(scene_manager));

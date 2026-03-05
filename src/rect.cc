@@ -7,7 +7,7 @@
 
 static glm::mat4 last_projection, last_view, last_vp;
 
-void Rect::Render(const Shader *shader) {
+void Rect::Render(const std::shared_ptr<Shader> shader) {
   shader->Use();
   if (last_projection != GetGameWindow().GetProjection() ||
       last_view != GetCamera().GetView()) {

@@ -100,7 +100,7 @@ entt::entity GetEntityAtPosition(const glm::vec2& position,
   return entt::null;
 }
 
-void DrawGrid(GameWindow& window, Camera& camera, Shader* shader) {
+void DrawGrid(GameWindow& window, Camera& camera, std::shared_ptr<Shader> shader) {
   float lineThickness = 1 / window.GetPixelsPerUnit();
   float halfWidth = (window.width / window.GetPixelsPerUnit()) / 2.0f;
   float halfHeight = (window.height / window.GetPixelsPerUnit()) / 2.0f;
@@ -156,7 +156,6 @@ void LevelEditor::Quit() {
       SaveLevel(current_scene_path, registry);
     }
   }
-  render::Clear();
 }
 
 void LevelEditor::Update(double dt) {
@@ -327,6 +326,16 @@ void LevelEditor::Render(GameWindow& window) {
     ImGui::Text("Camera Type: %s", camera.GetType() == CameraType::WORLD
                                        ? "WORLD"
                                        : "SCREEN_SPACE");
+    if (ImGui::CollapsingHeader("Lights")) {
+      int i = 0;
+      for (auto entity : registry.view<Light>()) {
+        auto& light = registry.get<Light>(entity);
+        i++;
+        if (ImGui::Button(std::format("Select Light #{}", i).c_str())) {
+          selected_entity = entity;
+        }
+      }
+    }
     ImGui::SeparatorText("Options");
     ImGui::Checkbox("Enable Grid", &enable_grid);
     ImGui::Checkbox("Enable Spotlight", &enable_spotlight);

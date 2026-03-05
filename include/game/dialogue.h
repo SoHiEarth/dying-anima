@@ -10,7 +10,7 @@
 
 struct DialogueMeta {
   std::string character_name;
-  Texture* character_image;
+  std::shared_ptr<Texture> character_image;
   std::vector<std::string> dialogue_lines;
 };
 

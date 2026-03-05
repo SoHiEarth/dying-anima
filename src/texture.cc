@@ -42,7 +42,8 @@ Texture::Texture(std::string_view path) {
 Texture::~Texture() { glDeleteTextures(1, &id); }
 
 static glm::mat4 last_proj, last_view, last_vp;
-void Texture::Render(const Shader *shader, const glm::mat4 &model) {
+void Texture::Render(const std::shared_ptr<Shader> shader,
+                     const glm::mat4 &model) {
   shader->Use();
   bool recalculate_vp = false;
   if (last_proj != GetGameWindow().GetProjection()) {

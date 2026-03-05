@@ -11,5 +11,5 @@ struct Texture {
   int channels;
   Texture(std::string_view path);
   ~Texture();
-  void Render(const Shader *shader, const glm::mat4 &model);
+  void Render(const std::shared_ptr<Shader> shader, const glm::mat4 &model);
 };

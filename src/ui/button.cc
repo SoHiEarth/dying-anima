@@ -3,11 +3,7 @@
 #include <print>
 
 void ui::Button::Update(const glm::ivec2& mouse_pos, bool mouse_pressed) {
-  std::print("Updating button '{}' at position ({}, {}) with size ({}, {})\n",
-             text, position.x, position.y, size.x, size.y);
-  std::print("Mouse position: ({}, {}), Mouse pressed: {}\n", mouse_pos.x,
-             mouse_pos.y,
-             mouse_pressed);
+  size.x = font->GetWidthScale(text, size.y);
   if (IsHovered(mouse_pos)) {
     hovered = true;
     if (mouse_pressed && on_click) { on_click(); }
@@ -16,7 +12,8 @@ void ui::Button::Update(const glm::ivec2& mouse_pos, bool mouse_pressed) {
   }
 }
 
-void ui::Button::Render(const Shader* text_shader, const Shader* rect_shader) {
+void ui::Button::Render(const std::shared_ptr<Shader> text_shader,
+                        const std::shared_ptr<Shader> rect_shader) {
   if (rect_shader) {
     Rect background;
     background.position = {GetPosition().x + size.x / 2.0f,
@@ -27,7 +24,7 @@ void ui::Button::Render(const Shader* text_shader, const Shader* rect_shader) {
   }
 
   if (text_shader && font) {
-    font->RenderUIAtHeight(text, GetPosition(), size.x, {1.0f, 1.0f, 1.0f}, text_shader);
+    font->RenderUIAtHeight(text, GetPosition(), size.y, {1.0f, 1.0f, 1.0f}, text_shader);
   }
 }
 

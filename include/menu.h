@@ -6,9 +6,11 @@
 
 struct MenuScene : public Scene {
   std::string Name() override { return "MenuScene"; };
-  Font* font = nullptr;
-  Shader *text_shader = nullptr, *sprite_shader = nullptr;
-  Texture *banner_texture = nullptr, *selected_texture = nullptr;
+  std::shared_ptr<Font> font;
+  std::shared_ptr<Shader> text_shader;
+  std::shared_ptr<Shader> sprite_shader;
+  std::shared_ptr<Texture> banner_texture;
+  std::shared_ptr<Texture> selected_texture;
   using Scene::Scene;
   void Init() override;
   void Quit() override;

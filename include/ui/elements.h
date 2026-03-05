@@ -14,20 +14,22 @@ struct Element {
  public:
   virtual ~Element() = default;
   virtual void Update(const glm::ivec2& mouse_pos, bool mouse_pressed) = 0;
-  virtual void Render(const Shader* text_shader, const Shader* rect_shader) = 0;
+  virtual void Render(const std::shared_ptr<Shader> text_shader, const std::shared_ptr<Shader> rect_shader) = 0;
   glm::ivec2 GetPosition() const { return position; }
   glm::ivec2 GetSize() const { return size; }
+  void SetPosition(const glm::ivec2& new_position) { position = new_position; }
+  void SetSize(const glm::ivec2& new_size) { size = new_size; }
   glm::ivec2 position{0, 0};
   glm::ivec2 size{ 20, 20 };
 };
 
 struct Button : Element {
  public:
-  Button(const std::string& text, Font* font, std::function<void()> on_click)
+  Button(const std::string& text, std::shared_ptr<Font> font, std::function<void()> on_click)
       : text(text), font(font), on_click(on_click) {}
   void Update(const glm::ivec2& mouse_pos, bool mouse_pressed) override;
-  void Render(const Shader* text_shader, const Shader* rect_shader) override;
-  void SetText(const std::string& new_text) { text = new_text; }
+  void Render(const std::shared_ptr<Shader> text_shader, const std::shared_ptr<Shader> rect_shader) override;
+  void SetText(std::string_view new_text) { text = new_text; }
   void SetTextColor(const glm::vec3& new_color) { text_color = new_color; }
   void SetHoverColor(const glm::vec3& new_color) { hover_color = new_color; }
   void SetBackgroundColor(const glm::vec3& new_color) {
@@ -44,7 +46,7 @@ struct Button : Element {
 
  private:
   std::string text;
-  Font* font;
+  std::shared_ptr<Font> font;
   std::function<void()> on_click;
   glm::vec3 background_color{0.2f, 0.2f, 0.2f};
   glm::vec3 hover_color{0.3f, 0.3f, 0.3f};
@@ -56,16 +58,16 @@ struct Button : Element {
 
 struct Label : Element {
  public:
-  Label(const std::string& text, Font* font) : text(text), font(font) {}
+  Label(const std::string& text, std::shared_ptr<Font> font) : text(text), font(font) {}
   void Update(const glm::ivec2& mouse_pos, bool mouse_pressed) override;
-  void Render(const Shader* text_shader, const Shader* rect_shader) override;
-  void SetText(const std::string& new_text) { text = new_text; }
-  void SetFont(Font* new_font) { font = new_font; }
+  void Render(const std::shared_ptr<Shader> text_shader, const std::shared_ptr<Shader> rect_shader) override;
+  void SetText(std::string_view new_text) { text = new_text; }
+  void SetFont(std::shared_ptr<Font> new_font) { font = new_font; }
   void SetColor(const glm::vec3& new_color) { color = new_color; }
 
  private:
   std::string text;
-  Font* font;
+  std::shared_ptr<Font> font;
   glm::vec3 color{1.0f, 1.0f, 1.0f};
   bool IsHovered(const glm::ivec2& mouse_pos) const;
   bool hovered{false};
@@ -74,13 +76,13 @@ struct Label : Element {
 struct Layout : Element {
  public:
   // Add an element to the layout. The layout takes ownership of the element.
-  void AddElement(std::unique_ptr<Element> element);
+  ui::Element* AddElement(std::unique_ptr<Element> element);
   // Clear all elements from the layout.
   void Clear();
   // Call Update on all child elements.
   void Update(const glm::ivec2& mouse_pos, bool mouse_pressed) override;
   // Call Render on all child elements.
-  void Render(const Shader* text_shader, const Shader* rect_shader) override;
+  void Render(const std::shared_ptr<Shader> text_shader, const std::shared_ptr<Shader> rect_shader) override;
   // Set the spacing between elements in the layout.
   void SetSpacing(int new_spacing) { spacing = new_spacing; }
   // Set the padding around the edges of the layout (top, right, bottom, left).

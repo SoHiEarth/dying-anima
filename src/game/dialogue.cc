@@ -41,19 +41,22 @@ void Game::SaveDialogue(const DialogueData& dialogue, std::string_view file) {
 }
 
 void Game::RenderDialogue(DialogueData& dialogue) {
-  static Font* font = nullptr;
+  static std::shared_ptr<Font> font = nullptr;
   if (!font) {
     font = ResourceManager::GetFont("dialouge").font;
   }
-  static Shader* font_shader = nullptr;
+  
+	static std::shared_ptr<Shader> font_shader = nullptr;
   if (!font_shader) {
     font_shader = ResourceManager::GetShader("font").shader;
   }
-  static Shader* texture_shader = nullptr;
+  
+	static std::shared_ptr<Shader> texture_shader = nullptr;
 	if (!texture_shader) {
 		texture_shader = ResourceManager::GetShader("texture").shader;
   }
-  static Shader* rect_shader = nullptr;
+  
+	static std::shared_ptr<Shader> rect_shader = nullptr;
   if (!rect_shader) {
 		rect_shader = ResourceManager::GetShader("rect").shader;
   }
