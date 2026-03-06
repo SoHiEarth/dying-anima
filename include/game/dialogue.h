@@ -4,9 +4,9 @@
 #include <entt/entt.hpp>
 #include <string>
 #include <vector>
-#include "texture.h"
-#include "font.h"
-#include "shader.h"
+#include "core/texture.h"
+#include "core/font.h"
+#include "core/shader.h"
 
 struct DialogueMeta {
   std::string character_name;

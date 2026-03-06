@@ -1,7 +1,7 @@
 #pragma once
-#include "font.h"
-#include "shader.h"
-#include "texture.h"
+#include "core/font.h"
+#include "core/shader.h"
+#include "core/texture.h"
 #include <map>
 #include <string>
 #include <memory>

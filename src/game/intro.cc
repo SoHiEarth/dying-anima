@@ -1,8 +1,8 @@
 #include "game/intro.h"
 #include "core/resource_manager.h"
 #include "core/input.h"
-#include "camera.h"
-#include "rect.h"
+#include "core/camera.h"
+#include "core/rect.h"
 #include "game/progression.h"
 #include "game.h"
 

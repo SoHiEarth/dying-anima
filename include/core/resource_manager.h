@@ -1,6 +1,6 @@
 #ifndef RESOURCE_MANAGER_H
 #define RESOURCE_MANAGER_H
-#include "../atlas.h"
+#include "core/atlas.h"
 
 namespace ResourceManager {
 extern TEXTURE_ATLAS texture_atlas;

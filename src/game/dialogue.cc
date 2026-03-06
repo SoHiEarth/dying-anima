@@ -2,8 +2,8 @@
 #include <pugixml.hpp>
 #include "core/resource_manager.h"
 #include "calculate.h"
-#include "window.h"
-#include "camera.h"
+#include "core/window.h"
+#include "core/camera.h"
 
 DialogueData Game::LoadDialogue(std::string_view file) {
 	DialogueData dialogue;

@@ -1,6 +1,6 @@
 #pragma once
 #include "core/scene.h"
-#include "shader.h"
+#include "core/shader.h"
 #include <entt/entt.hpp>
 
 struct LevelEditor : public Scene {

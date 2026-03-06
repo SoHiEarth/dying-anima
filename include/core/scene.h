@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <stack>
-#include "../window.h"
+#include "core/window.h"
 
 struct SceneManager;
 

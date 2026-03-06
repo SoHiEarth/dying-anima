@@ -1,5 +1,5 @@
 #include "ui/elements.h"
-#include "rect.h"
+#include "core/rect.h"
 #include <print>
 
 void ui::Button::Update(const glm::ivec2& mouse_pos, bool mouse_pressed) {

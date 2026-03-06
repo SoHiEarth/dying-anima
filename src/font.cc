@@ -5,12 +5,12 @@
 #include <stdexcept>
 #include <string>
 
-#include "shader.h"
+#include "core/shader.h"
 #include FT_FREETYPE_H
-#include "font.h"
-#include "window.h"
-#include "calculate.h"
-#include "camera.h"
+#include "core/font.h"
+#include "core/window.h"
+#include "util/calculate.h"
+#include "core/camera.h"
 
 Font::Font(std::string_view font_path) {
   auto dpi = 64.0f;

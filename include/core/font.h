@@ -1,5 +1,5 @@
 #pragma once
-#include "shader.h"
+#include "core/shader.h"
 #include <glm/glm.hpp>
 #include <map>
 #include <memory>

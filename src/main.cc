@@ -17,11 +17,11 @@
 #include "game.h"
 #include "level_editor.h"
 #include "menu.h"
-#include "state.h"
+#include "core/state.h"
 #include "core/scene.h"
 #include "core/input.h"
-#include "window.h"
-#include "render.h"
+#include "core/window.h"
+#include "core/render.h"
 
 void FramebufferSizeCallback(GLFWwindow * /* window */, int width, int height) {
   auto &window = GetGameWindow();

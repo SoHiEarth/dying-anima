@@ -2,7 +2,7 @@
 #define INPUT_H
 
 #include <map>
-#include "window.h"
+#include "core/window.h"
 
 namespace core::input {
 extern std::map<int, bool> states;

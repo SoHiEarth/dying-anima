@@ -1,8 +1,8 @@
-#include "rect.h"
-#include "camera.h"
+#include "core/rect.h"
+#include "core/camera.h"
 #include "core/quad.h"
-#include "shader.h"
-#include "window.h"
+#include "core/shader.h"
+#include "core/window.h"
 #include "calculate.h"
 
 static glm::mat4 last_projection, last_view, last_vp;

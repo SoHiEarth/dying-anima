@@ -1,4 +1,4 @@
-#include "texture.h"
+#include "core/texture.h"
 
 #include <glad/glad.h>
 #include <stb_image.h>
@@ -9,9 +9,9 @@
 #include <print>
 #include <string>
 
-#include "camera.h"
-#include "shader.h"
-#include "window.h"
+#include "core/camera.h"
+#include "core/shader.h"
+#include "core/window.h"
 #include "core/quad.h"
 
 Texture::Texture(std::string_view path) {

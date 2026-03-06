@@ -1,6 +1,6 @@
-#include "calculate.h"
+#include "core/calculate.h"
 
-#include "transform.h"
+#include "core/transform.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 

@@ -1,14 +1,14 @@
 #include "level_utils.h"
 
-#include "physics.h"
+#include "core/physics.h"
 #include "sprite.h"
-#include "transform.h"
+#include "core/transform.h"
 #include "core/resource_manager.h"
 #include <pugixml.hpp>
 #include <print>
 #include <sstream>
-#include "light.h"
-#include "render.h"
+#include "core/light.h"
+#include "core/render.h"
 #include "game/enemy.h"
 #include "game/spawn.h"
 

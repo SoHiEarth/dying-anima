@@ -5,8 +5,8 @@
 #include <string>
 #include <memory>
 #include "core/scene.h"
-#include "font.h"
-#include "shader.h"
+#include "core/font.h"
+#include "core/shader.h"
 
 struct IntroScene : public Scene {
   std::string Name() override { return "IntroScene"; };

@@ -2,7 +2,8 @@
 #define SPRITE_H
 
 #include <string>
-#include "texture.h"
+#include "core/texture.h"
+
 struct Sprite {
   std::string texture_tag;
   std::shared_ptr<Texture> texture;

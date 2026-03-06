@@ -1,16 +1,16 @@
 #include <glad/glad.h>
 // code block
 
-#include "render.h"
-#include "light.h"
-#include "window.h"
-#include "transform.h"
+#include "core/render.h"
+#include "core/light.h"
+#include "core/window.h"
+#include "core/transform.h"
 #include "sprite.h"
-#include "shader.h"
-#include "calculate.h"
+#include "core/shader.h"
+#include "util/calculate.h"
 #include "core/resource_manager.h"
 #include "core/quad.h"
-#include "camera.h"
+#include "core/camera.h"
 
 std::vector<std::shared_ptr<Framebuffer>> framebuffers;
 std::shared_ptr<Framebuffer> default_framebuffer;

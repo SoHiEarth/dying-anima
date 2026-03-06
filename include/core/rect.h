@@ -1,7 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 
-#include "shader.h"
+#include "core/shader.h"
 
 // Renders a colored rectangle in screen space
 struct Rect {

@@ -1,9 +1,9 @@
 #include "game/pause.h"
 
-#include "camera.h"
+#include "core/camera.h"
 #include "core/input.h"
 #include "core/resource_manager.h"
-#include "rect.h"
+#include "core/rect.h"
 #include "menu.h"
 #include "level_editor.h"
 #include "ui/elements.h"

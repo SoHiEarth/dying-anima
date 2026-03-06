@@ -1,9 +1,9 @@
 #pragma once
 #include "core/scene.h"
-#include "font.h"
-#include "texture.h"
-#include "shader.h"
-#include "transform.h"
+#include "core/font.h"
+#include "core/texture.h"
+#include "core/shader.h"
+#include "core/transform.h"
 #include "game/player.h"
 #include <entt/entt.hpp>
 #include "saves.h"

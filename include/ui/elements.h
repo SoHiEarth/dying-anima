@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "font.h"
-#include "shader.h"
+#include "core/font.h"
+#include "core/shader.h"
 
 namespace ui {
 struct Element {

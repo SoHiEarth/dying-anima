@@ -1,8 +1,8 @@
 #pragma once
 #include "core/scene.h"
-#include "font.h"
-#include "shader.h"
-#include "texture.h"
+#include "core/font.h"
+#include "core/shader.h"
+#include "core/texture.h"
 
 struct MenuScene : public Scene {
   std::string Name() override { return "MenuScene"; };
