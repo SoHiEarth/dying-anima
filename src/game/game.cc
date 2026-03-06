@@ -42,7 +42,6 @@ void GameScene::Init() {
   registry = LoadLevel("level.txt");
   player = registry.create();
   auto &player_transform = registry.emplace<Transform>(player);
-  player_transform.z_index = 2.0f;
   // find a spawn point
   auto view = registry.view<PlayerSpawn>();
   for (auto entity : view) {
@@ -151,6 +150,7 @@ void GameScene::Update(double dt) {
   float speed = std::min(1.0f, 1.0f - std::exp(-camera_smoothing * (float)dt));
   auto &camera_position = GetCamera().position;
   auto &player_transform = registry.get<Transform>(player);
+  player_transform.z_index = 2.0f;
   camera_position = glm::mix({camera_position.x, camera_position.y, 0.0f},
                              glm::vec3(player_transform.position, 0.0f), speed);
 

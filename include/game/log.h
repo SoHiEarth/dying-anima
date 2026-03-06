@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include "core/texture.h"
 
 namespace game {
   struct LogEntry {
@@ -13,7 +14,7 @@ namespace game {
     std::shared_ptr<Texture> texture;
   };
   struct Log {
-    void NewLog();
+    void NewLog(const LogEntry& entry);
     void LoadLog();
     void SaveLog();
     std::vector<LogEntry> GetLogs() { return log; }

@@ -2,7 +2,7 @@
 #define PAUSE_H
 
 #include "core/scene.h"
-#include "font.h"
+#include "core/font.h"
 
 struct PauseScene : public Scene {
  public:

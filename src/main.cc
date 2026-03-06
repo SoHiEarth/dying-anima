@@ -14,7 +14,7 @@
 
 #include "core/quad.h"
 #include "core/resource_manager.h"
-#include "game.h"
+#include "game/game.h"
 #include "level_editor.h"
 #include "menu.h"
 #include "core/state.h"

@@ -3,7 +3,7 @@
 #include "core/quad.h"
 #include "core/shader.h"
 #include "core/window.h"
-#include "calculate.h"
+#include "util/calculate.h"
 
 static glm::mat4 last_projection, last_view, last_vp;
 

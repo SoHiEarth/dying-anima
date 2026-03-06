@@ -1,7 +1,7 @@
 #include "game/dialogue.h"
 #include <pugixml.hpp>
 #include "core/resource_manager.h"
-#include "calculate.h"
+#include "util/calculate.h"
 #include "core/window.h"
 #include "core/camera.h"
 

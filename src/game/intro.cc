@@ -4,7 +4,7 @@
 #include "core/camera.h"
 #include "core/rect.h"
 #include "game/progression.h"
-#include "game.h"
+#include "game/game.h"
 
 std::string current_text = "";
 int character_index = 0;
