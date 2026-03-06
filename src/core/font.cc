@@ -13,7 +13,7 @@
 #include "core/camera.h"
 
 Font::Font(std::string_view font_path) {
-  auto dpi = 64.0f;
+  auto dpi = 96.0f;
   glGenVertexArrays(1, &vertex_attrib);
   glGenBuffers(1, &vertex_buffer);
   glBindVertexArray(vertex_attrib);

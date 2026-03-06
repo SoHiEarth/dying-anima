@@ -30,6 +30,7 @@ entt::registry LoadLevel(std::string_view filename) {
       auto& transform = registry.emplace<Transform>(entity);
       transform.position.x = transform_node.attribute("pos.x").as_float();
       transform.position.y = transform_node.attribute("pos.y").as_float();
+      transform.z_index = transform_node.attribute("z_index").as_float();
       transform.scale.x = transform_node.attribute("scale.x").as_float();
       transform.scale.y = transform_node.attribute("scale.y").as_float();
       transform.rotation = transform_node.attribute("rotation").as_float();
@@ -118,6 +119,7 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
       auto transform_node = object_node.append_child("Transform");
       transform_node.append_attribute("pos.x") = transform.position.x;
       transform_node.append_attribute("pos.y") = transform.position.y;
+      transform_node.append_attribute("z_index") = transform.z_index;
       transform_node.append_attribute("scale.x") = transform.scale.x;
       transform_node.append_attribute("scale.y") = transform.scale.y;
       transform_node.append_attribute("rotation") = transform.rotation;

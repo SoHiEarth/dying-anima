@@ -35,6 +35,14 @@ void ui::VerticalLayout::CalculateLayout() {
   }
 }
 
+int ui::VerticalLayout::GetLayoutSize() {
+  int total_size = padding[0] + padding[2] + spacing * (elements.size() - 1);
+  for (const auto& element : elements) {
+    total_size += element->GetSize().y;
+  }
+  return total_size;
+}
+
 void ui::HorizontalLayout::CalculateLayout() {
   int current_x = position.x + padding[3];
   int layout_height = size.y;
@@ -43,4 +51,12 @@ void ui::HorizontalLayout::CalculateLayout() {
     element->position = {current_x, position.y + padding[0]};
     current_x += element_size.x + spacing;
   }
+}
+
+int ui::HorizontalLayout::GetLayoutSize() {
+  int total_size = padding[1] + padding[3] + spacing * (elements.size() - 1);
+  for (const auto& element : elements) {
+    total_size += element->GetSize().x;
+  }
+  return total_size;
 }

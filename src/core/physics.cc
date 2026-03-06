@@ -32,7 +32,7 @@ b2BodyId physics::CreateBody(const glm::vec2 &position,
     (scale.y / 2.0f) * SCALE_MULTIPLIER);
   auto shape_def = b2DefaultShapeDef();
   shape_def.density = 1.0F;
-  shape_def.material.friction = 0.3F;
+  shape_def.material.friction = 0.0F;
   b2CreatePolygonShape(body, &shape_def, &shape);
   return body;
 }

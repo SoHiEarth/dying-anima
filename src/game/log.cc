@@ -11,7 +11,8 @@ void game::Log::NewLog(const LogEntry& entry) {
   log.push_back(new_entry);
 }
 
-void game::Log::LoadLog() { 
+void game::Log::LoadLog() {
+  log.clear();
   auto doc = pugi::xml_document();
   doc.load_file(LOG_FILE);
   auto entries = doc.child("logs").children("entry");

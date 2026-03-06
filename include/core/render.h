@@ -6,7 +6,8 @@
 struct Framebuffer {
   Framebuffer(int w, int h, unsigned int i);
 	int width = 0, height = 0;
-  unsigned int id = 0, colorbuffer = 0;
+  unsigned int id = 0;
+  unsigned int colorbuffer;
 };
 
 namespace render {

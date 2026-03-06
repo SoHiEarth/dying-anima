@@ -3,7 +3,7 @@
 #include <print>
 
 void ui::Button::Update(const glm::ivec2& mouse_pos, bool mouse_pressed) {
-  size.x = font->GetWidthScale(text, size.y);
+  size.x = font->GetWidth(text) * font->GetWidthScale(text, size.y);
   if (IsHovered(mouse_pos)) {
     hovered = true;
     if (mouse_pressed && on_click) { on_click(); }
@@ -19,7 +19,7 @@ void ui::Button::Render(const std::shared_ptr<Shader> text_shader,
     background.position = {GetPosition().x + size.x / 2.0f,
                            GetPosition().y + size.y / 2.0f};
     background.scale = size;
-    background.color = {hovered ? hover_color : background_color, 1.0f};
+    background.color = {hovered ? hover_color : background_color};
     background.Render(rect_shader);
   }
 

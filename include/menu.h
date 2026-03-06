@@ -3,14 +3,14 @@
 #include "core/font.h"
 #include "core/shader.h"
 #include "core/texture.h"
+#include "ui/elements.h"
 
 struct MenuScene : public Scene {
   std::string Name() override { return "MenuScene"; };
   std::shared_ptr<Font> font;
   std::shared_ptr<Shader> text_shader;
-  std::shared_ptr<Shader> sprite_shader;
-  std::shared_ptr<Texture> banner_texture;
-  std::shared_ptr<Texture> selected_texture;
+  std::shared_ptr<Shader> rect_shader;
+  ui::VerticalLayout menu_layout;
   using Scene::Scene;
   void Init() override;
   void Quit() override;

@@ -29,17 +29,43 @@
 #include "game/progression.h"
 #include "ui/elements.h"
 #include <algorithm>
+constexpr int LABEL_SIZE_Y = 36;
 
 void MenuScene::Init() {
-  font = ResourceManager::GetFont("Special").font;
+  glfwSwapInterval(1);  // Save resources
+  font = ResourceManager::GetFont("menu.ui").font;
   text_shader = ResourceManager::GetShader("Text").shader;
-  sprite_shader = ResourceManager::GetShader("Sprite").shader;
+  rect_shader = ResourceManager::GetShader("Rect").shader;
   text_shader->Use();
   text_shader->SetUniform("character", 0);
-  sprite_shader->Use();
-  sprite_shader->SetUniform("texture1", 0);
-  banner_texture = ResourceManager::GetTexture("util.banner").texture;
-  selected_texture = ResourceManager::GetTexture("menu.selected").texture;
+#ifndef NDEBUG
+  auto editor_label =
+      menu_layout
+          .AddElement(std::make_unique<ui::Button>(
+              "Editor", font,
+              [this]() {
+                scene_manager.PushScene(
+                    std::make_unique<LevelEditor>(scene_manager));
+              }))
+      ->size.y = LABEL_SIZE_Y;
+  #endif
+  auto exit_label =
+      menu_layout
+          .AddElement(std::make_unique<ui::Button>(
+              "Exit", font, [this]() { scene_manager.PopScene(); }))
+          ->size.y = LABEL_SIZE_Y;
+  auto play_label =
+      menu_layout
+          .AddElement(std::make_unique<ui::Button>(
+              "Play", font,
+              [this]() {
+                              scene_manager.PushScene(
+                                  std::make_unique<GameScene>(scene_manager));
+              }))
+          ->size.y = LABEL_SIZE_Y;
+  auto title = menu_layout.AddElement(std::make_unique<ui::Label>("Dying Anima", font))
+          ->size.y = LABEL_SIZE_Y * 2;
+  menu_layout.SetSpacing(LABEL_SIZE_Y);
 }
 
 int focus_index = 0;
@@ -79,68 +105,20 @@ void MenuScene::Update(double dt) {
 #endif
     focus_index = std::min(focus_index + 1, max_focus);
   }
+  glm::dvec2 mouse_pos{};
+  glfwGetCursorPos(GetGameWindow().window, &mouse_pos.x, &mouse_pos.y);
+  menu_layout.SetPosition(
+      {30, (GetGameWindow().height - menu_layout.GetLayoutSize()) / 2});
+  menu_layout.Update(mouse_pos,
+                     core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_LEFT));
 }
 
 void MenuScene::Render(GameWindow& window) {
   window.SetProjection(ProjectionType::SCREEN_SPACE);
   GetCamera().SetType(CameraType::UI);
-  banner_texture->Render(
-      sprite_shader,
-      CalculateModelMatrix(glm::vec2{window.width, window.height} * 0.5f, 0.0f,
-                           glm::vec2(window.width, window.height)));
-
-  const int menu_y = window.height / 4;
-  constexpr int padding = 50;
-  constexpr int selected_margin = 30;
-
-#ifdef NDEBUG
-  int text_width =
-      font->GetWidth("Play", 1.0f) + padding + font->GetWidth("Quit", 1.0f);
-#else
-  int text_width = font->GetWidth("Play") + padding + font->GetWidth("Quit") +
-                   padding + font->GetWidth("Level Editor");
-#endif
-  int x_pos = (window.width - text_width) / 2;
-
-  if (focus_index == static_cast<int>(AppState::PLAYING)) {
-    int width = font->GetWidth("Play") + selected_margin;
-    int height = font->GetHeight("Play") + selected_margin;
-    glm::ivec2 center_pos = {x_pos + width / 2 - selected_margin / 2,
-                             menu_y + height / 2 - selected_margin / 2};
-    selected_texture->Render(
-        sprite_shader, CalculateModelMatrix(center_pos, 0.0f, {width, height}));
-    core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
-  }
-  font->RenderUI("Play", glm::vec2(x_pos, menu_y), glm::vec2(1.0f), glm::vec3(1.0f), text_shader);
-  x_pos += font->GetWidth("Play") + padding;
-
-  if (focus_index == static_cast<int>(AppState::EXIT)) {
-    int width = font->GetWidth("Quit") + selected_margin;
-    int height = font->GetHeight("Quit") + selected_margin;
-    glm::vec2 center_pos = {x_pos + width / 2.0f - selected_margin / 2.0f,
-                            menu_y + height / 2.0f - selected_margin / 2.0f};
-    selected_texture->Render(
-        sprite_shader, CalculateModelMatrix(center_pos, 0.0f, {width, height}));
-    core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
-  }
-  font->RenderUI("Quit", glm::vec2(x_pos, menu_y), glm::vec2(1.0f),
-               glm::vec3(1.0f), text_shader);
-
-#ifndef NDEBUG
-  x_pos += font->GetWidth("Quit") + padding;
-  if (focus_index == static_cast<int>(AppState::LEVEL_EDITOR)) {
-    int width = font->GetWidth("Level Editor") + selected_margin;
-    int height = font->GetHeight("Level Editor") + selected_margin;
-    glm::vec2 center_pos = {x_pos + width / 2.0f - selected_margin / 2.0f,
-                            menu_y + height / 2.0f - selected_margin / 2.0f};
-    selected_texture->Render(
-        sprite_shader, CalculateModelMatrix(center_pos, 0.0f, {width, height}));
-    core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
-  }
-  font->RenderUI("Level Editor", glm::vec2(x_pos, menu_y), glm::vec2(1.0f),
-               glm::vec3(1.0f),
-               text_shader);
-#endif
+  menu_layout.Render(text_shader, rect_shader);
 }
 
-void MenuScene::Quit() {}
+void MenuScene::Quit() {
+  glfwSwapInterval(0);  // Psycho mode
+}

@@ -5,4 +5,5 @@
   <font name="Google Sans Code" tag="Debug" file="Google_Sans_Code/GoogleSansCode-VariableFont_wght.ttf"/>
   <font name="Tinos" tag="UI" file="Tinos/Tinos-Regular.ttf"/>
   <font name="Tinos" tag="Special" file="Tinos/Tinos-Regular.ttf"/>
+  <font name="Fragment Mono" tag="menu.ui" file="Fragment_Mono/FragmentMono-Regular.ttf"/>
 </fonts>

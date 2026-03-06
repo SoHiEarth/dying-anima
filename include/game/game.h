@@ -7,6 +7,7 @@
 #include "game/player.h"
 #include <entt/entt.hpp>
 #include "saves.h"
+#include "game/log.h"
 
 namespace game {
 extern SaveData save_data;
@@ -28,4 +29,5 @@ struct GameScene : public Scene {
   float physics_accumulator = 0.0f;
   entt::entity player;
   b2BodyId player_body;
+  game::Log player_log;
 };

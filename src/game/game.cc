@@ -34,6 +34,7 @@
 #include "core/window.h"
 #include "game/enemy.h"
 #include "game/spawn.h"
+#include "game/log.h"
 
 SaveData game::save_data{};
 
@@ -64,6 +65,7 @@ void GameScene::Init() {
     player_transform = game::save_data.player_transform;
     player_health = game::save_data.player_health;
   }
+  player_log.LoadLog();
 
   sprite_shader = ResourceManager::GetShader("Sprite").shader;
   rect_shader = ResourceManager::GetShader("Rect").shader;
@@ -82,6 +84,7 @@ void GameScene::Quit() {
   if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
     std::filesystem::create_directory("saves");
   }
+  player_log.SaveLog();
   SaveData save_data{};
   if (!std::filesystem::is_empty("saves")) {
     save_data = SaveManager::LoadLatestSave();

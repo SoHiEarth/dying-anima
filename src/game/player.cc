@@ -1,6 +1,7 @@
 #include "game/player.h"
 #include <vector>
 
+/*
 bool IsOnGround(b2BodyId body) {
   int capacity = b2Body_GetContactCapacity(body);
   if (capacity <= 0) {
@@ -17,6 +18,16 @@ bool IsOnGround(b2BodyId body) {
     if (cd.manifold.normal.y <= -0.707f) {
       return true;
     }
+  }
+  return false;
+}
+*/
+
+// Testing new implementation
+bool IsOnGround(b2BodyId body) {
+  auto velocity = b2Body_GetLinearVelocity(body);
+  if (velocity.y == 0) {
+    return true;
   }
   return false;
 }

@@ -1,4 +1,5 @@
 #version 330 core
+out vec4 FragColor;
 
 struct Light {
   int type; // 0 = directional, 1 = point
@@ -12,7 +13,6 @@ struct Light {
 const int MAX_LIGHTS = 32;
 
 in vec2 TexCoord;
-out vec4 FragColor;
 
 uniform sampler2D color_texture;
 uniform sampler2D normal_texture;
@@ -43,9 +43,5 @@ void main() {
       total_lighting += lights[i].color * volumetric * attenuation;
     }
   }
-
-  const float gamma = 2.2;
-  vec3 mapped = vec3(1.0) - exp(-total_lighting * exposure);
-  mapped = pow(mapped, vec3(1.0 / gamma));
-  FragColor = vec4(mapped, 1.0);
+  FragColor = vec4(total_lighting, 1.0);
 }

@@ -13,6 +13,7 @@ namespace game {
     std::string timestamp;
     std::shared_ptr<Texture> texture;
   };
+  // Consider moving Load/Save to SaveData and let savedata handle operations
   struct Log {
     void NewLog(const LogEntry& entry);
     void LoadLog();

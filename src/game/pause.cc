@@ -26,24 +26,26 @@ void PauseScene::Init() {
   layout = std::make_unique<ui::VerticalLayout>();
   layout->SetSpacing(20);
   layout->SetPadding(20, 20, 20, 20);
-  layout->AddElement(std::make_unique<ui::Label>("PAUSED", title_font));
-  auto resume_button = layout->AddElement(std::make_unique<ui::Button>("Resume", ui_font, [this]() { scene_manager.PopScene(); }));
+#ifndef NDEBUG
+  auto level_editor_button = layout->AddElement(
+      std::make_unique<ui::Button>("Level Editor", ui_font, [this]() {
+        scene_manager.PopScene();
+        scene_manager.PopScene();  // Pop the game scene
+        scene_manager.PushScene(std::make_unique<LevelEditor>(scene_manager));
+      }));
+#endif
+  auto exit_button =
+      layout->AddElement(std::make_unique<ui::Button>("Exit", ui_font, []() {
+        glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
+      }));
   auto menu_button = layout->AddElement(std::make_unique<ui::Button>("Menu", ui_font, [this]() {
     scene_manager.PopScene();
     scene_manager.PopScene();  // Pop the game scene
     scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
   }));
-  auto exit_button = layout->AddElement(std::make_unique<ui::Button>("Exit", ui_font, []() {
-    glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
-  }));
-#ifndef NDEBUG
-  auto level_editor_button = layout->AddElement(std::make_unique<ui::Button>("Level Editor", ui_font, [this]() {
-    scene_manager.PopScene();
-    scene_manager.PopScene();  // Pop the game scene
-    scene_manager.PushScene(std::make_unique<LevelEditor>(scene_manager));
-      }));
-#endif
-  layout->UpdateLayout();
+  auto resume_button = layout->AddElement(std::make_unique<ui::Button>(
+      "Resume", ui_font, [this]() { scene_manager.PopScene(); }));
+  layout->AddElement(std::make_unique<ui::Label>("PAUSED", title_font));
 }
 
 void PauseScene::Quit() {
@@ -51,13 +53,13 @@ void PauseScene::Quit() {
 }
 
 void PauseScene::Update(double dt) {
+  layout->SetPosition(
+      {30, (GetGameWindow().height - layout->GetLayoutSize()) / 2});
   time_since_open += dt;
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
     scene_manager.PopScene();
   }
   auto mouse_pos = GetMousePos();
-  int x_pos = 30 * (std::min(time_since_open, anim_full_time) / anim_full_time);
-  int y_pos = GetGameWindow().height / 2 + 100;
   layout->Update(mouse_pos,
                  core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_LEFT));
 }
@@ -70,6 +72,12 @@ void PauseScene::Render(GameWindow& window) {
   pause_rect.scale = {window.width, window.height};
   pause_rect.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.5f);
   pause_rect.Render(rect_shader);
+
+  Rect pause_rect_2;
+  pause_rect_2.position = glm::vec2(window.width / 6.0f, window.height / 2.0f);
+  pause_rect_2.scale = {window.width / 3.0f, window.height};
+  pause_rect_2.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.7f);
+  pause_rect_2.Render(rect_shader);
 
   int x_pos = 30 * (std::min(time_since_open, anim_full_time) / anim_full_time);
   int y_pos = window.height / 2 + 100;

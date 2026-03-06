@@ -7,4 +7,5 @@
   <texture name="game.city.light_sign" path="light_sign.png"/>
   <texture name="game.city.building" path="building.png"/>
   <texture name="game.city.lamp" path="lamp.png"/>
+  <texture name="game.city.brick" path="messy_brick.png"/>
 </textures>

@@ -4,5 +4,8 @@
   <shader name="Simple" tag="Sprite" vertex="simple.vert.glsl" fragment="simple.frag.glsl"/>
   <shader name="Rect" tag="Rect" vertex="rect.vert.glsl" fragment="rect.frag.glsl"/>
   <shader name="Deferred" tag="Deferred" vertex="deferred.vert.glsl" fragment="deferred.frag.glsl"/>
+  <shader name="Separate" tag="bloom.separate" vertex="separate.vert.glsl" fragment="separate.frag.glsl"/>
+  <shader name="Blur" tag="bloom.blur" vertex="blur.vert.glsl" fragment="blur.frag.glsl"/>
+  <shader name="Combine" tag="bloom.combine" vertex="combine.vert.glsl" fragment="combine.frag.glsl"/>
   <shader name="Fullscreen" tag="Fullscreen" vertex="fullscreen.vert.glsl" fragment="fullscreen.frag.glsl"/>
 </shaders>
