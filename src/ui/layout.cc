@@ -27,7 +27,6 @@ void ui::Layout::UpdateLayout() { CalculateLayout(); }
 
 void ui::VerticalLayout::CalculateLayout() {
   int current_y = position.y + padding[0];
-  int layout_width = size.x;
   for (const auto& element : elements) {
     auto element_size = element->GetSize();
     element->position = {position.x + padding[3], current_y};
@@ -36,7 +35,7 @@ void ui::VerticalLayout::CalculateLayout() {
 }
 
 int ui::VerticalLayout::GetLayoutSize() {
-  int total_size = padding[0] + padding[2] + spacing * (elements.size() - 1);
+  int total_size = padding[0] + padding[2] + spacing * ((int)elements.size() - 1);
   for (const auto& element : elements) {
     total_size += element->GetSize().y;
   }
@@ -45,7 +44,6 @@ int ui::VerticalLayout::GetLayoutSize() {
 
 void ui::HorizontalLayout::CalculateLayout() {
   int current_x = position.x + padding[3];
-  int layout_height = size.y;
   for (const auto& element : elements) {
     auto element_size = element->GetSize();
     element->position = {current_x, position.y + padding[0]};
@@ -54,7 +52,7 @@ void ui::HorizontalLayout::CalculateLayout() {
 }
 
 int ui::HorizontalLayout::GetLayoutSize() {
-  int total_size = padding[1] + padding[3] + spacing * (elements.size() - 1);
+  int total_size = padding[1] + padding[3] + spacing * ((int)elements.size() - 1);
   for (const auto& element : elements) {
     total_size += element->GetSize().x;
   }

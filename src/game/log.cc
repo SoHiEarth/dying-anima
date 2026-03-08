@@ -1,6 +1,8 @@
 #include "game/log.h"
 
 #include <chrono>
+#include <iomanip>
+#include <sstream>
 #include <pugixml.hpp>
 #define LOG_FILE "player_log.xml"
 
@@ -8,7 +10,18 @@ void game::Log::NewLog(const LogEntry& entry) {
   auto now = std::chrono::system_clock::now();
   auto now_c = std::chrono::system_clock::to_time_t(now);
   LogEntry new_entry = entry;
-  new_entry.timestamp = std::ctime(&now_c);
+
+  std::tm tm_buf;
+#ifdef _WIN32
+  localtime_s(&tm_buf, &now_c);
+#else
+  localtime_r(&now_c, &tm_buf);
+#endif
+
+  std::ostringstream oss;
+  oss << std::put_time(&tm_buf, "%c");
+  new_entry.timestamp = oss.str();
+
   log.push_back(new_entry);
 }
 

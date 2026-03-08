@@ -16,8 +16,8 @@ struct Scene {
   virtual ~Scene() = default;
   virtual void Init() {}
   virtual void Quit() {}
-  virtual void Update(double dt) {}
-  virtual void Render(GameWindow& window) {}
+  virtual void Update(double /* dt */) {}
+  virtual void Render(GameWindow& /* window */) {}
   virtual bool IsTransparent() { return false; };
 
  protected:

@@ -21,9 +21,6 @@ entt::registry LoadLevel(std::string_view filename) {
   }
   auto registry = entt::registry{};
   auto root = doc.child("Level");
-  int object_count = std::distance(root.children("Object").begin(),
-                                   root.children("Object").end());
-  printf("Loading level with %d objects\n", object_count);
   for (auto object_node : root.children("Object")) {
     auto entity = registry.create();
     {
@@ -48,7 +45,6 @@ entt::registry LoadLevel(std::string_view filename) {
         auto& physics = registry.emplace<PhysicsBody>(entity);
         auto& transform = registry.get<Transform>(entity);
         bool is_dynamic = physics_node.attribute("is_dynamic").as_bool();
-        bool is_chained = physics_node.attribute("is_chained").as_bool();
         if (physics::WorldValid()) {
           physics.body = physics::CreateBody(transform, is_dynamic);
         }
@@ -169,9 +165,6 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
       object_node.append_child("PlayerSpawn");
     }
   }
-  int object_count = std::distance(root.children("Object").begin(),
-                                   root.children("Object").end());
-  printf("Saving level with %d objects\n", object_count);
   if (!doc.save_file(filename.data())) {
     std::print("Failed to save level file: {}\n", filename);
   }

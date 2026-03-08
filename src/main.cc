@@ -35,7 +35,6 @@ void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {
 }
 
 int main() {
-  AppState game_state = AppState::MENU;
   if (!glfwInit()) {
     std::print("Failed to initialize GLFW\n");
     return -1;

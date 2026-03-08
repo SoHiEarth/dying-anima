@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 
 struct PlayerDamager {
-  int damage = 5.0f;
+  float damage = 5.0f;
   float hitbox_radius = 0.5f;
   float knockback = 1.0f;
   glm::vec2 knockback_direction = glm::vec2(1.0f, 0.0f);

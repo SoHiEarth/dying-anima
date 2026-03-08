@@ -43,13 +43,6 @@ void GameScene::Init() {
   registry = LoadLevel("level.txt");
   player = registry.create();
   auto& player_transform = registry.emplace<Transform>(player);
-  // find a spawn point
-  auto view = registry.view<PlayerSpawn>();
-  for (auto entity : view) {
-    auto& spawn_transform = registry.get<Transform>(entity);
-    player_transform.position = spawn_transform.position;
-    break;  // Just take the first spawn point we find
-  }
   registry.emplace<PlayerSpeed>(player);
   auto& player_health = registry.emplace<Health>(player, 100.0f);
   player_body = registry
@@ -99,7 +92,7 @@ void GameScene::Quit() {
 
 void GameScene::Update(double dt) {
   auto& player_speed = registry.get<PlayerSpeed>(player);
-  auto& player_body = registry.get<PhysicsBody>(player).body;
+  player_body = registry.get<PhysicsBody>(player).body;
 
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
     scene_manager.PushScene(std::make_unique<PauseScene>(scene_manager));
@@ -164,11 +157,11 @@ void GameScene::Update(double dt) {
     physics_accumulator -= physics_time_step;
   }
   auto physics_view = registry.view<Transform, PhysicsBody>();
-  physics_view.each(
-      [](auto entity, Transform& transform, PhysicsBody& physicsBody) {
+  physics_view.each([](auto /* entity */, Transform & transform,
+                       PhysicsBody & physicsBody) {
         physics::SyncPosition(physicsBody.body, transform.position);
       });
-  game::UpdatePlayerDamagers(registry, dt);
+  game::UpdatePlayerDamagers(registry, (float)dt);
 }
 
 void GameScene::Render(GameWindow& window) {

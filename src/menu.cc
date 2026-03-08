@@ -40,9 +40,7 @@ void MenuScene::Init() {
   text_shader->Use();
   text_shader->SetUniform("character", 0);
 #ifndef NDEBUG
-  auto editor_label =
-      menu_layout
-          .AddElement(std::make_unique<ui::Button>(
+  menu_layout.AddElement(std::make_unique<ui::Button>(
               "Editor", font,
               [this]() {
                 scene_manager.PushScene(
@@ -50,27 +48,23 @@ void MenuScene::Init() {
               }))
           ->size.y = LABEL_SIZE_Y;
 #endif
-  auto exit_label =
-      menu_layout
-          .AddElement(std::make_unique<ui::Button>(
+  menu_layout.AddElement(std::make_unique<ui::Button>(
               "Exit", font, [this]() { scene_manager.PopScene(); }))
           ->size.y = LABEL_SIZE_Y;
-  auto play_label = menu_layout
-                        .AddElement(std::make_unique<ui::Button>(
+  menu_layout.AddElement(std::make_unique<ui::Button>(
                             "Play", font,
                             [this]() {
                               scene_manager.PushScene(
                                   std::make_unique<GameScene>(scene_manager));
                             }))
                         ->size.y = LABEL_SIZE_Y;
-  auto title =
-      menu_layout.AddElement(std::make_unique<ui::Label>("Dying Anima", font))
+  menu_layout.AddElement(std::make_unique<ui::Label>("Dying Anima", font))
           ->size.y = LABEL_SIZE_Y * 2;
   menu_layout.SetSpacing(LABEL_SIZE_Y);
 }
 
 int focus_index = 0;
-void MenuScene::Update(double dt) {
+void MenuScene::Update(double /* dt */) {
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
     scene_manager.PopScene();
   }

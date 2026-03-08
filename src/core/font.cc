@@ -171,8 +171,6 @@ void Font::RenderUI(std::string_view text, const glm::vec2& position,
       last_vp * glm::translate(glm::mat4(1.0f), glm::vec3(position, 0.0f)));
   glActiveTexture(GL_TEXTURE0);
   glBindVertexArray(vertex_attrib);
-  float total_width = GetWidth(text) * scale.x;
-  float total_height = GetHeight(text) * scale.y;
   float x_pos = 0;
   float y_pos = 0;
   for (const char& c : text) {

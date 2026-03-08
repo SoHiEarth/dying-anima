@@ -27,24 +27,23 @@ void PauseScene::Init() {
   layout->SetSpacing(20);
   layout->SetPadding(20, 20, 20, 20);
 #ifndef NDEBUG
-  auto level_editor_button = layout->AddElement(
+  layout->AddElement(
       std::make_unique<ui::Button>("Level Editor", ui_font, [this]() {
         scene_manager.PopScene();
         scene_manager.PopScene();  // Pop the game scene
         scene_manager.PushScene(std::make_unique<LevelEditor>(scene_manager));
       }));
 #endif
-  auto exit_button =
-      layout->AddElement(std::make_unique<ui::Button>("Exit", ui_font, []() {
+  layout->AddElement(std::make_unique<ui::Button>("Exit", ui_font, []() {
         glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
       }));
-  auto menu_button = layout->AddElement(
+  layout->AddElement(
       std::make_unique<ui::Button>("Menu", ui_font, [this]() {
         scene_manager.PopScene();
         scene_manager.PopScene();  // Pop the game scene
         scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
       }));
-  auto resume_button = layout->AddElement(std::make_unique<ui::Button>(
+  layout->AddElement(std::make_unique<ui::Button>(
       "Resume", ui_font, [this]() { scene_manager.PopScene(); }));
   layout->AddElement(std::make_unique<ui::Label>("PAUSED", title_font));
 }
@@ -78,8 +77,5 @@ void PauseScene::Render(GameWindow& window) {
   pause_rect_2.scale = {window.width / 3.0f, window.height};
   pause_rect_2.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.7f);
   pause_rect_2.Render(rect_shader);
-
-  int x_pos = 30 * (std::min(time_since_open, anim_full_time) / anim_full_time);
-  int y_pos = window.height / 2 + 100;
   layout->Render(text_shader, rect_shader);
 }

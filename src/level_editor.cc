@@ -50,7 +50,8 @@ glm::vec2 ScreenToWorld(const glm::vec2& screen_pos, const Camera& camera,
   return world_pos;
 }
 
-void MouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+void MouseScrollCallback(GLFWwindow* /* window */, double /* xoffset */,
+                         double yoffset) {
   if (!core::input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
     return;
   }
@@ -87,8 +88,7 @@ bool ObjectExistsAtPosition(const glm::vec2& position,
 }
 
 entt::entity GetEntityAtPosition(const glm::vec2& position,
-                                 entt::registry& registry,
-                                 entt::entity spotlight) {
+                                 entt::registry& registry) {
   auto view = registry.view<Transform>();
   for (auto entity : view) {
     if (entity == spotlight) continue;
@@ -159,7 +159,7 @@ void LevelEditor::Quit() {
   }
 }
 
-void LevelEditor::Update(double dt) {
+void LevelEditor::Update(double /* dt */) {
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
     // add menu
     scene_manager.PopScene();
@@ -183,7 +183,7 @@ void LevelEditor::Update(double dt) {
       spotlight = registry.create();
     }
     if (!registry.any_of<Transform>(spotlight)) {
-      auto& transform = registry.emplace<Transform>(spotlight);
+      registry.emplace<Transform>(spotlight);
     }
     if (!registry.any_of<Light>(spotlight)) {
       registry.emplace<Light>(spotlight);
@@ -208,9 +208,9 @@ void LevelEditor::Update(double dt) {
   world_pos.x = std::floor(world_pos.x) + 0.5f;
   world_pos.y = std::floor(world_pos.y) + 0.5f;
   if (core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_MIDDLE)) {
-    GetCamera().position.x += (last_mouse_position.x - mouse_position.x) /
+    GetCamera().position.x += (float)(last_mouse_position.x - mouse_position.x) /
                               GetGameWindow().GetPixelsPerUnit();
-    GetCamera().position.y -= (last_mouse_position.y - mouse_position.y) /
+    GetCamera().position.y -= (float)(last_mouse_position.y - mouse_position.y) /
                               GetGameWindow().GetPixelsPerUnit();
   }
   if (core::input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
@@ -222,7 +222,7 @@ void LevelEditor::Update(double dt) {
       }
       if (current_tool == Toolkit::SELECT) {
         if (ObjectExistsAtPosition(world_pos, registry)) {
-          selected_entity = GetEntityAtPosition(world_pos, registry, spotlight);
+          selected_entity = GetEntityAtPosition(world_pos, registry);
         } else {
           auto entity = registry.create();
           auto& transform = registry.emplace<Transform>(entity);
@@ -239,7 +239,7 @@ void LevelEditor::Update(double dt) {
         }
       }
     } else if (core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
-      auto entity = GetEntityAtPosition(world_pos, registry, spotlight);
+      auto entity = GetEntityAtPosition(world_pos, registry);
       if (entity != entt::null) {
         registry.destroy(entity);
         if (selected_entity == entity) {
@@ -329,7 +329,6 @@ void LevelEditor::Render(GameWindow& window) {
     if (ImGui::CollapsingHeader("Lights")) {
       int i = 0;
       for (auto entity : registry.view<Light>()) {
-        auto& light = registry.get<Light>(entity);
         i++;
         if (ImGui::Button(std::format("Select Light #{}", i).c_str())) {
           selected_entity = entity;
@@ -342,9 +341,8 @@ void LevelEditor::Render(GameWindow& window) {
     if (ImGui::Button("Add Physics Bodies to All Transforms")) {
       for (auto entity : registry.view<Transform>()) {
         if (!registry.any_of<PhysicsBody>(entity)) {
-          auto& transform = registry.get<Transform>(entity);
-          registry.emplace<PhysicsBody>(entity);  // Do not add b2BodyId because
-                                                  // b2World is not initialized
+          registry.emplace<PhysicsBody>(entity);
+          // Do not add b2BodyId because b2World is not initialized
         }
       }
     }
@@ -408,7 +406,7 @@ void LevelEditor::Render(GameWindow& window) {
 
       if (registry.any_of<PlayerDamager>(selected_entity)) {
         auto& damager = registry.get<PlayerDamager>(selected_entity);
-        ImGui::DragInt("Damage", &damager.damage, 1.0f, 0);
+        ImGui::DragFloat("Damage", &damager.damage, 1.0f, 0);
         ImGui::DragFloat("Hitbox Radius", &damager.hitbox_radius, 0.1f, 0.0f);
         ImGui::DragFloat("Knockback", &damager.knockback, 0.1f, 0.0f);
         ImGui::DragFloat2("Knockback Direction",

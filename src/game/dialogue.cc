@@ -70,7 +70,7 @@ void Game::RenderDialogue(DialogueData& dialogue) {
   if (dialogue.state.current_line >= dialogue.data.size()) {
     std::print(
         "Warn: Dialogue current_line out of bounds, setting to last line\n");
-    dialogue.state.current_line = dialogue.data.size() - 1;
+    dialogue.state.current_line = (int)dialogue.data.size() - 1;
   }
   auto& window = GetGameWindow();
   window.SetProjection(ProjectionType::SCREEN_SPACE);

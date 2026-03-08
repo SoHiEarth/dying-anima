@@ -4,7 +4,7 @@
 #include "ui/elements.h"
 
 void ui::Button::Update(const glm::ivec2& mouse_pos, bool mouse_pressed) {
-  size.x = font->GetWidth(text) * font->GetWidthScale(text, size.y);
+  size.x = font->GetWidth(text) * (int)font->GetWidthScale(text, (float)size.y);
   if (IsHovered(mouse_pos)) {
     hovered = true;
     if (mouse_pressed && on_click) {
@@ -27,7 +27,7 @@ void ui::Button::Render(const std::shared_ptr<Shader> text_shader,
   }
 
   if (text_shader && font) {
-    font->RenderUIAtHeight(text, GetPosition(), size.y, {1.0f, 1.0f, 1.0f},
+    font->RenderUIAtHeight(text, GetPosition(), (float)size.y, {1.0f, 1.0f, 1.0f},
                            text_shader);
   }
 }

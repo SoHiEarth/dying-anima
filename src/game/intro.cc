@@ -42,7 +42,7 @@ void IntroScene::Update(double dt) {
     character_index++;
     timer = 0.0f;
     if (character_index > intro_text[text_index].size()) {
-      character_index = intro_text[text_index].size();
+      character_index = (int)intro_text[text_index].size();
     }
     current_text = intro_text[text_index].substr(0, character_index);
   }

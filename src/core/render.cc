@@ -85,7 +85,7 @@ void render::Render(entt::registry& registry) {
   auto view = GetCamera().GetView();
   glm::mat4 projection = GetGameWindow().GetProjection();
   auto light_view = registry.view<Transform, Light>();
-  int i = 0;
+  int light_count = 0;
   for (auto entity : light_view) {
     auto [transform, light] = light_view.get<Transform, Light>(entity);
     glm::vec3 light_world_pos = glm::vec3(transform.position, 1.0f);
@@ -93,23 +93,23 @@ void render::Render(entt::registry& registry) {
         projection * view * glm::vec4(light_world_pos, 1.0f);
     glm::vec2 light_texcoord =
         ((glm::vec2(light_clip_pos) / light_clip_pos.w) + 1.0f) * 0.5f;
-    deferred_shader->SetUniform("lights[" + std::to_string(i) + "].position",
+    deferred_shader->SetUniform("lights[" + std::to_string(light_count) + "].position",
                                 light_texcoord);
-    deferred_shader->SetUniform("lights[" + std::to_string(i) + "].type",
+    deferred_shader->SetUniform("lights[" + std::to_string(light_count) + "].type",
                                 static_cast<int>(light.type));
-    deferred_shader->SetUniform("lights[" + std::to_string(i) + "].intensity",
+    deferred_shader->SetUniform("lights[" + std::to_string(light_count) + "].intensity",
                                 light.intensity);
     deferred_shader->SetUniform(
-        "lights[" + std::to_string(i) + "].radial_falloff",
+        "lights[" + std::to_string(light_count) + "].radial_falloff",
         light.radial_falloff);
     deferred_shader->SetUniform(
-        "lights[" + std::to_string(i) + "].volumetric_intensity",
+        "lights[" + std::to_string(light_count) + "].volumetric_intensity",
         light.volumetric_intensity);
-    deferred_shader->SetUniform("lights[" + std::to_string(i) + "].color",
+    deferred_shader->SetUniform("lights[" + std::to_string(light_count) + "].color",
                                 light.color);
-    i++;
+    light_count++;
   }
-  deferred_shader->SetUniform("light_count", static_cast<int>(i));
+  deferred_shader->SetUniform("light_count", static_cast<int>(light_count));
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, color_framebuffer->colorbuffer);
   deferred_shader->SetUniform("color_texture", 0);
