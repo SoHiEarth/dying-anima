@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <memory>
 
 #include "core/shader.h"
 
@@ -8,5 +9,5 @@ struct Rect {
   glm::vec2 position;
   glm::vec2 scale;
   glm::vec4 color;
-  void Render(const std::shared_ptr<Shader> shader);
+  void Render(const std::shared_ptr<Shader>& shader) const;
 };

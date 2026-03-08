@@ -16,5 +16,5 @@ struct MenuScene : public Scene {
   void Quit() override;
   void Update(double dt) override;
   void Render(GameWindow& window) override;
-  bool IsTransparent() { return false; };
+  bool IsTransparent() override { return false; };
 };

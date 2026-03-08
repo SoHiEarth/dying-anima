@@ -7,6 +7,8 @@
 #include "core/window.h"
 #include "util/calculate.h"
 
+using glm::vec2;
+
 DialogueData Game::LoadDialogue(std::string_view file) {
   DialogueData dialogue;
   pugi::xml_document doc;
@@ -21,7 +23,7 @@ DialogueData Game::LoadDialogue(std::string_view file) {
         ResourceManager::GetTexture(character.attribute("texture").as_string())
             .texture;
     for (const auto& line : character.children("line")) {
-      meta.dialogue_lines.push_back(line.text().as_string());
+      meta.dialogue_lines.emplace_back(line.text().as_string());
     }
     dialogue.data.push_back(std::move(meta));
   }
@@ -67,25 +69,25 @@ void Game::RenderDialogue(DialogueData& dialogue) {
     rect_shader = ResourceManager::GetShader("rect").shader;
   }
   if (dialogue.data.empty()) return;
-  if (dialogue.state.current_line >= dialogue.data.size()) {
+  if (dialogue.state.current_line >= static_cast<int>(dialogue.data.size())) {
     std::print(
         "Warn: Dialogue current_line out of bounds, setting to last line\n");
-    dialogue.state.current_line = (int)dialogue.data.size() - 1;
+    dialogue.state.current_line = static_cast<int>(dialogue.data.size()) - 1;
   }
   auto& window = GetGameWindow();
   window.SetProjection(ProjectionType::SCREEN_SPACE);
-  GetCamera().SetType(CameraType::UI);
+  GetCamera().SetType(CameraType::kUi);
   auto meta = dialogue.data.at(dialogue.state.current_line);
   if (meta.character_image) {
     meta.character_image->Render(
         texture_shader,
-        CalculateModelMatrix(glm::vec2{50.0f, window.height * 0.25f}, 0.0f,
-                             glm::vec2(100.0f, 100.0f)));
+        CalculateModelMatrix(glm::vec2{50.0F, window.height * 0.25F}, 0.0F,
+                             glm::vec2(100.0F, 100.0F)));
   }
-  font->RenderUI(meta.character_name, glm::vec2{200.0f, window.height * 0.15f},
-                 glm::vec2(1.0f), glm::vec3(1.0f), font_shader);
+  font->RenderUI(meta.character_name, glm::vec2{200.0F, window.height * 0.15F},
+                 vec2(1.0F), glm::vec3(1.0F), font_shader);
   for (auto& line : meta.dialogue_lines) {
-    font->RenderUI(line, glm::vec2{200.0f, window.height * 0.25f},
-                   glm::vec2(1.0f), glm::vec3(1.0f), font_shader);
+    font->RenderUI(line, glm::vec2{200.0F, window.height * 0.25F},
+                   glm::vec2(1.0F), glm::vec3(1.0F), font_shader);
   }
 }

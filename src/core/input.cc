@@ -8,7 +8,7 @@ std::map<int, bool> core::input::states{}, core::input::last_frame_states{};
 bool core::input::IsKeyPressed(int key) { return states.at(key); }
 
 bool core::input::IsKeyPressedThisFrame(int key) {
-  if (last_frame_states.find(key) == last_frame_states.end()) {
+  if (!last_frame_states.contains(key)) {
     return states.at(key);
   }
   return states.at(key) && !last_frame_states.at(key);

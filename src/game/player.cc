@@ -27,8 +27,5 @@ bool IsOnGround(b2BodyId body) {
 // Testing new implementation
 bool IsOnGround(b2BodyId body) {
   auto velocity = b2Body_GetLinearVelocity(body);
-  if (velocity.y == 0) {
-    return true;
-  }
-  return false;
+  return velocity.y == 0;
 }

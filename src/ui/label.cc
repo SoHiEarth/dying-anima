@@ -1,19 +1,15 @@
 #include "ui/elements.h"
 
 void ui::Label::Update(const glm::ivec2& mouse_pos, bool /* mouse_pressed */) {
-  size.x = font->GetWidth(text) * (int)font->GetWidthScale(text, (float)size.y);
-  if (IsHovered(mouse_pos)) {
-    hovered = true;
-  } else {
-    hovered = false;
-  }
+  size.x = font_->GetWidth(text_) * static_cast<int>(font_->GetWidthScale(text_, static_cast<float>(size.y)));
+  hovered_ = IsHovered(mouse_pos);
 }
 
 void ui::Label::Render(const std::shared_ptr<Shader> text_shader,
                        const std::shared_ptr<Shader> /* rect_shader */) {
-  if (font) {
-    font->RenderUIAtHeight(text, position, (float)size.y,
-                           hovered ? color * 1.2f : color, text_shader);
+  if (font_) {
+    font_->RenderUIAtHeight(text_, position, static_cast<float>(size.y),
+                           hovered_ ? color_ * 1.2F : color_, text_shader);
   }
 }
 

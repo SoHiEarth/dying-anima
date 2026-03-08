@@ -5,7 +5,7 @@ b2WorldId physics::world;
 
 void physics::Init(const glm::vec2& gravity) {
   b2WorldDef world_def = b2DefaultWorldDef();
-  world_def.gravity = {gravity.x, gravity.y};
+  world_def.gravity = {.x=gravity.x, .y=gravity.y};
   world = b2CreateWorld(&world_def);
 }
 
@@ -14,7 +14,7 @@ void physics::SetGravity(const glm::vec2& gravity) {
 }
 
 #define GRACE_SCALE 0.025f
-#define SCALE_MULTIPLIER 1.0f - GRACE_SCALE
+#define SCALE_MULTIPLIER (1.0f - GRACE_SCALE)
 b2BodyId physics::CreateBody(const glm::vec2& position, const glm::vec2& scale,
                              float angle, bool is_dynamic) {
   auto body_def = b2DefaultBodyDef();
@@ -23,12 +23,12 @@ b2BodyId physics::CreateBody(const glm::vec2& position, const glm::vec2& scale,
   } else {
     body_def.type = b2_staticBody;
   }
-  body_def.position = {position.x, position.y};
+  body_def.position = {.x=position.x, .y=position.y};
   body_def.rotation = b2MakeRot(angle);
   body_def.fixedRotation = true;
   auto body = b2CreateBody(world, &body_def);
-  auto shape = b2MakeBox((scale.x / 2.0f) * SCALE_MULTIPLIER,
-                         (scale.y / 2.0f) * SCALE_MULTIPLIER);
+  auto shape = b2MakeBox((scale.x / 2.0F) * SCALE_MULTIPLIER,
+                         (scale.y / 2.0F) * SCALE_MULTIPLIER);
   auto shape_def = b2DefaultShapeDef();
   shape_def.density = 1.0F;
   shape_def.material.friction = 0.0F;
@@ -46,7 +46,8 @@ b2BodyId physics::CreateChainBody(const std::vector<glm::vec2>& vertices) {
   body_def.type = b2_staticBody;
   auto body = b2CreateBody(world, &body_def);
   std::vector<b2Vec2> b2_vertices;
-  for (const auto& vertex : vertices) {
+  b2_vertices.reserve(vertices.size());
+for (const auto& vertex : vertices) {
     b2_vertices.push_back({vertex.x, vertex.y});
   }
 

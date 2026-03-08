@@ -24,8 +24,8 @@ glm::mat4 CalculateModelMatrix(const glm::vec2& position, float rotation,
   }
   */
 
-  glm::mat4 model(1.0f);
-  if (rotation != 0.0f) {
+  glm::mat4 model(1.0F);
+  if (rotation != 0.0F) {
     float r = glm::radians(rotation);
     float c = std::cos(r);
     float s = std::sin(r);
@@ -56,8 +56,8 @@ glm::mat4 CalculateModelMatrix(const glm::vec2& position, float z_index,
   }
   */
 
-  glm::mat4 model(1.0f);
-  if (rotation != 0.0f) {
+  glm::mat4 model(1.0F);
+  if (rotation != 0.0F) {
     float r = glm::radians(rotation);
     float c = std::cos(r);
     float s = std::sin(r);

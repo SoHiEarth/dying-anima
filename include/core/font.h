@@ -24,15 +24,15 @@ struct Font {
   // For compatibility, scale is glm::vec2(1.0f)
   void Render(std::string_view text, const glm::vec2& position,
               const glm::vec3& color,
-              const std::shared_ptr<Shader> shader) const;
+              const std::shared_ptr<Shader>& shader) const;
   void Render(std::string_view text, const glm::vec2& position,
               const glm::vec2& scale, const glm::vec3& color,
-              const std::shared_ptr<Shader> shader) const;
+              const std::shared_ptr<Shader>& shader) const;
   void RenderUI(std::string_view text, const glm::vec2& position,
                 const glm::vec2& scale, const glm::vec3& color,
-                const std::shared_ptr<Shader> shader) const;
+                const std::shared_ptr<Shader>& shader) const;
   // Render with exact pixel height (width scales proportionally)
   void RenderUIAtHeight(std::string_view text, const glm::vec2& position,
                         float height_pixels, const glm::vec3& color,
-                        const std::shared_ptr<Shader> shader) const;
+                        const std::shared_ptr<Shader>& shader) const;
 };

@@ -16,7 +16,7 @@ void Quit();
 void Render(entt::registry& registry);
 void RecreateFramebuffers(int width, int height);
 std::shared_ptr<Framebuffer> CreateFramebuffer(int width, int height);
-void BindFramebuffer(std::shared_ptr<Framebuffer> framebuffer);
+void BindFramebuffer(const std::shared_ptr<Framebuffer>& framebuffer);
 void UnbindFramebuffer();
 void DeleteFramebuffer(std::shared_ptr<Framebuffer> framebuffer);
 extern float exposure;

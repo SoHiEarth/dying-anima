@@ -5,6 +5,7 @@
 #include <ft2build.h>
 #include <stb_image.h>
 
+#include <algorithm>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -12,26 +13,21 @@
 #include "menu.h"
 #include FT_FREETYPE_H
 
-#include <algorithm>
-
 #include "core/atlas.h"
 #include "core/camera.h"
-#include "core/font.h"
 #include "core/input.h"
-#include "core/quad.h"
 #include "core/resource_manager.h"
-#include "core/shader.h"
 #include "core/state.h"
-#include "core/texture.h"
 #include "core/window.h"
 #include "game/game.h"
 #include "game/intro.h"
 #include "game/progression.h"
 #include "level_editor.h"
 #include "ui/elements.h"
-#include "util/calculate.h"
-constexpr int LABEL_SIZE_Y = 36;
-
+constexpr int kLabelSizeY = 36;
+namespace {
+int focus_index = 0;
+}
 void MenuScene::Init() {
   glfwSwapInterval(1);  // Save resources
   font = ResourceManager::GetFont("menu.ui").font;
@@ -40,30 +36,31 @@ void MenuScene::Init() {
   text_shader->Use();
   text_shader->SetUniform("character", 0);
 #ifndef NDEBUG
-  menu_layout.AddElement(std::make_unique<ui::Button>(
-              "Editor", font,
-              [this]() {
-                scene_manager.PushScene(
-                    std::make_unique<LevelEditor>(scene_manager));
-              }))
-          ->size.y = LABEL_SIZE_Y;
+  menu_layout
+      .AddElement(std::make_unique<ui::Button>(
+          "Editor", font,
+          [this]() {
+            scene_manager.PushScene(
+                std::make_unique<LevelEditor>(scene_manager));
+          }))
+      ->size.y = kLabelSizeY;
 #endif
-  menu_layout.AddElement(std::make_unique<ui::Button>(
-              "Exit", font, [this]() { scene_manager.PopScene(); }))
-          ->size.y = LABEL_SIZE_Y;
-  menu_layout.AddElement(std::make_unique<ui::Button>(
-                            "Play", font,
-                            [this]() {
-                              scene_manager.PushScene(
-                                  std::make_unique<GameScene>(scene_manager));
-                            }))
-                        ->size.y = LABEL_SIZE_Y;
+  menu_layout
+      .AddElement(std::make_unique<ui::Button>(
+          "Exit", font, [this]() { scene_manager.PopScene(); }))
+      ->size.y = kLabelSizeY;
+  menu_layout
+      .AddElement(std::make_unique<ui::Button>(
+          "Play", font,
+          [this]() {
+            scene_manager.PushScene(std::make_unique<GameScene>(scene_manager));
+          }))
+      ->size.y = kLabelSizeY;
   menu_layout.AddElement(std::make_unique<ui::Label>("Dying Anima", font))
-          ->size.y = LABEL_SIZE_Y * 2;
-  menu_layout.SetSpacing(LABEL_SIZE_Y);
+      ->size.y = kLabelSizeY * 2;
+  menu_layout.SetSpacing(kLabelSizeY);
 }
 
-int focus_index = 0;
 void MenuScene::Update(double /* dt */) {
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
     scene_manager.PopScene();
@@ -73,19 +70,21 @@ void MenuScene::Update(double /* dt */) {
       case AppState::PLAYING:
         scene_manager.PopScene();
         scene_manager.PushScene(std::make_unique<GameScene>(scene_manager));
-        if (std::find(game::save_data.completion_markers.begin(),
-                      game::save_data.completion_markers.end(),
-                      Progression::INTRO_COMPLETE_MARKER) ==
+        if (std::ranges::find(game::save_data.completion_markers,
+
+                              Progression::INTRO_COMPLETE_MARKER) ==
             game::save_data.completion_markers.end()) {
           scene_manager.PushScene(std::make_unique<IntroScene>(scene_manager));
         }
         break;
       case AppState::EXIT:
-        glfwSetWindowShouldClose(GetGameWindow().window, true);
+        glfwSetWindowShouldClose(GetGameWindow().window, 1);
         break;
       case AppState::LEVEL_EDITOR:
         scene_manager.PopScene();
         scene_manager.PushScene(std::make_unique<LevelEditor>(scene_manager));
+        break;
+      default:
         break;
     }
   }
@@ -110,7 +109,7 @@ void MenuScene::Update(double /* dt */) {
 
 void MenuScene::Render(GameWindow& window) {
   window.SetProjection(ProjectionType::SCREEN_SPACE);
-  GetCamera().SetType(CameraType::UI);
+  GetCamera().SetType(CameraType::kUi);
   menu_layout.Render(text_shader, rect_shader);
 }
 

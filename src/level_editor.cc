@@ -28,9 +28,9 @@
 #include "tinyfiledialogs/tinyfiledialogs.h"
 #include "util/calculate.h"
 
-enum class Toolkit { SELECT, MOVE };
-
-Toolkit current_tool = Toolkit::SELECT;
+enum class Toolkit { kSelect, kMove };
+namespace {
+Toolkit current_tool = Toolkit::kSelect;
 entt::entity selected_entity = entt::null;
 glm::dvec2 mouse_position, last_mouse_position;
 std::string current_scene_path;
@@ -38,35 +38,35 @@ entt::entity spotlight = entt::null;
 bool enable_spotlight = false;
 bool enable_grid = true;
 
-glm::vec2 ScreenToWorld(const glm::vec2& screen_pos, const Camera& camera,
-                        const GameWindow& window) {
+glm::vec2 ScreenToWorld(const glm::vec2& screen_pos,
+                               const Camera& camera, const GameWindow& window) {
   float ppu = window.GetPixelsPerUnit();
   int width = window.width;
   int height = window.height;
   glm::vec2 centered_screen =
-      screen_pos - glm::vec2(width / 2.0f, height / 2.0f);
+      screen_pos - glm::vec2(width / 2.0F, height / 2.0F);
   centered_screen.y = -centered_screen.y;
   glm::vec2 world_pos = centered_screen / ppu + camera.position;
   return world_pos;
 }
 
 void MouseScrollCallback(GLFWwindow* /* window */, double /* xoffset */,
-                         double yoffset) {
+                                double yoffset) {
   if (!core::input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
     return;
   }
   GetGameWindow().SetPixelsPerUnit(GetGameWindow().GetPixelsPerUnit() +
-                                   (float)yoffset);
-  if (GetGameWindow().GetPixelsPerUnit() < 10.0f) {
-    GetGameWindow().SetPixelsPerUnit(10.0f);
+                                   static_cast<float>(yoffset));
+  if (GetGameWindow().GetPixelsPerUnit() < 10.0F) {
+    GetGameWindow().SetPixelsPerUnit(10.0F);
   }
-  if (GetGameWindow().GetPixelsPerUnit() > 500.0f) {
-    GetGameWindow().SetPixelsPerUnit(500.0f);
+  if (GetGameWindow().GetPixelsPerUnit() > 500.0F) {
+    GetGameWindow().SetPixelsPerUnit(500.0F);
   }
 }
 
 bool PointInRect(const glm::vec2& point, const Transform& transform) {
-  glm::vec2 half_scale = transform.scale * 0.5f;
+  glm::vec2 half_scale = transform.scale * 0.5F;
   glm::vec2 min = transform.position - half_scale;
   glm::vec2 max = transform.position + half_scale;
   return (point.x >= min.x && point.x <= max.x && point.y >= min.y &&
@@ -74,21 +74,19 @@ bool PointInRect(const glm::vec2& point, const Transform& transform) {
 }
 
 bool ObjectExistsAtPosition(const glm::vec2& position,
-                            entt::registry& registry) {
-  auto view = registry.view<Transform>();
-  for (auto entity : view) {
-    if (entity != spotlight) {
-      const auto& transform = view.get<Transform>(entity);
-      if (PointInRect(position, transform)) {
-        return true;
-      }
+                                   entt::registry& registry) {
+  auto view = registry.view<const Transform>();
+  return std::ranges::any_of(view.each(), [&](const auto& entity_transform) {
+    auto [entity, transform] = entity_transform;
+    if (entity == spotlight) {
+      return false;
     }
-  }
-  return false;
+    return PointInRect(position, transform);
+  });
 }
 
 entt::entity GetEntityAtPosition(const glm::vec2& position,
-                                 entt::registry& registry) {
+                                        entt::registry& registry) {
   auto view = registry.view<Transform>();
   for (auto entity : view) {
     if (entity == spotlight) continue;
@@ -101,43 +99,44 @@ entt::entity GetEntityAtPosition(const glm::vec2& position,
 }
 
 void DrawGrid(GameWindow& window, Camera& camera,
-              std::shared_ptr<Shader> shader) {
-  float lineThickness = 1 / window.GetPixelsPerUnit();
-  float halfWidth = (window.width / window.GetPixelsPerUnit()) / 2.0f;
-  float halfHeight = (window.height / window.GetPixelsPerUnit()) / 2.0f;
-  float left = camera.position.x - halfWidth;
-  float right = camera.position.x + halfWidth;
-  float bottom = camera.position.y - halfHeight;
-  float top = camera.position.y + halfHeight;
-  float startX = floor(left);
-  float startY = floor(bottom);
+                     const std::shared_ptr<Shader>& shader) {
+  float line_thickness = 1 / window.GetPixelsPerUnit();
+  float half_width = (window.width / window.GetPixelsPerUnit()) / 2.0F;
+  float half_height = (window.height / window.GetPixelsPerUnit()) / 2.0F;
+  float left = camera.position.x - half_width;
+  float right = camera.position.x + half_width;
+  float bottom = camera.position.y - half_height;
+  float top = camera.position.y + half_height;
+  float start_x = floor(left);
+  float start_y = floor(bottom);
 
-  for (float x = startX; x <= right; x++) {
+  for (float x = start_x; x <= right; x++) {
     Rect line(glm::vec2(x, camera.position.y),
-              glm::vec2(lineThickness, window.height),
-              glm::vec4(0.3f, 0.3f, 0.3f, 1.0f));
+              glm::vec2(line_thickness, window.height),
+              glm::vec4(0.3F, 0.3F, 0.3F, 1.0F));
     line.Render(shader);
   }
-  for (float y = startY; y <= top; y++) {
+  for (float y = start_y; y <= top; y++) {
     Rect line(glm::vec2(camera.position.x, y),
-              glm::vec2(window.width, lineThickness),
-              glm::vec4(0.3f, 0.3f, 0.3f, 1.0f));
+              glm::vec2(window.width, line_thickness),
+              glm::vec4(0.3F, 0.3F, 0.3F, 1.0F));
     line.Render(shader);
   }
 
   // Origin
-  Rect xAxis(glm::vec2(0.0f, camera.position.y),
-             glm::vec2(lineThickness * 2.0f, window.height),
-             glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-  xAxis.Render(shader);
-  Rect yAxis(glm::vec2(camera.position.x, 0.0f),
-             glm::vec2(window.width, lineThickness * 2.0f),
-             glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-  yAxis.Render(shader);
+  Rect x_axis(glm::vec2(0.0F, camera.position.y),
+              glm::vec2(line_thickness * 2.0F, window.height),
+              glm::vec4(1.0F, 0.0F, 0.0F, 1.0F));
+  x_axis.Render(shader);
+  Rect y_axis(glm::vec2(camera.position.x, 0.0F),
+              glm::vec2(window.width, line_thickness * 2.0F),
+              glm::vec4(0.0F, 1.0F, 0.0F, 1.0F));
+  y_axis.Render(shader);
 }
+}  // namespace
 
 void LevelEditor::Init() {
-  auto level_path =
+  auto* level_path =
       tinyfd_openFileDialog("Open Scene", "", 0, nullptr, nullptr, 0);
   if (level_path) {
     current_scene_path = level_path;
@@ -150,7 +149,7 @@ void LevelEditor::Init() {
 
 void LevelEditor::Quit() {
   if (current_scene_path.empty()) {
-    auto level =
+    auto* level =
         tinyfd_saveFileDialog("Save Scene", "scene", 0, nullptr, nullptr);
     if (level) {
       current_scene_path = level;
@@ -168,7 +167,7 @@ void LevelEditor::Update(double /* dt */) {
   if (core::input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL) &&
       core::input::IsKeyPressed(GLFW_KEY_S)) {
     if (current_scene_path.empty()) {
-      auto level =
+      auto* level =
           tinyfd_saveFileDialog("Save Scene", "scene", 0, nullptr, nullptr);
       if (level) {
         current_scene_path = level;
@@ -190,10 +189,10 @@ void LevelEditor::Update(double /* dt */) {
     }
     auto& light = registry.get<Light>(spotlight);
     light.type = LightType::POINT;
-    light.color = glm::vec3(1.0f, 1.0f, 1.0f);
-    light.intensity = 1.0f;
-    light.radial_falloff = 10.0f;
-    light.volumetric_intensity = 0.25f;
+    light.color = glm::vec3(1.0F, 1.0F, 1.0F);
+    light.intensity = 1.0F;
+    light.radial_falloff = 10.0F;
+    light.volumetric_intensity = 0.25F;
   } else {
     if (registry.valid(spotlight)) {
       registry.destroy(spotlight);
@@ -205,30 +204,32 @@ void LevelEditor::Update(double /* dt */) {
   glm::vec2 world_pos =
       ScreenToWorld(mouse_position, GetCamera(), GetGameWindow());
   if (enable_spotlight) registry.get<Transform>(spotlight).position = world_pos;
-  world_pos.x = std::floor(world_pos.x) + 0.5f;
-  world_pos.y = std::floor(world_pos.y) + 0.5f;
+  world_pos.x = std::floor(world_pos.x) + 0.5F;
+  world_pos.y = std::floor(world_pos.y) + 0.5F;
   if (core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_MIDDLE)) {
-    GetCamera().position.x += (float)(last_mouse_position.x - mouse_position.x) /
-                              GetGameWindow().GetPixelsPerUnit();
-    GetCamera().position.y -= (float)(last_mouse_position.y - mouse_position.y) /
-                              GetGameWindow().GetPixelsPerUnit();
+    GetCamera().position.x +=
+        static_cast<float>(last_mouse_position.x - mouse_position.x) /
+        GetGameWindow().GetPixelsPerUnit();
+    GetCamera().position.y -=
+        static_cast<float>(last_mouse_position.y - mouse_position.y) /
+        GetGameWindow().GetPixelsPerUnit();
   }
   if (core::input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
     if (core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_LEFT)) {
-      if (selected_entity != entt::null && current_tool == Toolkit::MOVE) {
+      if (selected_entity != entt::null && current_tool == Toolkit::kMove) {
         registry.get<Transform>(selected_entity).position +=
             ScreenToWorld(mouse_position, GetCamera(), GetGameWindow()) -
             ScreenToWorld(last_mouse_position, GetCamera(), GetGameWindow());
       }
-      if (current_tool == Toolkit::SELECT) {
+      if (current_tool == Toolkit::kSelect) {
         if (ObjectExistsAtPosition(world_pos, registry)) {
           selected_entity = GetEntityAtPosition(world_pos, registry);
         } else {
           auto entity = registry.create();
           auto& transform = registry.emplace<Transform>(entity);
           transform.position = world_pos;
-          transform.scale = glm::vec2(1.0f);
-          transform.rotation = 0.0f;
+          transform.scale = glm::vec2(1.0F);
+          transform.rotation = 0.0F;
           auto& sprite = registry.emplace<Sprite>(entity);
           sprite.texture_tag = "util.notexture";
           sprite.texture =
@@ -256,7 +257,7 @@ void LevelEditor::Render(GameWindow& window) {
   ImGui::NewFrame();
 
   window.SetProjection(ProjectionType::CENTERED);
-  GetCamera().SetType(CameraType::WORLD);
+  GetCamera().SetType(CameraType::kWorld);
   render::Render(registry);
 
   auto& camera = GetCamera();
@@ -272,7 +273,7 @@ void LevelEditor::Render(GameWindow& window) {
           current_scene_path.clear();
         }
         if (ImGui::MenuItem("Open", "Ctrl+O")) {
-          auto level_path =
+          auto* level_path =
               tinyfd_openFileDialog("Open Scene", "", 0, nullptr, nullptr, 0);
           if (level_path) {
             current_scene_path = level_path;
@@ -281,8 +282,8 @@ void LevelEditor::Render(GameWindow& window) {
         }
         if (ImGui::MenuItem("Save", "Ctrl+S")) {
           if (current_scene_path.empty()) {
-            auto level = tinyfd_saveFileDialog("Save Scene", "scene", 0,
-                                               nullptr, nullptr);
+            auto* level = tinyfd_saveFileDialog("Save Scene", "scene", 0,
+                                                nullptr, nullptr);
             if (level) {
               current_scene_path = level;
               SaveLevel(current_scene_path, registry);
@@ -303,8 +304,10 @@ void LevelEditor::Render(GameWindow& window) {
     }
     // tool
     ImGui::SeparatorText("Toolkit");
-    ImGui::RadioButton("Select", (int*)&current_tool, (int)Toolkit::SELECT);
-    ImGui::RadioButton("Move", (int*)&current_tool, (int)Toolkit::MOVE);
+    ImGui::RadioButton("Select", reinterpret_cast<int*>(&current_tool),
+                       static_cast<int>(Toolkit::kSelect));
+    ImGui::RadioButton("Move", reinterpret_cast<int*>(&current_tool),
+                       static_cast<int>(Toolkit::kMove));
     ImGui::SeparatorText("Resource Manager");
     ImGui::Text("Textures:");
     if (ImGui::Button("Reload Textures")) {
@@ -313,8 +316,9 @@ void LevelEditor::Render(GameWindow& window) {
     }
     for (const auto& [key, value] : ResourceManager::texture_atlas) {
       if (ImGui::CollapsingHeader(key.c_str())) {
-        ImGui::Image(value.texture->id, ImVec2((float)value.texture->width,
-                                               (float)value.texture->height));
+        ImGui::Image(value.texture->id,
+                     ImVec2(static_cast<float>(value.texture->width),
+                            static_cast<float>(value.texture->height)));
         ImGui::Text("Dimensions: %dx%d", value.texture->width,
                     value.texture->height);
         ImGui::Text("File: %s", value.texture->path.c_str());
@@ -323,7 +327,7 @@ void LevelEditor::Render(GameWindow& window) {
     ImGui::SeparatorText("Renderer");
     ImGui::Text("Position: (%.2f, %.2f)", camera.position.x, camera.position.y);
     ImGui::Text("Window PPU: %.2f", window.GetPixelsPerUnit());
-    ImGui::Text("Camera Type: %s", camera.GetType() == CameraType::WORLD
+    ImGui::Text("Camera Type: %s", camera.GetType() == CameraType::kWorld
                                        ? "WORLD"
                                        : "SCREEN_SPACE");
     if (ImGui::CollapsingHeader("Lights")) {
@@ -352,10 +356,10 @@ void LevelEditor::Render(GameWindow& window) {
     }
     if (selected_entity != entt::null) {
       auto& transform = registry.get<Transform>(selected_entity);
-      ImGui::DragFloat2("Position", glm::value_ptr(transform.position), 0.1f);
-      ImGui::DragFloat("Z Index", &transform.z_index, 0.1f);
-      ImGui::DragFloat2("Scale", glm::value_ptr(transform.scale), 0.1f);
-      ImGui::DragFloat("Rotation", &transform.rotation, 1.0f);
+      ImGui::DragFloat2("Position", glm::value_ptr(transform.position), 0.1F);
+      ImGui::DragFloat("Z Index", &transform.z_index, 0.1F);
+      ImGui::DragFloat2("Scale", glm::value_ptr(transform.scale), 0.1F);
+      ImGui::DragFloat("Rotation", &transform.rotation, 1.0F);
       if (registry.any_of<Sprite>(selected_entity)) {
         auto& sprite = registry.get<Sprite>(selected_entity);
         if (ImGui::InputText("Color Tag", &sprite.texture_tag)) {
@@ -385,14 +389,15 @@ void LevelEditor::Render(GameWindow& window) {
       if (registry.any_of<Light>(selected_entity)) {
         if (ImGui::CollapsingHeader("Light")) {
           auto& light = registry.get<Light>(selected_entity);
-          ImGui::Combo("Light Type", (int*)&light.type, "DIRECTIONAL\0POINT\0");
+          ImGui::Combo("Light Type", reinterpret_cast<int*>(&light.type),
+                       "DIRECTIONAL\0POINT\0");
           ImGui::ColorEdit3("Light Color", glm::value_ptr(light.color));
-          ImGui::DragFloat("Light Intensity", &light.intensity, 0.1f, 0.0f);
+          ImGui::DragFloat("Light Intensity", &light.intensity, 0.1F, 0.0F);
           if (light.type == LightType::POINT) {
             ImGui::DragFloat("Light Radial Falloff", &light.radial_falloff,
-                             0.1f, 0.0f);
+                             0.1F, 0.0F);
             ImGui::DragFloat("Light Volumetric Intensity",
-                             &light.volumetric_intensity, 0.1f, 0.0f);
+                             &light.volumetric_intensity, 0.1F, 0.0F);
           }
         }
         if (ImGui::Button("Remove Light Component")) {
@@ -406,13 +411,13 @@ void LevelEditor::Render(GameWindow& window) {
 
       if (registry.any_of<PlayerDamager>(selected_entity)) {
         auto& damager = registry.get<PlayerDamager>(selected_entity);
-        ImGui::DragFloat("Damage", &damager.damage, 1.0f, 0);
-        ImGui::DragFloat("Hitbox Radius", &damager.hitbox_radius, 0.1f, 0.0f);
-        ImGui::DragFloat("Knockback", &damager.knockback, 0.1f, 0.0f);
+        ImGui::DragFloat("Damage", &damager.damage, 1.0F, 0);
+        ImGui::DragFloat("Hitbox Radius", &damager.hitbox_radius, 0.1F, 0.0F);
+        ImGui::DragFloat("Knockback", &damager.knockback, 0.1F, 0.0F);
         ImGui::DragFloat2("Knockback Direction",
-                          glm::value_ptr(damager.knockback_direction), 0.1f);
+                          glm::value_ptr(damager.knockback_direction), 0.1F);
         ImGui::DragFloat("Time Until Next Hit", &damager.time_until_next_hit,
-                         0.1f, 0.0f);
+                         0.1F, 0.0F);
         if (ImGui::Button("Remove PlayerDamager Component")) {
           registry.remove<PlayerDamager>(selected_entity);
         }

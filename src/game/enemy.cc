@@ -18,7 +18,7 @@ void game::UpdatePlayerDamagers(entt::registry& registry, float delta_time) {
         damager.accumulator += delta_time;
         if (damager.accumulator >= damager.time_until_next_hit) {
           health.health -= damager.damage;
-          damager.accumulator = 0.0f;
+          damager.accumulator = 0.0F;
         }
       }
     }

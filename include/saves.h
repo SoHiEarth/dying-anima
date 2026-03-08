@@ -13,6 +13,6 @@ struct SaveData {
 
 namespace SaveManager {
 void SaveGame(const SaveData& data);
-SaveData LoadGame(std::string_view file_name);
+SaveData LoadGame(std::string_view filename);
 SaveData LoadLatestSave();
 }  // namespace SaveManager

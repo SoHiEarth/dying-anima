@@ -1,17 +1,16 @@
-#include <print>
-
 #include "core/rect.h"
 #include "ui/elements.h"
 
 void ui::Button::Update(const glm::ivec2& mouse_pos, bool mouse_pressed) {
-  size.x = font->GetWidth(text) * (int)font->GetWidthScale(text, (float)size.y);
+  size.x = font_->GetWidth(text_) * static_cast<int>(font_->GetWidthScale(
+                                      text_, static_cast<float>(size.y)));
   if (IsHovered(mouse_pos)) {
-    hovered = true;
-    if (mouse_pressed && on_click) {
-      on_click();
+    hovered_ = true;
+    if (mouse_pressed && on_click_) {
+      on_click_();
     }
   } else {
-    hovered = false;
+    hovered_ = false;
   }
 }
 
@@ -19,16 +18,16 @@ void ui::Button::Render(const std::shared_ptr<Shader> text_shader,
                         const std::shared_ptr<Shader> rect_shader) {
   if (rect_shader) {
     Rect background;
-    background.position = {GetPosition().x + size.x / 2.0f,
-                           GetPosition().y + size.y / 2.0f};
+    background.position = {GetPosition().x + (size.x / 2.0F),
+                           GetPosition().y + (size.y / 2.0F)};
     background.scale = size;
-    background.color = {hovered ? hover_color : background_color};
+    background.color = {hovered_ ? hover_color_ : background_color_};
     background.Render(rect_shader);
   }
 
-  if (text_shader && font) {
-    font->RenderUIAtHeight(text, GetPosition(), (float)size.y, {1.0f, 1.0f, 1.0f},
-                           text_shader);
+  if (text_shader && font_) {
+    font_->RenderUIAtHeight(text_, GetPosition(), static_cast<float>(size.y),
+                           {1.0F, 1.0F, 1.0F}, text_shader);
   }
 }
 

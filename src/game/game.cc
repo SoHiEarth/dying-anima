@@ -15,14 +15,10 @@
 
 #include "core/atlas.h"
 #include "core/camera.h"
-#include "core/font.h"
 #include "core/input.h"
 #include "core/physics.h"
-#include "core/rect.h"
 #include "core/render.h"
 #include "core/resource_manager.h"
-#include "core/shader.h"
-#include "core/state.h"
 #include "core/transform.h"
 #include "core/window.h"
 #include "game/enemy.h"
@@ -30,7 +26,6 @@
 #include "game/log.h"
 #include "game/pause.h"
 #include "game/player.h"
-#include "game/spawn.h"
 #include "level_utils.h"
 #include "saves.h"
 #include "sprite.h"
@@ -39,12 +34,12 @@
 SaveData game::save_data{};
 
 void GameScene::Init() {
-  physics::Init({0, -19.81f});
+  physics::Init({0, -19.81F});
   registry = LoadLevel("level.txt");
   player = registry.create();
   auto& player_transform = registry.emplace<Transform>(player);
   registry.emplace<PlayerSpeed>(player);
-  auto& player_health = registry.emplace<Health>(player, 100.0f);
+  auto& player_health = registry.emplace<Health>(player, 100.0F);
   player_body = registry
                     .emplace<PhysicsBody>(
                         player, physics::CreateBody(player_transform, true))
@@ -99,9 +94,9 @@ void GameScene::Update(double dt) {
   }
 
   b2Vec2 velocity = b2Body_GetLinearVelocity(player_body);
-  float speed_multiplier = 1.0f;
+  float speed_multiplier = 1.0F;
   if (IsOnGround(player_body)) {
-    speed_multiplier = 1.0f;
+    speed_multiplier = 1.0F;
   } else {
     speed_multiplier =
         player_speed.air_control_multiplier;  // Air control is reduced
@@ -111,14 +106,14 @@ void GameScene::Update(double dt) {
     if (velocity.x > 0) {
       velocity.x *= player_speed.deceleration;
     }
-    velocity.x = std::max(velocity.x - player_speed.speed * speed_multiplier,
+    velocity.x = std::max(velocity.x - (player_speed.speed * speed_multiplier),
                           -player_speed.max_speed);
   }
   if (core::input::IsKeyPressed(GLFW_KEY_D)) {
     if (velocity.x < 0) {
       velocity.x *= player_speed.deceleration;
     }
-    velocity.x = std::min(velocity.x + player_speed.speed * speed_multiplier,
+    velocity.x = std::min(velocity.x + (player_speed.speed * speed_multiplier),
                           player_speed.max_speed);
   }
   if (!core::input::IsKeyPressed(GLFW_KEY_A) &&
@@ -138,30 +133,31 @@ void GameScene::Update(double dt) {
 
   if (core::input::IsKeyPressed(GLFW_KEY_SPACE) && IsOnGround(player_body)) {
     b2Body_ApplyLinearImpulse(player_body,
-                              b2Vec2(0.0f, player_speed.jump_impulse),
+                              b2Vec2(0.0F, player_speed.jump_impulse),
                               b2Body_GetLocalCenterOfMass(player_body), true);
   }
 
   // Frame-independent camera smoothing
-  constexpr float camera_smoothing = 5.0f;  // Smoothing factor
-  float speed = std::min(1.0f, 1.0f - std::exp(-camera_smoothing * (float)dt));
+  constexpr float kCameraSmoothing = 5.0F;  // Smoothing factor
+  float speed = std::min(
+      1.0F, 1.0F - std::exp(-kCameraSmoothing * static_cast<float>(dt)));
   auto& camera_position = GetCamera().position;
   auto& player_transform = registry.get<Transform>(player);
-  player_transform.z_index = 2.0f;
-  camera_position = glm::mix({camera_position.x, camera_position.y, 0.0f},
-                             glm::vec3(player_transform.position, 0.0f), speed);
+  player_transform.z_index = 2.0F;
+  camera_position = glm::mix({camera_position.x, camera_position.y, 0.0F},
+                             glm::vec3(player_transform.position, 0.0F), speed);
 
-  physics_accumulator += (float)dt;
+  physics_accumulator += static_cast<float>(dt);
   while (physics_accumulator >= physics_time_step) {
     b2World_Step(physics::world, physics_time_step, 4);
     physics_accumulator -= physics_time_step;
   }
   auto physics_view = registry.view<Transform, PhysicsBody>();
-  physics_view.each([](auto /* entity */, Transform & transform,
-                       PhysicsBody & physicsBody) {
+  physics_view.each(
+      [](auto /* entity */, Transform& transform, PhysicsBody& physicsBody) {
         physics::SyncPosition(physicsBody.body, transform.position);
       });
-  game::UpdatePlayerDamagers(registry, (float)dt);
+  game::UpdatePlayerDamagers(registry, static_cast<float>(dt));
 }
 
 void GameScene::Render(GameWindow& window) {
@@ -171,15 +167,15 @@ void GameScene::Render(GameWindow& window) {
   ImGui::NewFrame();
 
   window.SetProjection(ProjectionType::CENTERED);
-  GetCamera().SetType(CameraType::WORLD);
+  GetCamera().SetType(CameraType::kWorld);
   render::Render(registry);
 
   window.SetProjection(ProjectionType::SCREEN_SPACE);
-  GetCamera().SetType(CameraType::UI);
+  GetCamera().SetType(CameraType::kUi);
   auto& player_health = registry.get<Health>(player);
   special_font->RenderUI(
       std::format("Health: {}", static_cast<int>(player_health.health)),
-      glm::vec2(20.0f, 20.0f), glm::vec2(1.0f), glm::vec3(1.0f), text_shader);
+      glm::vec2(20.0F, 20.0F), glm::vec2(1.0F), glm::vec3(1.0F), text_shader);
 
   // debug info: fps
   static double previous_seconds = glfwGetTime();
@@ -194,7 +190,7 @@ void GameScene::Render(GameWindow& window) {
   }
 
   ImGui::Begin("Telemetry & More");
-  ImGui::DragFloat("render::exposure", &render::exposure, 0.01f, 0.0f, 10.0f);
+  ImGui::DragFloat("render::exposure", &render::exposure, 0.01F, 0.0F, 10.0F);
   ImGui::Text("FPS: %.2f", fps);
   auto& player_transform = registry.get<Transform>(player);
   if (ImGui::DragFloat3("Position",
@@ -203,7 +199,7 @@ void GameScene::Render(GameWindow& window) {
         player_body,
         b2Vec2(player_transform.position.x, player_transform.position.y),
         b2Body_GetRotation(player_body));
-    b2Body_SetLinearVelocity(player_body, b2Vec2(0.0f, 0.0f));
+    b2Body_SetLinearVelocity(player_body, b2Vec2(0.0F, 0.0F));
   }
   auto velocity = b2Body_GetLinearVelocity(player_body);
   ImGui::Text("Velocity: (%.2f, %.2f)", velocity.x, velocity.y);
@@ -231,14 +227,14 @@ void GameScene::Render(GameWindow& window) {
   ImGui::Begin("Player Tweaker");
   auto& player_speed = registry.get<PlayerSpeed>(player);
   ImGui::DragFloat("Air Control Multiplier",
-                   &player_speed.air_control_multiplier, 0.01f, 0.0f, 1.0f);
-  ImGui::DragFloat("Max Speed", &player_speed.max_speed, 0.1f, 0.0f);
-  ImGui::DragFloat("Max Boost Speed", &player_speed.max_boost_speed, 0.1f,
-                   0.0f);
-  ImGui::DragFloat("Speed", &player_speed.speed, 0.01f, 0.0f);
-  ImGui::DragFloat("Deceleration", &player_speed.deceleration, 0.01f, 0.0f);
-  ImGui::DragFloat("Boost Speed", &player_speed.boost_speed, 1.0f, 0.0f);
-  ImGui::DragFloat("Jump Impulse", &player_speed.jump_impulse, 1.0f, 0.0f);
+                   &player_speed.air_control_multiplier, 0.01F, 0.0F, 1.0F);
+  ImGui::DragFloat("Max Speed", &player_speed.max_speed, 0.1F, 0.0F);
+  ImGui::DragFloat("Max Boost Speed", &player_speed.max_boost_speed, 0.1F,
+                   0.0F);
+  ImGui::DragFloat("Speed", &player_speed.speed, 0.01F, 0.0F);
+  ImGui::DragFloat("Deceleration", &player_speed.deceleration, 0.01F, 0.0F);
+  ImGui::DragFloat("Boost Speed", &player_speed.boost_speed, 1.0F, 0.0F);
+  ImGui::DragFloat("Jump Impulse", &player_speed.jump_impulse, 1.0F, 0.0F);
   ImGui::End();
 
   ImGui::Render();

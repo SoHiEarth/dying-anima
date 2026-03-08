@@ -2,8 +2,8 @@
 
 #include <chrono>
 #include <iomanip>
-#include <sstream>
 #include <pugixml.hpp>
+#include <sstream>
 #define LOG_FILE "player_log.xml"
 
 void game::Log::NewLog(const LogEntry& entry) {

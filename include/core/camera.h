@@ -4,24 +4,26 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 enum class CameraType {
-  WORLD,  // Return view matrix based on position
-  UI,     // Ignore position
+  kWorld,  // Return view matrix based on position
+  kUi,     // Ignore position
 };
 
 struct Camera {
  private:
-  CameraType type = CameraType::WORLD;
+  CameraType type_ = CameraType::kWorld;
 
  public:
-  glm::vec2 position = {0.0f, 0.0f};
-  void SetType(CameraType new_type) { type = new_type; }
-  CameraType GetType() const { return type; }
+  glm::vec2 position = {0.0F, 0.0F};
+  void SetType(CameraType new_type) { type_ = new_type; }
+  CameraType GetType() const { return type_; }
   glm::mat4 GetView() {
-    switch (type) {
-      case CameraType::WORLD:
-        return glm::translate(glm::mat4(1.0f), -glm::vec3(position, 3.0f));
+    switch (type_) {
+      case CameraType::kWorld:
+        return glm::translate(glm::mat4(1.0F), -glm::vec3(position, 3.0F));
+      case CameraType::kUi:
+        break;
     }
-    return glm::mat4(1.0f);
+    return glm::mat4(1.0F);
   }
 };
 

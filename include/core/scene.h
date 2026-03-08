@@ -30,9 +30,9 @@ struct SceneManager {
  public:
   void PushScene(std::unique_ptr<Scene> scene) {
     if (scene == nullptr) return;
-    pending_changes.push_back({SceneChange::PUSH, std::move(scene)});
+    pending_changes.emplace_back(SceneChange::PUSH, std::move(scene));
   }
-  void PopScene() { pending_changes.push_back({SceneChange::POP, nullptr}); }
+  void PopScene() { pending_changes.emplace_back(SceneChange::POP, nullptr); }
   bool NoScenes() const { return scenes.empty(); }
   void Update(double dt) {
     if (scenes.empty()) return;
@@ -41,7 +41,7 @@ struct SceneManager {
   void Render(GameWindow& window) {
     if (scenes.empty()) return;
     size_t start = 0;
-    for (auto i = scenes.size() - 1; i >= 0; i--) {
+    for (auto i = static_cast<int>(scenes.size()) - 1; i >= 0; i--) {
       if (!scenes[i]->IsTransparent()) {
         start = i;
         break;

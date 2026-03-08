@@ -2,11 +2,9 @@
 
 #include <print>
 #include <pugixml.hpp>
-#include <sstream>
 
 #include "core/light.h"
 #include "core/physics.h"
-#include "core/render.h"
 #include "core/resource_manager.h"
 #include "core/transform.h"
 #include "game/enemy.h"

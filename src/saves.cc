@@ -31,10 +31,10 @@ void SaveManager::SaveGame(const SaveData& data) {
   doc.save_file(file_name.c_str());
 }
 
-SaveData SaveManager::LoadGame(std::string_view file_name) {
+SaveData SaveManager::LoadGame(std::string_view filename) {
   SaveData data{};
   pugi::xml_document doc;
-  if (!doc.load_file(file_name.data())) {
+  if (!doc.load_file(filename.data())) {
     throw std::runtime_error("Failed to load save file");
   }
   auto player_node = doc.child("SaveData").child("Player");
@@ -47,15 +47,15 @@ SaveData SaveManager::LoadGame(std::string_view file_name) {
   }
   auto comp_marker_node = doc.child("SaveData").child("Completion");
   for (auto marker : comp_marker_node.children("Marker")) {
-    data.completion_markers.push_back(marker.attribute("name").as_string());
+    data.completion_markers.emplace_back(marker.attribute("name").as_string());
   }
-  std::cout << "Loaded game from " << file_name << std::endl;
+  std::cout << "Loaded game from " << filename << std::endl;
   data.valid = true;
   return data;
 }
 
 SaveData SaveManager::LoadLatestSave() {
-  std::string largest_save_id = "";
+  std::string largest_save_id;
   for (const auto& entry : std::filesystem::directory_iterator("saves")) {
     if (entry.is_regular_file() && entry.path().extension() == ".save") {
       std::string filename = entry.path().filename().string();

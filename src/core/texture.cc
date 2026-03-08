@@ -16,7 +16,7 @@
 
 Texture::Texture(std::string_view path) {
   this->path = std::string(path);
-  stbi_set_flip_vertically_on_load(true);
+  stbi_set_flip_vertically_on_load(1);
   unsigned char* data =
       stbi_load(std::string(path).c_str(), &width, &height, &channels, 0);
   if (data) {
@@ -42,8 +42,8 @@ Texture::Texture(std::string_view path) {
 Texture::~Texture() { glDeleteTextures(1, &id); }
 
 static glm::mat4 last_proj, last_view, last_vp;
-void Texture::Render(const std::shared_ptr<Shader> shader,
-                     const glm::mat4& model) {
+void Texture::Render(const std::shared_ptr<Shader>& shader,
+                     const glm::mat4& model) const {
   shader->Use();
   bool recalculate_vp = false;
   if (last_proj != GetGameWindow().GetProjection()) {

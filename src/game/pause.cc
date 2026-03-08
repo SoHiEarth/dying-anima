@@ -7,15 +7,15 @@
 #include "level_editor.h"
 #include "menu.h"
 #include "ui/elements.h"
-
-double anim_full_time = 0.4f;
+namespace {
 std::unique_ptr<ui::VerticalLayout> layout;
-
 glm::ivec2 GetMousePos() {
-  double x, y;
+  double x;
+  double y;
   glfwGetCursorPos(glfwGetCurrentContext(), &x, &y);
   return glm::ivec2(x, y);
 }
+}  // namespace
 
 void PauseScene::Init() {
   rect_shader = ResourceManager::GetShader("Rect").shader;
@@ -35,14 +35,13 @@ void PauseScene::Init() {
       }));
 #endif
   layout->AddElement(std::make_unique<ui::Button>("Exit", ui_font, []() {
-        glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
-      }));
-  layout->AddElement(
-      std::make_unique<ui::Button>("Menu", ui_font, [this]() {
-        scene_manager.PopScene();
-        scene_manager.PopScene();  // Pop the game scene
-        scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
-      }));
+    glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
+  }));
+  layout->AddElement(std::make_unique<ui::Button>("Menu", ui_font, [this]() {
+    scene_manager.PopScene();
+    scene_manager.PopScene();  // Pop the game scene
+    scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
+  }));
   layout->AddElement(std::make_unique<ui::Button>(
       "Resume", ui_font, [this]() { scene_manager.PopScene(); }));
   layout->AddElement(std::make_unique<ui::Label>("PAUSED", title_font));
@@ -65,17 +64,17 @@ void PauseScene::Update(double dt) {
 
 void PauseScene::Render(GameWindow& window) {
   window.SetProjection(ProjectionType::SCREEN_SPACE);
-  GetCamera().SetType(CameraType::UI);
+  GetCamera().SetType(CameraType::kUi);
   Rect pause_rect;
-  pause_rect.position = glm::vec2(window.width / 2.0f, window.height / 2.0f);
+  pause_rect.position = glm::vec2(window.width / 2.0F, window.height / 2.0F);
   pause_rect.scale = {window.width, window.height};
-  pause_rect.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.5f);
+  pause_rect.color = glm::vec4(0.0F, 0.0F, 0.0F, 0.5F);
   pause_rect.Render(rect_shader);
 
   Rect pause_rect_2;
-  pause_rect_2.position = glm::vec2(window.width / 6.0f, window.height / 2.0f);
-  pause_rect_2.scale = {window.width / 3.0f, window.height};
-  pause_rect_2.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.7f);
+  pause_rect_2.position = glm::vec2(window.width / 6.0F, window.height / 2.0F);
+  pause_rect_2.scale = {window.width / 3.0F, window.height};
+  pause_rect_2.color = glm::vec4(0.0F, 0.0F, 0.0F, 0.7F);
   pause_rect_2.Render(rect_shader);
   layout->Render(text_shader, rect_shader);
 }

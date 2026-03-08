@@ -7,6 +7,7 @@
 #include <imgui_impl_opengl3.h>
 #include <stb_image.h>
 
+#include <algorithm>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -17,13 +18,12 @@
 #include "core/render.h"
 #include "core/resource_manager.h"
 #include "core/scene.h"
-#include "core/state.h"
 #include "core/window.h"
-#include "game/game.h"
-#include "level_editor.h"
 #include "menu.h"
 
-void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {
+namespace {
+void FramebufferSizeCallback(GLFWwindow* /* window */, int width,
+                                    int height) {
   auto& window = GetGameWindow();
   window.width = width;
   window.height = height;
@@ -33,6 +33,7 @@ void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {
   glViewport(0, 0, width, height);
   render::RecreateFramebuffers(width, height);
 }
+}  // namespace
 
 int main() {
   if (!glfwInit()) {
@@ -49,7 +50,7 @@ int main() {
     return -1;
   }
   glfwMakeContextCurrent(window.window);
-  gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+  gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
   glfwGetFramebufferSize(window.window, &window.width, &window.height);
   window.SetPixelsPerUnit(window.GetPixelsPerUnit());
   window.RecalculateCenteredProjection();
@@ -63,7 +64,7 @@ int main() {
   ImGuiIO& imgui_io = ImGui::GetIO();
   ResourceManager::Init();
   imgui_io.Fonts->AddFontFromFileTTF(
-      ResourceManager::GetFont("Debug").file.c_str(), 15.5f);
+      ResourceManager::GetFont("Debug").file.c_str(), 15.5F);
   ImGui_ImplGlfw_InitForOpenGL(window.window, true);
   ImGui_ImplOpenGL3_Init("#version 150");
   render::Init();
@@ -73,16 +74,14 @@ int main() {
   scene_manager.ProcessSceneChanges();
 
   double last_time = glfwGetTime();
-  constexpr double MAX_DELTA_TIME = 0.1;
+  constexpr double kMaxDeltaTime = 0.1;
 
   while (!glfwWindowShouldClose(window.window)) {
     double current_time = glfwGetTime();
     double delta_time = current_time - last_time;
     last_time = current_time;
 
-    if (delta_time > MAX_DELTA_TIME) {
-      delta_time = MAX_DELTA_TIME;
-    }
+    delta_time = std::min(delta_time, kMaxDeltaTime);
 
     glfwPollEvents();
     core::input::Update(window);
@@ -92,7 +91,7 @@ int main() {
       static bool wireframe = false;
       wireframe = !wireframe;
       if (wireframe) {
-        glLineWidth(2.0f);
+        glLineWidth(2.0F);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       } else {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -111,7 +110,7 @@ int main() {
       }
     }
     scene_manager.Update(delta_time);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.0F, 0.0F, 0.0F, 1.0F);
     glClear(GL_COLOR_BUFFER_BIT);
     scene_manager.Render(window);
     glfwSwapBuffers(window.window);
@@ -122,7 +121,7 @@ int main() {
       last_time = glfwGetTime();
     }
     if (scene_manager.NoScenes()) {
-      glfwSetWindowShouldClose(window.window, true);
+      glfwSetWindowShouldClose(window.window, 1);
     }
     scene_manager.ProcessSceneChanges();
   }
