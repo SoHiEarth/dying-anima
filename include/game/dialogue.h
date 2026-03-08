@@ -4,9 +4,10 @@
 #include <entt/entt.hpp>
 #include <string>
 #include <vector>
-#include "core/texture.h"
+
 #include "core/font.h"
 #include "core/shader.h"
+#include "core/texture.h"
 
 struct DialogueMeta {
   std::string character_name;
@@ -27,5 +28,5 @@ namespace Game {
 DialogueData LoadDialogue(std::string_view file);
 void SaveDialogue(const DialogueData& dialogue, std::string_view file);
 void RenderDialogue(DialogueData& dialogue);
-} // namespace Game
+}  // namespace Game
 #endif

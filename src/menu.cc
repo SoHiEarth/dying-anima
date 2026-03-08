@@ -1,8 +1,6 @@
 #include <glad/glad.h>
 // Code block
 
-#include "menu.h"
-
 #include <GLFW/glfw3.h>
 #include <ft2build.h>
 #include <stb_image.h>
@@ -10,25 +8,28 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "menu.h"
 #include FT_FREETYPE_H
 
+#include <algorithm>
+
 #include "core/atlas.h"
-#include "util/calculate.h"
 #include "core/camera.h"
-#include "core/quad.h"
-#include "core/resource_manager.h"
 #include "core/font.h"
 #include "core/input.h"
+#include "core/quad.h"
+#include "core/resource_manager.h"
 #include "core/shader.h"
+#include "core/state.h"
 #include "core/texture.h"
 #include "core/window.h"
-#include "core/state.h"
 #include "game/game.h"
-#include "level_editor.h"
 #include "game/intro.h"
 #include "game/progression.h"
+#include "level_editor.h"
 #include "ui/elements.h"
-#include <algorithm>
+#include "util/calculate.h"
 constexpr int LABEL_SIZE_Y = 36;
 
 void MenuScene::Init() {
@@ -47,23 +48,23 @@ void MenuScene::Init() {
                 scene_manager.PushScene(
                     std::make_unique<LevelEditor>(scene_manager));
               }))
-      ->size.y = LABEL_SIZE_Y;
-  #endif
+          ->size.y = LABEL_SIZE_Y;
+#endif
   auto exit_label =
       menu_layout
           .AddElement(std::make_unique<ui::Button>(
               "Exit", font, [this]() { scene_manager.PopScene(); }))
           ->size.y = LABEL_SIZE_Y;
-  auto play_label =
-      menu_layout
-          .AddElement(std::make_unique<ui::Button>(
-              "Play", font,
-              [this]() {
+  auto play_label = menu_layout
+                        .AddElement(std::make_unique<ui::Button>(
+                            "Play", font,
+                            [this]() {
                               scene_manager.PushScene(
                                   std::make_unique<GameScene>(scene_manager));
-              }))
-          ->size.y = LABEL_SIZE_Y;
-  auto title = menu_layout.AddElement(std::make_unique<ui::Label>("Dying Anima", font))
+                            }))
+                        ->size.y = LABEL_SIZE_Y;
+  auto title =
+      menu_layout.AddElement(std::make_unique<ui::Label>("Dying Anima", font))
           ->size.y = LABEL_SIZE_Y * 2;
   menu_layout.SetSpacing(LABEL_SIZE_Y);
 }

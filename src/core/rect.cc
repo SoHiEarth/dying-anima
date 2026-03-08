@@ -1,4 +1,5 @@
 #include "core/rect.h"
+
 #include "core/camera.h"
 #include "core/quad.h"
 #include "core/shader.h"
@@ -15,7 +16,8 @@ void Rect::Render(const std::shared_ptr<Shader> shader) {
     last_view = GetCamera().GetView();
     last_vp = last_projection * last_view;
   }
-  shader->SetUniform("mvp", last_vp * CalculateModelMatrix(position, 0.0f, scale));
+  shader->SetUniform("mvp",
+                     last_vp * CalculateModelMatrix(position, 0.0f, scale));
   shader->SetUniform("rect_color", color);
   core::quad::Render(core::quad::QuadType::QUAD_ONLY);
 }

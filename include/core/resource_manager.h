@@ -14,6 +14,6 @@ void ReloadTextures();
 void ReloadShaders();
 void ReloadFonts();
 void Quit();
-} // namespace ResourceManager
+}  // namespace ResourceManager
 
-#endif // RESOURCE_MANAGER_H
+#endif  // RESOURCE_MANAGER_H

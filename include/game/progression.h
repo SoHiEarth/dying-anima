@@ -5,4 +5,4 @@ namespace Progression {
 constexpr const char* INTRO_COMPLETE_MARKER = "marker.intro.complete";
 }
 
-#endif // PROGRESSION_H
+#endif  // PROGRESSION_H

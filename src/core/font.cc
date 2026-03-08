@@ -7,10 +7,10 @@
 
 #include "core/shader.h"
 #include FT_FREETYPE_H
+#include "core/camera.h"
 #include "core/font.h"
 #include "core/window.h"
 #include "util/calculate.h"
-#include "core/camera.h"
 
 Font::Font(std::string_view font_path) {
   auto dpi = 96.0f;
@@ -24,7 +24,7 @@ Font::Font(std::string_view font_path) {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
+                        (void*)(3 * sizeof(float)));
 
   FT_Library ft;
   if (FT_Init_FreeType(&ft)) {
@@ -68,7 +68,7 @@ Font::Font(std::string_view font_path) {
 }
 
 Font::~Font() {
-  for (const auto &[_, character] : characters) {
+  for (const auto& [_, character] : characters) {
     glDeleteTextures(1, &character.texture);
   }
   glDeleteVertexArrays(1, &vertex_attrib);
@@ -77,8 +77,8 @@ Font::~Font() {
 
 int Font::GetWidth(std::string_view text) const {
   int width = 0;
-  for (const char &c : text) {
-    const auto &ch = characters.at(c);
+  for (const char& c : text) {
+    const auto& ch = characters.at(c);
     width += (ch.advance >> 6);
   }
   return width;
@@ -86,8 +86,8 @@ int Font::GetWidth(std::string_view text) const {
 
 int Font::GetHeight(std::string_view text) const {
   int height = 0;
-  for (auto &c : text) {
-    const auto &ch = characters.at(c);
+  for (auto& c : text) {
+    const auto& ch = characters.at(c);
     int h = ch.size.y;
     if (h > height) {
       height = h;
@@ -99,12 +99,13 @@ int Font::GetHeight(std::string_view text) const {
 static glm::mat4 last_projection, last_view, last_vp;
 
 void Font::Render(std::string_view text, const glm::vec2& position,
-                  const glm::vec3 &color,
+                  const glm::vec3& color,
                   const std::shared_ptr<Shader> shader) const {
   Render(text, position, glm::vec2(1.0f), color, shader);
 }
 
-void Font::Render(std::string_view text, const glm::vec2 &position, const glm::vec2& scale, const glm::vec3 &color,
+void Font::Render(std::string_view text, const glm::vec2& position,
+                  const glm::vec2& scale, const glm::vec3& color,
                   const std::shared_ptr<Shader> shader) const {
   shader->Use();
   shader->SetUniform("color", color);
@@ -126,23 +127,24 @@ void Font::Render(std::string_view text, const glm::vec2 &position, const glm::v
   float total_height = GetHeight(text) * scale.y;
   float x_pos = -total_width / 2.0f;
   float y_pos = -total_height / 2.0f;
-  for (const char &c : text) {
-    const auto &ch = characters.at(c);
+  for (const char& c : text) {
+    const auto& ch = characters.at(c);
     float xpos = x_pos + ch.bearing.x * scale.x;
     float ypos = y_pos - (ch.size.y - ch.bearing.y) * scale.y;
     float w = ch.size.x * scale.x;
     float h = ch.size.y * scale.y;
 
-    float vertices[6][5] = {
-        {xpos, ypos + h, 0.0f, 0.0f, 0.0f}, {xpos, ypos, 0.0f, 0.0f, 1.0f},
-        {xpos + w, ypos, 0.0f, 1.0f, 1.0f},
-        {xpos, ypos + h, 0.0f, 0.0f, 0.0f},    {xpos + w, ypos, 0.0f, 1.0f, 1.0f},
-        {xpos + w, ypos + h, 0.0f, 1.0f, 0.0f}};
+    float vertices[6][5] = {{xpos, ypos + h, 0.0f, 0.0f, 0.0f},
+                            {xpos, ypos, 0.0f, 0.0f, 1.0f},
+                            {xpos + w, ypos, 0.0f, 1.0f, 1.0f},
+                            {xpos, ypos + h, 0.0f, 0.0f, 0.0f},
+                            {xpos + w, ypos, 0.0f, 1.0f, 1.0f},
+                            {xpos + w, ypos + h, 0.0f, 1.0f, 0.0f}};
     glBindTexture(GL_TEXTURE_2D, ch.texture);
     glBindVertexArray(vertex_attrib);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
-    glDrawArrays(GL_TRIANGLES, 0, 6); 
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     x_pos += (ch.advance >> 6) * scale.x;
   }
@@ -150,8 +152,8 @@ void Font::Render(std::string_view text, const glm::vec2 &position, const glm::v
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Font::RenderUI(std::string_view text, const glm::vec2 &position,
-                  const glm::vec2 &scale, const glm::vec3 &color,
+void Font::RenderUI(std::string_view text, const glm::vec2& position,
+                    const glm::vec2& scale, const glm::vec3& color,
                     const std::shared_ptr<Shader> shader) const {
   shader->Use();
   shader->SetUniform("color", color);
@@ -173,8 +175,8 @@ void Font::RenderUI(std::string_view text, const glm::vec2 &position,
   float total_height = GetHeight(text) * scale.y;
   float x_pos = 0;
   float y_pos = 0;
-  for (const char &c : text) {
-    const auto &ch = characters.at(c);
+  for (const char& c : text) {
+    const auto& ch = characters.at(c);
     float xpos = x_pos + ch.bearing.x * scale.x;
     float ypos = y_pos - (ch.size.y - ch.bearing.y) * scale.y;
     float w = ch.size.x * scale.x;
@@ -204,8 +206,8 @@ float Font::GetWidthScale(std::string_view text, float height) const {
   return height / natural_height;
 }
 
-void Font::RenderUIAtHeight(std::string_view text, const glm::vec2 &position,
-                            float height_pixels, const glm::vec3 &color,
+void Font::RenderUIAtHeight(std::string_view text, const glm::vec2& position,
+                            float height_pixels, const glm::vec3& color,
                             const std::shared_ptr<Shader> shader) const {
   RenderUI(text, position, glm::vec2(GetWidthScale(text, height_pixels)), color,
            shader);

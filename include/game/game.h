@@ -1,13 +1,14 @@
 #pragma once
-#include "core/scene.h"
-#include "core/font.h"
-#include "core/texture.h"
-#include "core/shader.h"
-#include "core/transform.h"
-#include "game/player.h"
 #include <entt/entt.hpp>
-#include "saves.h"
+
+#include "core/font.h"
+#include "core/scene.h"
+#include "core/shader.h"
+#include "core/texture.h"
+#include "core/transform.h"
 #include "game/log.h"
+#include "game/player.h"
+#include "saves.h"
 
 namespace game {
 extern SaveData save_data;

@@ -9,24 +9,24 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "util/calculate.h"
 #include "core/camera.h"
 #include "core/input.h"
-#include "core/resource_manager.h"
-#include "level_editor.h"
-#include "level_utils.h"
 #include "core/light.h"
+#include "core/physics.h"
 #include "core/rect.h"
 #include "core/render.h"
+#include "core/resource_manager.h"
 #include "core/shader.h"
-#include "core/physics.h"
-#include "sprite.h"
-#include "tinyfiledialogs/tinyfiledialogs.h"
 #include "core/transform.h"
 #include "core/window.h"
-#include "menu.h"
 #include "game/enemy.h"
 #include "game/spawn.h"
+#include "level_editor.h"
+#include "level_utils.h"
+#include "menu.h"
+#include "sprite.h"
+#include "tinyfiledialogs/tinyfiledialogs.h"
+#include "util/calculate.h"
 
 enum class Toolkit { SELECT, MOVE };
 
@@ -100,7 +100,8 @@ entt::entity GetEntityAtPosition(const glm::vec2& position,
   return entt::null;
 }
 
-void DrawGrid(GameWindow& window, Camera& camera, std::shared_ptr<Shader> shader) {
+void DrawGrid(GameWindow& window, Camera& camera,
+              std::shared_ptr<Shader> shader) {
   float lineThickness = 1 / window.GetPixelsPerUnit();
   float halfWidth = (window.width / window.GetPixelsPerUnit()) / 2.0f;
   float halfHeight = (window.height / window.GetPixelsPerUnit()) / 2.0f;
@@ -173,8 +174,7 @@ void LevelEditor::Update(double dt) {
         current_scene_path = level;
         SaveLevel(current_scene_path, registry);
       }
-    }
-    else {
+    } else {
       SaveLevel(current_scene_path, registry);
     }
   }
@@ -287,8 +287,7 @@ void LevelEditor::Render(GameWindow& window) {
               current_scene_path = level;
               SaveLevel(current_scene_path, registry);
             }
-          }
-          else {
+          } else {
             SaveLevel(current_scene_path, registry);
           }
         }
@@ -314,9 +313,10 @@ void LevelEditor::Render(GameWindow& window) {
     }
     for (const auto& [key, value] : ResourceManager::texture_atlas) {
       if (ImGui::CollapsingHeader(key.c_str())) {
-        ImGui::Image(value.texture->id,
-                     ImVec2((float)value.texture->width, (float)value.texture->height));
-        ImGui::Text("Dimensions: %dx%d", value.texture->width, value.texture->height);
+        ImGui::Image(value.texture->id, ImVec2((float)value.texture->width,
+                                               (float)value.texture->height));
+        ImGui::Text("Dimensions: %dx%d", value.texture->width,
+                    value.texture->height);
         ImGui::Text("File: %s", value.texture->path.c_str());
       }
     }
@@ -343,7 +343,8 @@ void LevelEditor::Render(GameWindow& window) {
       for (auto entity : registry.view<Transform>()) {
         if (!registry.any_of<PhysicsBody>(entity)) {
           auto& transform = registry.get<Transform>(entity);
-          registry.emplace<PhysicsBody>(entity); // Do not add b2BodyId because b2World is not initialized
+          registry.emplace<PhysicsBody>(entity);  // Do not add b2BodyId because
+                                                  // b2World is not initialized
         }
       }
     }

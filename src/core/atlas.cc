@@ -9,10 +9,10 @@
 
 std::once_flag font_flag, shader_flag, texture_flag;
 
-void PrintFontResults(FONT_ATLAS &atlas) {
+void PrintFontResults(FONT_ATLAS& atlas) {
   std::print("- Font Atlas Result -\nLoaded {} fonts from atlas.\n",
              atlas.size());
-  for (const auto &[tag, entry] : atlas) {
+  for (const auto& [tag, entry] : atlas) {
     std::print("Name: {} (Tag: {}) File: {})\n", entry.name, tag, entry.file);
   }
 }
@@ -41,10 +41,10 @@ FONT_ATLAS LoadFontAtlas(std::string_view filename) {
   return font_atlas;
 }
 
-void PrintShaderResults(SHADER_ATLAS &atlas) {
+void PrintShaderResults(SHADER_ATLAS& atlas) {
   std::print("- Shader Atlas Result -\nLoaded {} shaders from atlas.\n",
              atlas.size());
-  for (const auto &[tag, entry] : atlas) {
+  for (const auto& [tag, entry] : atlas) {
     std::print("Name: {} (Tag: {}) Vertex File: {}, Fragment File: {})\n",
                entry.name, tag, entry.vertex_file, entry.fragment_file);
   }
@@ -68,7 +68,8 @@ SHADER_ATLAS LoadShaderAtlas(std::string_view filename) {
         (base_path / shader_node.attribute("vertex").as_string()).string();
     entry.fragment_file =
         (base_path / shader_node.attribute("fragment").as_string()).string();
-    entry.shader = std::make_shared<Shader>(entry.vertex_file, entry.fragment_file);
+    entry.shader =
+        std::make_shared<Shader>(entry.vertex_file, entry.fragment_file);
     shader_atlas.insert({tag, entry});
   }
   std::call_once(
@@ -77,10 +78,10 @@ SHADER_ATLAS LoadShaderAtlas(std::string_view filename) {
   return shader_atlas;
 }
 
-void PrintTextureResults(TEXTURE_ATLAS &atlas) {
+void PrintTextureResults(TEXTURE_ATLAS& atlas) {
   std::print("- Texture Atlas Result -\nLoaded {} textures from atlas.\n",
              atlas.size());
-  for (const auto &[name, entry] : atlas) {
+  for (const auto& [name, entry] : atlas) {
     std::print("Name: {} (File: {}, Dimensions: {}x{})\n", name, entry.path,
                entry.texture->width, entry.texture->height);
   }

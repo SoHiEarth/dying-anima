@@ -1,21 +1,23 @@
 #include "util/calculate.h"
 
-#include "core/transform.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-glm::mat4 CalculateModelMatrix(const Transform &transform) {
-  return CalculateModelMatrix(transform.position, transform.z_index, transform.rotation,
-                              transform.scale);
+#include "core/transform.h"
+
+glm::mat4 CalculateModelMatrix(const Transform& transform) {
+  return CalculateModelMatrix(transform.position, transform.z_index,
+                              transform.rotation, transform.scale);
 }
 
-glm::mat4 CalculateModelMatrix(const glm::vec2 &position, float rotation,
-                               const glm::vec2 &scale) {
+glm::mat4 CalculateModelMatrix(const glm::vec2& position, float rotation,
+                               const glm::vec2& scale) {
   /*
   * Backup use: cleaner but slower
   auto model = glm::translate(glm::mat4(1.0f), glm::vec3(position, 0.0f));
   if (rotation != 0.0f) {
-    model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f,
+  0.0f, 1.0f));
   }
   if (scale.x != 1.0f || scale.y != 1.0f) {
     model = glm::scale(model, glm::vec3(scale, 1.0f));
@@ -40,10 +42,8 @@ glm::mat4 CalculateModelMatrix(const glm::vec2 &position, float rotation,
   return model;
 }
 
-glm::mat4 CalculateModelMatrix(const glm::vec2 &position, 
-                               float z_index,
-                               float rotation,
-                               const glm::vec2 &scale) {
+glm::mat4 CalculateModelMatrix(const glm::vec2& position, float z_index,
+                               float rotation, const glm::vec2& scale) {
   /*
   * Backup use: cleaner but slower
   auto model = glm::translate(glm::mat4(1.0f), glm::vec3(position, 0.0f));

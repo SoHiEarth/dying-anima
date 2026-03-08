@@ -1,4 +1,5 @@
 #include "game/player.h"
+
 #include <vector>
 
 /*
@@ -12,7 +13,7 @@ bool IsOnGround(b2BodyId body) {
   if (count > capacity) {
     count = capacity;
   }
-  
+
   for (int i = 0; i < count; ++i) {
     b2ContactData &cd = contacts[i];
     if (cd.manifold.normal.y <= -0.707f) {

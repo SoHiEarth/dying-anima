@@ -1,13 +1,14 @@
 #include "core/resource_manager.h"
+
 #include <format>
 #include <print>
 #include <stdexcept>
 
 namespace ResourceManager {
-  TEXTURE_ATLAS texture_atlas;
-  SHADER_ATLAS shader_atlas;
-  FONT_ATLAS font_atlas;
-}
+TEXTURE_ATLAS texture_atlas;
+SHADER_ATLAS shader_atlas;
+FONT_ATLAS font_atlas;
+}  // namespace ResourceManager
 
 void ResourceManager::Init() {
   texture_atlas = LoadTextureAtlas("assets/textures/texture.xml");
@@ -22,7 +23,8 @@ TextureHandle ResourceManager::GetTexture(std::string_view tag) {
   }
   std::print("Texture with tag '{}' not found in atlas\n", tag);
   // Return util.notexture
-  if (auto it = texture_atlas.find("util.notexture"); it != texture_atlas.end()) {
+  if (auto it = texture_atlas.find("util.notexture");
+      it != texture_atlas.end()) {
     return it->second;
   } else {
     throw std::runtime_error(

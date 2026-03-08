@@ -1,4 +1,5 @@
 #include "game/log.h"
+
 #include <chrono>
 #include <pugixml.hpp>
 #define LOG_FILE "player_log.xml"
@@ -20,11 +21,14 @@ void game::Log::LoadLog() {
     LogEntry log_entry;
     log_entry.timestamp = entry.child("timestamp").text().as_string();
     for (auto& title : entry.child("title").children("degradation")) {
-      auto level = static_cast<DegradationLevel>(title.attribute("level").as_int());
+      auto level =
+          static_cast<DegradationLevel>(title.attribute("level").as_int());
       log_entry.title[level] = title.text().as_string();
     }
-    for (auto& description : entry.child("description").children("degradation")) {
-      auto level = static_cast<DegradationLevel>(description.attribute("level").as_int());
+    for (auto& description :
+         entry.child("description").children("degradation")) {
+      auto level = static_cast<DegradationLevel>(
+          description.attribute("level").as_int());
       log_entry.description[level] = description.text().as_string();
     }
     log.push_back(log_entry);
@@ -40,13 +44,15 @@ void game::Log::SaveLog() {
     auto title_node = entry_node.append_child("title");
     for (const auto& title : entry.title) {
       auto degradation_node = title_node.append_child("degradation");
-      degradation_node.append_attribute("level") = static_cast<int>(title.first);
+      degradation_node.append_attribute("level") =
+          static_cast<int>(title.first);
       degradation_node.text().set(title.second.c_str());
     }
     auto description_node = entry_node.append_child("description");
     for (const auto& description : entry.description) {
       auto degradation_node = description_node.append_child("degradation");
-      degradation_node.append_attribute("level") = static_cast<int>(description.first);
+      degradation_node.append_attribute("level") =
+          static_cast<int>(description.first);
       degradation_node.text().set(description.second.c_str());
     }
   }

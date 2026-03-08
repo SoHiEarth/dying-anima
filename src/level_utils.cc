@@ -1,16 +1,17 @@
 #include "level_utils.h"
 
-#include "core/physics.h"
-#include "sprite.h"
-#include "core/transform.h"
-#include "core/resource_manager.h"
-#include <pugixml.hpp>
 #include <print>
+#include <pugixml.hpp>
 #include <sstream>
+
 #include "core/light.h"
+#include "core/physics.h"
 #include "core/render.h"
+#include "core/resource_manager.h"
+#include "core/transform.h"
 #include "game/enemy.h"
 #include "game/spawn.h"
+#include "sprite.h"
 
 entt::registry LoadLevel(std::string_view filename) {
   pugi::xml_document doc;
@@ -131,8 +132,10 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
     }
     if (registry.try_get<PhysicsBody>(entity)) {
       auto physics_node = object_node.append_child("Physics");
-      physics_node.append_attribute("is_dynamic") = registry.get<PhysicsBody>(entity).is_dynamic;
-      physics_node.append_attribute("is_chained") = registry.get<PhysicsBody>(entity).is_chained;
+      physics_node.append_attribute("is_dynamic") =
+          registry.get<PhysicsBody>(entity).is_dynamic;
+      physics_node.append_attribute("is_chained") =
+          registry.get<PhysicsBody>(entity).is_chained;
     }
     if (registry.try_get<Light>(entity)) {
       const auto& light = registry.get<Light>(entity);
@@ -146,7 +149,7 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
       light_node.append_attribute("color.g") = light.color.g;
       light_node.append_attribute("color.b") = light.color.b;
     }
-    
+
     // Custom Game components
     if (registry.try_get<PlayerDamager>(entity)) {
       const auto& enemy = registry.get<PlayerDamager>(entity);

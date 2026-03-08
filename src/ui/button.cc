@@ -1,12 +1,15 @@
-#include "ui/elements.h"
-#include "core/rect.h"
 #include <print>
+
+#include "core/rect.h"
+#include "ui/elements.h"
 
 void ui::Button::Update(const glm::ivec2& mouse_pos, bool mouse_pressed) {
   size.x = font->GetWidth(text) * font->GetWidthScale(text, size.y);
   if (IsHovered(mouse_pos)) {
     hovered = true;
-    if (mouse_pressed && on_click) { on_click(); }
+    if (mouse_pressed && on_click) {
+      on_click();
+    }
   } else {
     hovered = false;
   }
@@ -24,7 +27,8 @@ void ui::Button::Render(const std::shared_ptr<Shader> text_shader,
   }
 
   if (text_shader && font) {
-    font->RenderUIAtHeight(text, GetPosition(), size.y, {1.0f, 1.0f, 1.0f}, text_shader);
+    font->RenderUIAtHeight(text, GetPosition(), size.y, {1.0f, 1.0f, 1.0f},
+                           text_shader);
   }
 }
 

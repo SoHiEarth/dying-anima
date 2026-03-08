@@ -7,5 +7,5 @@ struct Shader {
   ~Shader();
   void Use() const;
   template <typename T>
-  void SetUniform(std::string_view name, const T &value) const;
+  void SetUniform(std::string_view name, const T& value) const;
 };

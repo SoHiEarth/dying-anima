@@ -5,7 +5,7 @@
 
 struct Framebuffer {
   Framebuffer(int w, int h, unsigned int i);
-	int width = 0, height = 0;
+  int width = 0, height = 0;
   unsigned int id = 0;
   unsigned int colorbuffer;
 };
@@ -20,5 +20,5 @@ void BindFramebuffer(std::shared_ptr<Framebuffer> framebuffer);
 void UnbindFramebuffer();
 void DeleteFramebuffer(std::shared_ptr<Framebuffer> framebuffer);
 extern float exposure;
-}
+}  // namespace render
 #endif  // RENDER_H

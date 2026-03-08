@@ -1,4 +1,5 @@
 #include "saves.h"
+
 #include <chrono>
 #include <filesystem>
 #include <iostream>
@@ -12,7 +13,7 @@ void SaveManager::SaveGame(const SaveData& data) {
   player_node.append_attribute("pos.y") = data.player_transform.position.y;
   player_node.append_attribute("Health") = data.player_health.health;
   auto comp_marker_node = root.append_child("Completion");
-  for (const auto &marker : data.completion_markers) {
+  for (const auto& marker : data.completion_markers) {
     auto marker_node = comp_marker_node.append_child("Marker");
     marker_node.append_attribute("name") = marker.c_str();
   }
@@ -55,7 +56,7 @@ SaveData SaveManager::LoadGame(std::string_view file_name) {
 
 SaveData SaveManager::LoadLatestSave() {
   std::string largest_save_id = "";
-  for (const auto &entry : std::filesystem::directory_iterator("saves")) {
+  for (const auto& entry : std::filesystem::directory_iterator("saves")) {
     if (entry.is_regular_file() && entry.path().extension() == ".save") {
       std::string filename = entry.path().filename().string();
       std::string save_id = filename.substr(0, filename.find(".save"));

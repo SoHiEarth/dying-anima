@@ -2,6 +2,7 @@
 #define INPUT_H
 
 #include <map>
+
 #include "core/window.h"
 
 namespace core::input {
@@ -10,6 +11,6 @@ extern std::map<int, bool> last_frame_states;
 void Update(GameWindow& window);
 bool IsKeyPressed(int key);
 bool IsKeyPressedThisFrame(int key);
-} // namespace core::input
+}  // namespace core::input
 
 #endif

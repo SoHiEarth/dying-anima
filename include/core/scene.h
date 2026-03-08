@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <stack>
+
 #include "core/window.h"
 
 struct SceneManager;
@@ -20,14 +21,10 @@ struct Scene {
   virtual bool IsTransparent() { return false; };
 
  protected:
-   SceneManager& scene_manager;
+  SceneManager& scene_manager;
 };
 
-enum class SceneChange {
-  NONE,
-  PUSH,
-  POP
-};
+enum class SceneChange { NONE, PUSH, POP };
 
 struct SceneManager {
  public:
@@ -35,16 +32,12 @@ struct SceneManager {
     if (scene == nullptr) return;
     pending_changes.push_back({SceneChange::PUSH, std::move(scene)});
   }
-  void PopScene() {
-    pending_changes.push_back({SceneChange::POP, nullptr});
-  }
-  bool NoScenes() const {
-    return scenes.empty();
-  }
+  void PopScene() { pending_changes.push_back({SceneChange::POP, nullptr}); }
+  bool NoScenes() const { return scenes.empty(); }
   void Update(double dt) {
     if (scenes.empty()) return;
     scenes.back()->Update(dt);
-  } 
+  }
   void Render(GameWindow& window) {
     if (scenes.empty()) return;
     size_t start = 0;
@@ -76,6 +69,7 @@ struct SceneManager {
     }
     pending_changes.clear();
   }
+
  private:
   std::vector<std::unique_ptr<Scene>> scenes;
   std::vector<std::pair<SceneChange, std::unique_ptr<Scene>>> pending_changes;

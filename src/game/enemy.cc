@@ -1,6 +1,7 @@
 #include "game/enemy.h"
-#include "game/player.h"
+
 #include "core/transform.h"
+#include "game/player.h"
 
 void game::UpdatePlayerDamagers(entt::registry& registry, float delta_time) {
   auto view = registry.view<PlayerDamager>();
@@ -11,7 +12,8 @@ void game::UpdatePlayerDamagers(entt::registry& registry, float delta_time) {
     for (auto health_entity : health_view) {
       auto& health = health_view.get<Health>(health_entity);
       auto& player_transform = registry.get<Transform>(health_entity);
-      float distance = glm::distance(transform.position, player_transform.position);
+      float distance =
+          glm::distance(transform.position, player_transform.position);
       if (distance < damager.hitbox_radius) {
         damager.accumulator += delta_time;
         if (damager.accumulator >= damager.time_until_next_hit) {

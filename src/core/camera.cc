@@ -2,6 +2,4 @@
 
 static Camera camera;
 
-Camera &GetCamera() {
-  return camera;
-}
+Camera& GetCamera() { return camera; }

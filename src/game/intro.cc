@@ -1,24 +1,25 @@
 #include "game/intro.h"
-#include "core/resource_manager.h"
-#include "core/input.h"
+
 #include "core/camera.h"
+#include "core/input.h"
 #include "core/rect.h"
-#include "game/progression.h"
+#include "core/resource_manager.h"
 #include "game/game.h"
+#include "game/progression.h"
 
 std::string current_text = "";
 int character_index = 0;
 int text_index = 0;
 
-
 void IntroScene::Init() {
-	text_shader = ResourceManager::GetShader("Text").shader;
-	rect_shader = ResourceManager::GetShader("Rect").shader;
-         font = ResourceManager::GetFont("Special").font;
+  text_shader = ResourceManager::GetShader("Text").shader;
+  rect_shader = ResourceManager::GetShader("Rect").shader;
+  font = ResourceManager::GetFont("Special").font;
 }
 
 void IntroScene::Quit() {
-  game::save_data.completion_markers.push_back(Progression::INTRO_COMPLETE_MARKER);
+  game::save_data.completion_markers.push_back(
+      Progression::INTRO_COMPLETE_MARKER);
 }
 
 bool update_text = false;
@@ -63,12 +64,10 @@ void IntroScene::Render(GameWindow& window) {
   rect.scale = {window.width, window.height};
   rect.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.8f);
   rect.Render(rect_shader);
-  font->Render(current_text,
-               {window.width / 2.0f, window.height / 2.0f},
-               glm::vec2(0.75f),
-               glm::vec3(1.0f), text_shader);
-  font->Render("Press Space To Continue",
+  font->Render(current_text, {window.width / 2.0f, window.height / 2.0f},
+               glm::vec2(0.75f), glm::vec3(1.0f), text_shader);
+  font->Render(
+      "Press Space To Continue",
       {window.width / 2.0f, font->GetHeight("Press Space To Continue")},
-               glm::vec2(0.5f),
-               glm::vec3(0.5f), text_shader);
+      glm::vec2(0.5f), glm::vec3(0.5f), text_shader);
 }

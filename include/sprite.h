@@ -2,6 +2,7 @@
 #define SPRITE_H
 
 #include <string>
+
 #include "core/texture.h"
 
 struct Sprite {
@@ -10,4 +11,4 @@ struct Sprite {
   std::shared_ptr<Texture> normal;
 };
 
-#endif // SPRITE_H
+#endif  // SPRITE_H

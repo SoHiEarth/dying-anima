@@ -1,5 +1,5 @@
-#include "ui/elements.h"
 #include "core/window.h"
+#include "ui/elements.h"
 
 ui::Element* ui::Layout::AddElement(std::unique_ptr<ui::Element> element) {
   elements.push_back(std::move(element));

@@ -1,10 +1,11 @@
 #pragma once
+#include <map>
+#include <memory>
+#include <string>
+
 #include "core/font.h"
 #include "core/shader.h"
 #include "core/texture.h"
-#include <map>
-#include <string>
-#include <memory>
 
 struct FontHandle {
   std::string name;

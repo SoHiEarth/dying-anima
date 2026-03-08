@@ -149,9 +149,8 @@ void render::Render(entt::registry& registry) {
   deferred_shader->SetUniform("exposure", exposure);
   glActiveTexture(GL_TEXTURE0);
   combine_shader->SetUniform("bloom_texture", 0);
-  glBindTexture(GL_TEXTURE_2D, horizontal
-                                   ? bloom_framebuffer->colorbuffer
-                                   : bloom_framebuffer_2->colorbuffer);
+  glBindTexture(GL_TEXTURE_2D, horizontal ? bloom_framebuffer->colorbuffer
+                                          : bloom_framebuffer_2->colorbuffer);
   glActiveTexture(GL_TEXTURE1);
   combine_shader->SetUniform("scene_texture", 1);
   glBindTexture(GL_TEXTURE_2D, default_framebuffer->colorbuffer);
@@ -185,16 +184,13 @@ void render::RecreateFramebuffers(int width, int height) {
     if (framebuffer == nullptr) continue;
     glBindTexture(GL_TEXTURE_2D, framebuffer->colorbuffer);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, static_cast<int>(width),
-                 static_cast<int>(height), 0, GL_RGBA, GL_FLOAT,
-                 nullptr);
+                 static_cast<int>(height), 0, GL_RGBA, GL_FLOAT, nullptr);
     glBindTexture(GL_TEXTURE_2D, 0);
   }
 }
 
-std::shared_ptr<Framebuffer> render::CreateFramebuffer(
-    int width, int height) {
-  framebuffers.push_back(
-      std::make_shared<Framebuffer>(width, height, 0));
+std::shared_ptr<Framebuffer> render::CreateFramebuffer(int width, int height) {
+  framebuffers.push_back(std::make_shared<Framebuffer>(width, height, 0));
   return framebuffers.back();
 }
 

@@ -2,10 +2,10 @@
 
 #include "core/camera.h"
 #include "core/input.h"
-#include "core/resource_manager.h"
 #include "core/rect.h"
-#include "menu.h"
+#include "core/resource_manager.h"
 #include "level_editor.h"
+#include "menu.h"
 #include "ui/elements.h"
 
 double anim_full_time = 0.4f;
@@ -38,11 +38,12 @@ void PauseScene::Init() {
       layout->AddElement(std::make_unique<ui::Button>("Exit", ui_font, []() {
         glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
       }));
-  auto menu_button = layout->AddElement(std::make_unique<ui::Button>("Menu", ui_font, [this]() {
-    scene_manager.PopScene();
-    scene_manager.PopScene();  // Pop the game scene
-    scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
-  }));
+  auto menu_button = layout->AddElement(
+      std::make_unique<ui::Button>("Menu", ui_font, [this]() {
+        scene_manager.PopScene();
+        scene_manager.PopScene();  // Pop the game scene
+        scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
+      }));
   auto resume_button = layout->AddElement(std::make_unique<ui::Button>(
       "Resume", ui_font, [this]() { scene_manager.PopScene(); }));
   layout->AddElement(std::make_unique<ui::Label>("PAUSED", title_font));
@@ -60,8 +61,7 @@ void PauseScene::Update(double dt) {
     scene_manager.PopScene();
   }
   auto mouse_pos = GetMousePos();
-  layout->Update(mouse_pos,
-                 core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_LEFT));
+  layout->Update(mouse_pos, core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_LEFT));
 }
 
 void PauseScene::Render(GameWindow& window) {

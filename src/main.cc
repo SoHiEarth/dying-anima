@@ -12,19 +12,19 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <print>
 
+#include "core/input.h"
 #include "core/quad.h"
+#include "core/render.h"
 #include "core/resource_manager.h"
+#include "core/scene.h"
+#include "core/state.h"
+#include "core/window.h"
 #include "game/game.h"
 #include "level_editor.h"
 #include "menu.h"
-#include "core/state.h"
-#include "core/scene.h"
-#include "core/input.h"
-#include "core/window.h"
-#include "core/render.h"
 
-void FramebufferSizeCallback(GLFWwindow * /* window */, int width, int height) {
-  auto &window = GetGameWindow();
+void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {
+  auto& window = GetGameWindow();
   window.width = width;
   window.height = height;
   window.SetPixelsPerUnit(window.GetPixelsPerUnit());
@@ -43,7 +43,7 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  auto &window = GetGameWindow();
+  auto& window = GetGameWindow();
   window.window = glfwCreateWindow(800, 600, "Dying Anima", nullptr, nullptr);
   if (!window.window) {
     glfwTerminate();
@@ -61,9 +61,10 @@ int main() {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
-  ImGuiIO &imgui_io = ImGui::GetIO();
+  ImGuiIO& imgui_io = ImGui::GetIO();
   ResourceManager::Init();
-  imgui_io.Fonts->AddFontFromFileTTF(ResourceManager::GetFont("Debug").file.c_str(), 15.5f);
+  imgui_io.Fonts->AddFontFromFileTTF(
+      ResourceManager::GetFont("Debug").file.c_str(), 15.5f);
   ImGui_ImplGlfw_InitForOpenGL(window.window, true);
   ImGui_ImplOpenGL3_Init("#version 150");
   render::Init();
@@ -71,22 +72,22 @@ int main() {
   SceneManager scene_manager;
   scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
   scene_manager.ProcessSceneChanges();
-  
+
   double last_time = glfwGetTime();
   constexpr double MAX_DELTA_TIME = 0.1;
-  
+
   while (!glfwWindowShouldClose(window.window)) {
     double current_time = glfwGetTime();
     double delta_time = current_time - last_time;
     last_time = current_time;
-    
+
     if (delta_time > MAX_DELTA_TIME) {
       delta_time = MAX_DELTA_TIME;
     }
-    
+
     glfwPollEvents();
     core::input::Update(window);
-    #ifndef NDEBUG
+#ifndef NDEBUG
     if (core::input::IsKeyPressedThisFrame(GLFW_KEY_F2)) {
       // wireframe or filled
       static bool wireframe = false;
@@ -98,13 +99,14 @@ int main() {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       }
     }
-    #endif
+#endif
     if (core::input::IsKeyPressedThisFrame(GLFW_KEY_F11)) {
       static bool fullscreen = false;
       fullscreen = !fullscreen;
       if (fullscreen) {
-        const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        glfwSetWindowMonitor(window.window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);
+        const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        glfwSetWindowMonitor(window.window, glfwGetPrimaryMonitor(), 0, 0,
+                             mode->width, mode->height, mode->refreshRate);
       } else {
         glfwSetWindowMonitor(window.window, nullptr, 100, 100, 800, 600, 0);
       }
@@ -114,7 +116,7 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
     scene_manager.Render(window);
     glfwSwapBuffers(window.window);
-    
+
     while (window.IsMinimized()) {
       glfwGetFramebufferSize(window.window, &window.width, &window.height);
       glfwPollEvents();

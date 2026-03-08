@@ -1,8 +1,8 @@
 #ifndef GAME_ENEMY_H
 #define GAME_ENEMY_H
 
-#include <glm/glm.hpp>
 #include <entt/entt.hpp>
+#include <glm/glm.hpp>
 
 struct PlayerDamager {
   int damage = 5.0f;

@@ -1,7 +1,8 @@
 #pragma once
+#include <string>
+
 #include "core/transform.h"
 #include "game/player.h"
-#include <string>
 
 struct SaveData {
   bool valid = false;
@@ -14,4 +15,4 @@ namespace SaveManager {
 void SaveGame(const SaveData& data);
 SaveData LoadGame(std::string_view file_name);
 SaveData LoadLatestSave();
-} // namespace SaveManager
+}  // namespace SaveManager
