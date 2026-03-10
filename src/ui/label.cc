@@ -1,7 +1,7 @@
 #include "ui/elements.h"
 
 void ui::Label::Update(const glm::ivec2& mouse_pos, bool /* mouse_pressed */) {
-  size.x = font_->GetWidth(text_) * static_cast<int>(font_->GetWidthScale(text_, static_cast<float>(size.y)));
+  size.x = static_cast<int>(font_->GetWidth(text_) * font_->GetWidthScale(text_, static_cast<float>(size.y)));
   hovered_ = IsHovered(mouse_pos);
 }
 

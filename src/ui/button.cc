@@ -2,7 +2,7 @@
 #include "ui/elements.h"
 
 void ui::Button::Update(const glm::ivec2& mouse_pos, bool mouse_pressed) {
-  size.x = font_->GetWidth(text_) * static_cast<int>(font_->GetWidthScale(
+  size.x = static_cast<int>(font_->GetWidth(text_) * font_->GetWidthScale(
                                       text_, static_cast<float>(size.y)));
   if (IsHovered(mouse_pos)) {
     hovered_ = true;
