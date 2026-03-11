@@ -8,12 +8,14 @@
 #include "core/texture.h"
 
 struct FontHandle {
+  std::string tag;
   std::string name;
   std::string file;
   std::shared_ptr<Font> font;
 };
 
 struct ShaderHandle {
+  std::string tag;
   std::string name;
   std::string vertex_file;
   std::string fragment_file;
@@ -21,6 +23,7 @@ struct ShaderHandle {
 };
 
 struct TextureHandle {
+  std::string tag;
   std::string path;
   std::shared_ptr<Texture> texture;
 };

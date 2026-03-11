@@ -9,6 +9,7 @@
 
 struct PhysicsBody {
   b2BodyId body;
+  b2ShapeId shape;
   bool is_dynamic = false;
   bool is_chained = false;
 };
@@ -18,15 +19,13 @@ extern b2WorldId world;
 bool WorldValid();
 void Init(const glm::vec2& gravity);
 void SetGravity(const glm::vec2& gravity);
-b2BodyId CreateBody(const glm::vec2& position, const glm::vec2& scale,
-                    float angle, bool is_dynamic);
-b2BodyId CreateBody(Transform transform, bool is_dynamic);
 b2BodyId CreateChainBody(const std::vector<glm::vec2>& vertices);
-PhysicsBody CreatePhysicsBody(Transform transform, bool is_dynamic);
-PhysicsBody CreatePhysicsBody(const glm::vec2& position, const glm::vec2& scale,
-                              float angle, bool is_dynamic);
+PhysicsBody CreateBody(Transform transform, bool is_dynamic);
+PhysicsBody CreateBody(const glm::vec2& position, const glm::vec2& scale,
+                       float angle, bool is_dynamic);
 void SyncPosition(b2BodyId body, glm::vec2& position);
 void SyncTransform(b2BodyId body, Transform& transform);
+bool IsColliding(PhysicsBody body1, PhysicsBody body2);
 void Quit();
 }  // namespace physics
 

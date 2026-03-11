@@ -53,7 +53,7 @@ void IntroScene::Update(double dt) {
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_SPACE) || update_text) {
     text_index++;
     update_text = false;
-    if (std::cmp_greater_equal(text_index ,intro_text.size())) {
+    if (std::cmp_greater_equal(text_index, intro_text.size())) {
       scene_manager.PopScene();
     }
   }

@@ -35,7 +35,7 @@ void PrintTextureResults(TEXTURE_ATLAS& atlas) {
   }
 }
 
-}
+}  // namespace
 
 FONT_ATLAS LoadFontAtlas(std::string_view filename) {
   FONT_ATLAS font_atlas{};
@@ -50,7 +50,8 @@ FONT_ATLAS LoadFontAtlas(std::string_view filename) {
       std::filesystem::path(filename).parent_path();
   for (pugi::xml_node font_node : fonts_node.children("font")) {
     FontHandle entry;
-    const auto *tag = font_node.attribute("tag").as_string();
+    const auto* tag = font_node.attribute("tag").as_string();
+    entry.tag = tag;
     entry.name = font_node.attribute("name").as_string();
     entry.file = (base_path / font_node.attribute("file").as_string()).string();
     entry.font = std::make_shared<Font>(entry.file);
@@ -73,7 +74,8 @@ SHADER_ATLAS LoadShaderAtlas(std::string_view filename) {
   auto base_path = std::filesystem::path(filename).parent_path();
   for (pugi::xml_node shader_node : shaders_node.children("shader")) {
     ShaderHandle entry;
-    const auto *tag = shader_node.attribute("tag").as_string();
+    const auto* tag = shader_node.attribute("tag").as_string();
+    entry.tag = tag;
     entry.name = shader_node.attribute("name").as_string();
     entry.vertex_file =
         (base_path / shader_node.attribute("vertex").as_string()).string();
@@ -105,7 +107,8 @@ TEXTURE_ATLAS LoadTextureAtlas(std::string_view filename) {
     std::string name = texture_node.attribute("name").as_string();
     std::string path =
         (base_path / texture_node.attribute("path").as_string()).string();
-    texture_atlas.insert({name, {.path=path, .texture=std::make_shared<Texture>(path)}});
+    texture_atlas.insert(
+        {name, {.tag = name, .path = path, .texture = std::make_shared<Texture>(path)}});
   }
   std::call_once(
       texture_flag, [](TEXTURE_ATLAS atlas) { PrintTextureResults(atlas); },

@@ -22,8 +22,7 @@
 #include "menu.h"
 
 namespace {
-void FramebufferSizeCallback(GLFWwindow* /* window */, int width,
-                                    int height) {
+void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {
   auto& window = GetGameWindow();
   window.width = width;
   window.height = height;

@@ -35,8 +35,8 @@ void ui::VerticalLayout::CalculateLayout() {
 }
 
 int ui::VerticalLayout::GetLayoutSize() {
-  int total_size =
-      padding_[0] + padding_[2] + (spacing_ * (static_cast<int>(elements_.size()) - 1));
+  int total_size = padding_[0] + padding_[2] +
+                   (spacing_ * (static_cast<int>(elements_.size()) - 1));
   for (const auto& element : elements_) {
     total_size += element->GetSize().y;
   }
@@ -53,8 +53,8 @@ void ui::HorizontalLayout::CalculateLayout() {
 }
 
 int ui::HorizontalLayout::GetLayoutSize() {
-  int total_size =
-      padding_[1] + padding_[3] + (spacing_ * (static_cast<int>(elements_.size()) - 1));
+  int total_size = padding_[1] + padding_[3] +
+                   (spacing_ * (static_cast<int>(elements_.size()) - 1));
   for (const auto& element : elements_) {
     total_size += element->GetSize().x;
   }
@@ -69,4 +69,3 @@ ui::Button::Button(std::string text, std::shared_ptr<Font> font,
     : text_(std::move(text)),
       font_(std::move(font)),
       on_click_(std::move(on_click)) {}
-

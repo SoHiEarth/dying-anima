@@ -57,10 +57,11 @@ Font::Font(std::string_view font_path) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     Character character = {
-        .texture=texture,
-        .size=glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-        .bearing=glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-        .advance=static_cast<unsigned int>(face->glyph->advance.x)};
+        .texture = texture,
+        .size = glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+        .bearing =
+            glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+        .advance = static_cast<unsigned int>(face->glyph->advance.x)};
     characters.insert(std::pair<char, Character>(c, character));
   }
   glBindTexture(GL_TEXTURE_2D, 0);

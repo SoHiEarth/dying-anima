@@ -12,7 +12,7 @@ struct LevelEditor : public Scene {
   void Quit() override;
   void Update(double dt) override;
   void Render(GameWindow& window) override;
-  bool IsTransparent() { return false; };
+  bool IsTransparent() override { return false; };
   std::shared_ptr<Shader> rect_shader;
   std::shared_ptr<Shader> sprite_shader;
   entt::registry registry;

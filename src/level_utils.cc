@@ -44,7 +44,7 @@ entt::registry LoadLevel(std::string_view filename) {
         auto& transform = registry.get<Transform>(entity);
         bool is_dynamic = physics_node.attribute("is_dynamic").as_bool();
         if (physics::WorldValid()) {
-          physics.body = physics::CreateBody(transform, is_dynamic);
+          physics = physics::CreateBody(transform, is_dynamic);
         }
         physics.is_dynamic = is_dynamic;
       }

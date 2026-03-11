@@ -27,7 +27,7 @@ std::shared_ptr<Shader> sprite_shader;
 std::shared_ptr<Shader> bloom_separate_shader;
 std::shared_ptr<Shader> bloom_blur_shader;
 std::shared_ptr<Shader> combine_shader;
-}
+}  // namespace
 float render::exposure = 1.0F;
 
 Framebuffer::Framebuffer(int w, int h, unsigned int i)
@@ -56,10 +56,10 @@ void render::Render(entt::registry& registry) {
     sorted_entities.push_back(entity);
   }
   std::ranges::sort(sorted_entities,
-            [&registry](entt::entity a, entt::entity b) {
-              return registry.get<Transform>(a).z_index <
-                     registry.get<Transform>(b).z_index;
-            });
+                    [&registry](entt::entity a, entt::entity b) {
+                      return registry.get<Transform>(a).z_index <
+                             registry.get<Transform>(b).z_index;
+                    });
 
   BindFramebuffer(color_framebuffer);
   glClearColor(0.0F, 0.0F, 0.0F, 1.0F);
@@ -122,8 +122,8 @@ void render::Render(entt::registry& registry) {
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, normal_framebuffer->colorbuffer);
   deferred_shader->SetUniform("normal_texture", 1);
-  float aspect_ratio =
-      static_cast<float>(GetGameWindow().width) / static_cast<float>(GetGameWindow().height);
+  float aspect_ratio = static_cast<float>(GetGameWindow().width) /
+                       static_cast<float>(GetGameWindow().height);
   deferred_shader->SetUniform("aspect_ratio", aspect_ratio);
   core::quad::Render(core::quad::FULL_QUAD);
 
@@ -189,8 +189,8 @@ void render::RecreateFramebuffers(int width, int height) {
   for (auto& framebuffer : framebuffers) {
     if (framebuffer == nullptr) continue;
     glBindTexture(GL_TEXTURE_2D, framebuffer->colorbuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width,
-                 height, 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA,
+                 GL_FLOAT, nullptr);
     glBindTexture(GL_TEXTURE_2D, 0);
   }
 }

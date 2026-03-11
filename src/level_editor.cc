@@ -9,7 +9,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "core/animation.h"
 #include "core/camera.h"
+#include "core/component.h"
 #include "core/input.h"
 #include "core/light.h"
 #include "core/physics.h"
@@ -19,6 +21,7 @@
 #include "core/shader.h"
 #include "core/transform.h"
 #include "core/window.h"
+#include "editor/animation.h"
 #include "game/enemy.h"
 #include "game/spawn.h"
 #include "level_editor.h"
@@ -38,8 +41,8 @@ entt::entity spotlight = entt::null;
 bool enable_spotlight = false;
 bool enable_grid = true;
 
-glm::vec2 ScreenToWorld(const glm::vec2& screen_pos,
-                               const Camera& camera, const GameWindow& window) {
+glm::vec2 ScreenToWorld(const glm::vec2& screen_pos, const Camera& camera,
+                        const GameWindow& window) {
   float ppu = window.GetPixelsPerUnit();
   int width = window.width;
   int height = window.height;
@@ -51,7 +54,7 @@ glm::vec2 ScreenToWorld(const glm::vec2& screen_pos,
 }
 
 void MouseScrollCallback(GLFWwindow* /* window */, double /* xoffset */,
-                                double yoffset) {
+                         double yoffset) {
   if (!core::input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
     return;
   }
@@ -74,7 +77,7 @@ bool PointInRect(const glm::vec2& point, const Transform& transform) {
 }
 
 bool ObjectExistsAtPosition(const glm::vec2& position,
-                                   entt::registry& registry) {
+                            entt::registry& registry) {
   auto view = registry.view<const Transform>();
   return std::ranges::any_of(view.each(), [&](const auto& entity_transform) {
     auto [entity, transform] = entity_transform;
@@ -86,7 +89,7 @@ bool ObjectExistsAtPosition(const glm::vec2& position,
 }
 
 entt::entity GetEntityAtPosition(const glm::vec2& position,
-                                        entt::registry& registry) {
+                                 entt::registry& registry) {
   auto view = registry.view<Transform>();
   for (auto entity : view) {
     if (entity == spotlight) continue;
@@ -99,7 +102,7 @@ entt::entity GetEntityAtPosition(const glm::vec2& position,
 }
 
 void DrawGrid(GameWindow& window, Camera& camera,
-                     const std::shared_ptr<Shader>& shader) {
+              const std::shared_ptr<Shader>& shader) {
   float line_thickness = 1 / window.GetPixelsPerUnit();
   float half_width = (window.width / window.GetPixelsPerUnit()) / 2.0F;
   float half_height = (window.height / window.GetPixelsPerUnit()) / 2.0F;
@@ -145,9 +148,17 @@ void LevelEditor::Init() {
   rect_shader = ResourceManager::GetShader("Rect").shader;
   sprite_shader = ResourceManager::GetShader("Sprite").shader;
   glfwSetScrollCallback(GetGameWindow().window, MouseScrollCallback);
+  REGISTER_COMPONENT(Animation);
+  REGISTER_COMPONENT(Transform);
+  REGISTER_COMPONENT(Sprite);
+  REGISTER_COMPONENT(Light);
+  REGISTER_COMPONENT(PhysicsBody);
+  REGISTER_COMPONENT(PlayerSpawn);
+  REGISTER_COMPONENT(PlayerDamager);
 }
 
 void LevelEditor::Quit() {
+  glfwSetScrollCallback(GetGameWindow().window, nullptr);
   if (current_scene_path.empty()) {
     auto* level =
         tinyfd_saveFileDialog("Save Scene", "scene", 0, nullptr, nullptr);
@@ -294,6 +305,19 @@ void LevelEditor::Render(GameWindow& window) {
         }
         ImGui::EndMenu();
       }
+
+      if (ImGui::BeginMenu("View")) {
+        if (ImGui::MenuItem("Toggle Grid")) {
+          enable_grid = !enable_grid;
+        }
+        if (ImGui::MenuItem("Toggle Spotlight")) {
+          enable_spotlight = !enable_spotlight;
+        }
+        if (ImGui::MenuItem("Animation Editor")) {
+          editor::ShowAnimationWindow(!editor::internal::show_animation_window);
+        }
+        ImGui::EndMenu();
+      }
       ImGui::EndMainMenuBar();
     }
     ImGui::Begin("Info");
@@ -355,34 +379,33 @@ void LevelEditor::Render(GameWindow& window) {
       selected_entity = entt::null;
     }
     if (selected_entity != entt::null) {
-      auto& transform = registry.get<Transform>(selected_entity);
-      ImGui::DragFloat2("Position", glm::value_ptr(transform.position), 0.1F);
-      ImGui::DragFloat("Z Index", &transform.z_index, 0.1F);
-      ImGui::DragFloat2("Scale", glm::value_ptr(transform.scale), 0.1F);
-      ImGui::DragFloat("Rotation", &transform.rotation, 1.0F);
-      if (registry.any_of<Sprite>(selected_entity)) {
-        auto& sprite = registry.get<Sprite>(selected_entity);
-        if (ImGui::InputText("Color Tag", &sprite.texture_tag)) {
-          sprite.texture =
-              ResourceManager::GetTexture(sprite.texture_tag).texture;
-        }
-        static std::string normal_texture_tag = sprite.texture_tag;
-        if (ImGui::InputText("Normal Map Tag", &normal_texture_tag)) {
-          sprite.normal =
-              ResourceManager::GetTexture(normal_texture_tag).texture;
+      if (ImGui::CollapsingHeader("Transform")) {
+        auto& transform = registry.get<Transform>(selected_entity);
+        ImGui::DragFloat2("Position", glm::value_ptr(transform.position), 0.1F);
+        ImGui::DragFloat("Z Index", &transform.z_index, 0.1F);
+        ImGui::DragFloat2("Scale", glm::value_ptr(transform.scale), 0.1F);
+        ImGui::DragFloat("Rotation", &transform.rotation, 1.0F);
+      }
+      if (ImGui::CollapsingHeader("Sprite")) {
+        if (registry.any_of<Sprite>(selected_entity)) {
+          auto& sprite = registry.get<Sprite>(selected_entity);
+          if (ImGui::InputText("Color Tag", &sprite.texture_tag)) {
+            sprite.texture =
+                ResourceManager::GetTexture(sprite.texture_tag).texture;
+          }
+          static std::string normal_texture_tag = sprite.texture_tag;
+          if (ImGui::InputText("Normal Map Tag", &normal_texture_tag)) {
+            sprite.normal =
+                ResourceManager::GetTexture(normal_texture_tag).texture;
+          }
         }
       }
       // Check if it has a physics body component
       if (registry.any_of<PhysicsBody>(selected_entity)) {
-        auto& physics_body = registry.get<PhysicsBody>(selected_entity);
-        ImGui::Checkbox("Is Dynamic", &physics_body.is_dynamic);
-        ImGui::Checkbox("Is Chained", &physics_body.is_chained);
-        if (ImGui::Button("Remove Physics Body Component")) {
-          registry.remove<PhysicsBody>(selected_entity);
-        }
-      } else {
-        if (ImGui::Button("Add Physics Body Component")) {
-          registry.emplace<PhysicsBody>(selected_entity);
+        if (ImGui::CollapsingHeader("Physics Body")) {
+          auto& physics_body = registry.get<PhysicsBody>(selected_entity);
+          ImGui::Checkbox("Is Dynamic", &physics_body.is_dynamic);
+          ImGui::Checkbox("Is Chained", &physics_body.is_chained);
         }
       }
       // Check if it has a light component
@@ -400,30 +423,18 @@ void LevelEditor::Render(GameWindow& window) {
                              &light.volumetric_intensity, 0.1F, 0.0F);
           }
         }
-        if (ImGui::Button("Remove Light Component")) {
-          registry.remove<Light>(selected_entity);
-        }
-      } else {
-        if (ImGui::Button("Add Light Component")) {
-          registry.emplace<Light>(selected_entity);
-        }
       }
 
       if (registry.any_of<PlayerDamager>(selected_entity)) {
-        auto& damager = registry.get<PlayerDamager>(selected_entity);
-        ImGui::DragFloat("Damage", &damager.damage, 1.0F, 0);
-        ImGui::DragFloat("Hitbox Radius", &damager.hitbox_radius, 0.1F, 0.0F);
-        ImGui::DragFloat("Knockback", &damager.knockback, 0.1F, 0.0F);
-        ImGui::DragFloat2("Knockback Direction",
-                          glm::value_ptr(damager.knockback_direction), 0.1F);
-        ImGui::DragFloat("Time Until Next Hit", &damager.time_until_next_hit,
-                         0.1F, 0.0F);
-        if (ImGui::Button("Remove PlayerDamager Component")) {
-          registry.remove<PlayerDamager>(selected_entity);
-        }
-      } else {
-        if (ImGui::Button("Add PlayerDamager Component")) {
-          registry.emplace<PlayerDamager>(selected_entity);
+        if (ImGui::CollapsingHeader("Player Damager")) {
+          auto& damager = registry.get<PlayerDamager>(selected_entity);
+          ImGui::DragFloat("Damage", &damager.damage, 1.0F, 0);
+          ImGui::DragFloat("Hitbox Radius", &damager.hitbox_radius, 0.1F, 0.0F);
+          ImGui::DragFloat("Knockback", &damager.knockback, 0.1F, 0.0F);
+          ImGui::DragFloat2("Knockback Direction",
+                            glm::value_ptr(damager.knockback_direction), 0.1F);
+          ImGui::DragFloat("Time Until Next Hit", &damager.time_until_next_hit,
+                           0.1F, 0.0F);
         }
       }
 
@@ -431,20 +442,78 @@ void LevelEditor::Render(GameWindow& window) {
         if (ImGui::Button("Remove PlayerSpawn Component")) {
           registry.remove<PlayerSpawn>(selected_entity);
         }
-      } else {
-        if (ImGui::Button("Add PlayerSpawn Component")) {
-          registry.emplace<PlayerSpawn>(selected_entity);
+      }
+
+      if (registry.any_of<Animation>(selected_entity)) {
+        if (ImGui::CollapsingHeader("Animation")) {
+          ImGui::Text("View and edit this animation in the Animation Editor");
+          if (ImGui::Button("Edit Animation")) {
+            editor::ShowAnimationWindow(true);
+          }
         }
       }
 
+      ImGui::SeparatorText("Utilities");
+
+      if (ImGui::Button("Add Component")) {
+        ImGui::OpenPopup("add_component_popup");
+      }
+
+      static std::string search;
+      if (ImGui::BeginPopup("add_component_popup")) {
+        if (ImGui::IsWindowAppearing()) {
+          search.clear();
+        }
+        ImGui::InputText("Search", &search);
+        for (const auto& component : GetComponentRegistry()) {
+          if (component.Has(registry, selected_entity)) {
+            continue;
+          }
+
+          std::string lower_name = component.name;
+          std::string lower_search = search;
+          std::transform(lower_name.begin(), lower_name.end(),
+                         lower_name.begin(), ::tolower);
+          std::transform(lower_search.begin(), lower_search.end(),
+                         lower_search.begin(), ::tolower);
+          if (!lower_search.empty() &&
+              lower_name.find(search) == std::string::npos) {
+            continue;
+          }
+
+          if (ImGui::Selectable(component.name.c_str())) {
+            component.Add(registry, selected_entity);
+            ImGui::CloseCurrentPopup();
+          }
+        }
+        ImGui::EndPopup();
+      }
+
       if (ImGui::Button("Delete Entity")) {
-        registry.destroy(selected_entity);
-        selected_entity = entt::null;
+        ImGui::OpenPopup("delete_entity_popup");
+      }
+      if (ImGui::BeginPopup("delete_entity_popup")) {
+        ImGui::Text("Are you sure you want to delete this entity?");
+        if (ImGui::Button("Yes")) {
+          registry.destroy(selected_entity);
+          selected_entity = entt::null;
+          ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel")) {
+          ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
       }
     } else {
       ImGui::Text("No entity selected");
     }
+
     ImGui::End();
+  }
+
+  if (editor::internal::show_animation_window) {
+    editor::AnimationWindow(registry.get<Animation>(selected_entity));
   }
 
   ImGui::Render();

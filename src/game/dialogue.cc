@@ -1,6 +1,7 @@
 #include "game/dialogue.h"
 
 #include <pugixml.hpp>
+#include <utility>
 
 #include "core/camera.h"
 #include "core/resource_manager.h"
@@ -69,7 +70,8 @@ void Game::RenderDialogue(DialogueData& dialogue) {
     rect_shader = ResourceManager::GetShader("rect").shader;
   }
   if (dialogue.data.empty()) return;
-  if (dialogue.state.current_line >= static_cast<int>(dialogue.data.size())) {
+  if (std::cmp_greater_equal(dialogue.state.current_line,
+                             dialogue.data.size())) {
     std::print(
         "Warn: Dialogue current_line out of bounds, setting to last line\n");
     dialogue.state.current_line = static_cast<int>(dialogue.data.size()) - 1;

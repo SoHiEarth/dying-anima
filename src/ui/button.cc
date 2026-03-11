@@ -2,8 +2,9 @@
 #include "ui/elements.h"
 
 void ui::Button::Update(const glm::ivec2& mouse_pos, bool mouse_pressed) {
-  size.x = static_cast<int>(font_->GetWidth(text_) * font_->GetWidthScale(
-                                      text_, static_cast<float>(size.y)));
+  size.x =
+      static_cast<int>(font_->GetWidth(text_) *
+                       font_->GetWidthScale(text_, static_cast<float>(size.y)));
   if (IsHovered(mouse_pos)) {
     hovered_ = true;
     if (mouse_pressed && on_click_) {
@@ -27,7 +28,7 @@ void ui::Button::Render(const std::shared_ptr<Shader> text_shader,
 
   if (text_shader && font_) {
     font_->RenderUIAtHeight(text_, GetPosition(), static_cast<float>(size.y),
-                           {1.0F, 1.0F, 1.0F}, text_shader);
+                            {1.0F, 1.0F, 1.0F}, text_shader);
   }
 }
 
