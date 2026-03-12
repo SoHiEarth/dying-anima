@@ -1,11 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <textures>
-  <texture name="util.notexture" path="notexture.png"/>
-  <texture name="game.player" path="player.png"/>
-  <texture name="util.banner" path="banner.png"/>
-  <texture name="menu.selected" path="selected.png"/>
-  <texture name="game.city.light_sign" path="light_sign.png"/>
-  <texture name="game.city.building" path="building.png"/>
-  <texture name="game.city.lamp" path="lamp.png"/>
-  <texture name="game.city.brick" path="messy_brick.png"/>
+	<texture name="util.notexture" path="notexture.png"/>
+	<texture name="game.player" path="player.png"/>
+	<texture name="util.banner" path="banner.png"/>
+	<texture name="menu.selected" path="selected.png"/>
+	<texture name="game.city.light_sign" path="light_sign.png"/>
+	<texture name="game.city.building" path="building.png"/>
+	<texture name="game.city.lamp" path="lamp.png"/>
+	<texture name="game.city.brick" path="messy_brick.png"/>
+	<texture name="game.ui.heart_background" path="heart_background.png"/>
+	<texture name="game.ui.heart_half" path="heart_half.png"/>
+	<texture name="game.ui.heart_full" path="heart_full.png"/>
+	<texture name="game.city.awning" path="awning.png"/>
 </textures>
