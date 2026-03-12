@@ -30,11 +30,12 @@
 #include "saves.h"
 #include "sprite.h"
 #include "util/calculate.h"
+#include "core/animation.h"
 
 SaveData game::save_data{};
 
 void GameScene::Init() {
-  physics::Init({0, -19.81F});
+  physics::Init({0, -39.81F});
   registry = LoadLevel("level.txt");
   player = registry.create();
   auto& player_transform = registry.emplace<Transform>(player);
@@ -158,6 +159,7 @@ void GameScene::Update(double dt) {
         physics::SyncPosition(physicsBody.body, transform.position);
       });
   game::UpdatePlayerDamagers(registry, static_cast<float>(dt));
+  UpdateAnimations(registry, static_cast<float>(dt));
 }
 
 void GameScene::Render(GameWindow& window) {

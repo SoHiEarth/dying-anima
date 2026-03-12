@@ -22,18 +22,10 @@ void editor::AnimationWindow(Animation& animation) {
   }
 
   ImGui::Begin("Animation Editor", &editor::internal::show_animation_window);
-  
-  if (ImGui::Button("Add Animation")) {
-    animation.animations.emplace_back(std::format("New Animation {}", static_cast<int>(animation.animations.size())), std::vector<AnimationFrame>{});
-  }
 
-  for (auto& [name, frames] : animation.animations) {
-    ImGui::PushID(name.c_str());
-    ImGui::Text("Preloaded Animation: %s", name.c_str());
-    if (ImGui::TreeNode(name.c_str())) {
-      for (size_t i = 0; i < frames.size(); ++i) {
+      for (size_t i = 0; i < animation.frames.size(); ++i) {
         if (ImGui::CollapsingHeader(("Frame " + std::to_string(i)).c_str())) {
-        ImGui::Text("Texture: %s", frames[i].texture.tag.c_str());
+        ImGui::Text("Texture: %s", animation.frames[i].texture.tag.c_str());
         ImGui::SameLine();
         if (ImGui::Button(("Change##" + std::to_string(i)).c_str())) {
           ImGui::OpenPopup(("TexturePopup##" + std::to_string(i)).c_str());
@@ -46,20 +38,16 @@ void editor::AnimationWindow(Animation& animation) {
           ImGui::InputText("Texture Tag", &tag);
           if (ImGui::Button(("Load Texture##" + std::to_string(i)).c_str())) {
             auto texture = ResourceManager::GetTexture(tag);
-            frames[i].texture = texture;
+            animation.frames[i].texture = texture;
             ImGui::CloseCurrentPopup();
           }
           ImGui::EndPopup();
         }
-        ImGui::InputFloat(("Duration##" + std::to_string(i)).c_str(), &frames[i].duration);
+        ImGui::InputFloat(("Duration##" + std::to_string(i)).c_str(), &animation.frames[i].duration);
         }
       }
-      if (ImGui::Button("Add Frame")) {
-        frames.emplace_back(ResourceManager::GetTexture("util.notexture"), 0.1F);
-      }
-      ImGui::TreePop();
-    }
-    ImGui::PopID();
+  if (ImGui::Button("Add Frame")) {
+    animation.frames.emplace_back(ResourceManager::GetTexture("util.notexture"), 0.1F);
   }
 
   ImGui::SeparatorText("Utilities");

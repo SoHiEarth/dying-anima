@@ -10,6 +10,7 @@
 #include "game/enemy.h"
 #include "game/spawn.h"
 #include "sprite.h"
+#include "core/animation.h"
 
 entt::registry LoadLevel(std::string_view filename) {
   pugi::xml_document doc;
@@ -84,6 +85,13 @@ entt::registry LoadLevel(std::string_view filename) {
       auto spawn_node = object_node.child("PlayerSpawn");
       if (spawn_node) {
         registry.emplace<PlayerSpawn>(entity);
+      }
+    }
+    {
+      auto animation_node = object_node.child("Animation");
+      if (animation_node) {
+        auto& animation = registry.emplace<Animation>(entity);
+        animation = LoadAnimationFromFile(animation_node.attribute("file_path").as_string());
       }
     }
   }
@@ -161,6 +169,12 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
 
     if (registry.all_of<PlayerSpawn>(entity)) {
       object_node.append_child("PlayerSpawn");
+    }
+
+    if (registry.try_get<Animation>(entity)) {
+      const auto& animation = registry.get<Animation>(entity);
+      auto animation_node = object_node.append_child("Animation");
+      animation_node.append_attribute("file_path") = animation.file_path.c_str();
     }
   }
   if (!doc.save_file(filename.data())) {

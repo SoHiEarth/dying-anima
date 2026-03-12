@@ -12,7 +12,7 @@ struct PlayerSpeed {
   float speed = 0.25f;
   float deceleration = 0.325f;
   float boost_speed = 1.75f;
-  float jump_impulse = 0.275f;
+  float jump_impulse = 8.75f;
 };
 
 bool IsOnGround(b2BodyId body);
