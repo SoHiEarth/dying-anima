@@ -130,6 +130,14 @@ void GameScene::Update(double dt) {
       velocity.x = std::max(velocity.x * player_speed.boost_speed,
                             -player_speed.max_boost_speed);
   }
+
+  if (velocity.x > 0) {
+    auto& transform = registry.get<Transform>(player);
+    transform.scale.x = 1.0f;
+  } else if (velocity.x < 0) {
+    auto& transform = registry.get<Transform>(player);
+    transform.scale.x = -1.0f;  // Flip sprite when moving left
+  }
   b2Body_SetLinearVelocity(player_body, velocity);
 
   if (core::input::IsKeyPressed(GLFW_KEY_SPACE) && IsOnGround(player_body)) {
@@ -175,9 +183,33 @@ void GameScene::Render(GameWindow& window) {
   window.SetProjection(ProjectionType::SCREEN_SPACE);
   GetCamera().SetType(CameraType::kUi);
   auto& player_health = registry.get<Health>(player);
-  special_font->RenderUI(
-      std::format("Health: {}", static_cast<int>(player_health.health)),
-      glm::vec2(20.0F, 20.0F), glm::vec2(1.0F), glm::vec3(1.0F), text_shader);
+  auto health_full_count = static_cast<int>(player_health.health / 10.0f);
+  auto health_partial_count =
+      (player_health.health - (health_full_count * 10.0)) / 10.0f;
+  auto health_empty_count =
+      10 - health_full_count - (health_partial_count > 0 ? 1 : 0);
+  int health_x = 20;
+  const int health_y = window.height - 40;
+  for (int i = 0; i < health_full_count; i++) {
+    ResourceManager::GetTexture("game.ui.heart_full")
+        .texture->Render(sprite_shader,
+                         CalculateModelMatrix({health_x += 50, health_y}, 0.0f,
+                                              0.0f, {40.0f, 40.0f}));
+  }
+  for (int i = 0; i < health_partial_count; i++) {
+    ResourceManager::GetTexture("game.ui.heart_half")
+        .texture->Render(sprite_shader,
+                         CalculateModelMatrix({health_x += 50, health_y}, 0.0f,
+                                              0.0f,
+                                              {40.0f, 40.0f}));
+  }
+  for (int i = 0; i < health_empty_count; i++) {
+    ResourceManager::GetTexture("game.ui.heart_empty")
+        .texture->Render(sprite_shader,
+                         CalculateModelMatrix({health_x += 50, health_y}, 0.0f,
+                                              0.0f,
+                                              {40.0f, 40.0f}));
+  }
 
   // debug info: fps
   static double previous_seconds = glfwGetTime();
