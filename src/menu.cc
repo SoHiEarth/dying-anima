@@ -35,7 +35,8 @@ void MenuScene::Init() {
   rect_shader = ResourceManager::GetShader("Rect").shader;
   text_shader->Use();
   text_shader->SetUniform("character", 0);
-#ifndef NDEBUG
+// Commented out for demonstration purposes
+  //#ifndef NDEBUG
   menu_layout
       .AddElement(std::make_unique<ui::Button>(
           "Editor", font,
@@ -44,7 +45,7 @@ void MenuScene::Init() {
                 std::make_unique<LevelEditor>(scene_manager));
           }))
       ->size.y = kLabelSizeY;
-#endif
+//#endif
   menu_layout
       .AddElement(std::make_unique<ui::Button>(
           "Exit", font, [this]() { scene_manager.PopScene(); }))
