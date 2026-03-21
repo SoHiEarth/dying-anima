@@ -3,8 +3,10 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <imgui_internal.h>
 #include <imgui_stdlib.h>
 
+#include <algorithm>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -30,6 +32,7 @@
 #include "sprite.h"
 #include "tinyfiledialogs/tinyfiledialogs.h"
 #include "util/calculate.h"
+#include "game/game.h"
 
 enum class Toolkit { kSelect, kMove };
 namespace {
@@ -38,7 +41,7 @@ entt::entity selected_entity = entt::null;
 glm::dvec2 mouse_position, last_mouse_position;
 std::string current_scene_path;
 entt::entity spotlight = entt::null;
-bool enable_spotlight = false;
+bool enable_spotlight = true;
 bool enable_grid = true;
 
 glm::vec2 ScreenToWorld(const glm::vec2& screen_pos, const Camera& camera,
@@ -202,8 +205,8 @@ void LevelEditor::Update(double /* dt */) {
     light.type = LightType::POINT;
     light.color = glm::vec3(1.0F, 1.0F, 1.0F);
     light.intensity = 1.0F;
-    light.radial_falloff = 10.0F;
-    light.volumetric_intensity = 0.25F;
+    light.radial_falloff = 50.0F;
+    light.volumetric_intensity = 0.05F;
   } else {
     if (registry.valid(spotlight)) {
       registry.destroy(spotlight);
@@ -275,6 +278,41 @@ void LevelEditor::Render(GameWindow& window) {
   if (enable_grid) {
     DrawGrid(window, camera, rect_shader);
   }
+  
+  auto *viewport = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(viewport->Pos);
+  ImGui::SetNextWindowSize(viewport->Size);
+  ImGui::SetNextWindowViewport(viewport->ID);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0F);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0F);
+  auto window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+                                  ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+                                  ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
+                                  ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBackground;
+  ImGui::Begin("DockSpace", nullptr, window_flags);
+  ImGui::PopStyleVar(2);
+  ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+  ImGui::DockSpace(dockspace_id, ImVec2(0.0F, 0.0F), ImGuiDockNodeFlags_PassthruCentralNode);
+  ImGui::End();
+  static bool first_dock_layout = true;
+  if (first_dock_layout) {
+    first_dock_layout = false;
+    ImGui::DockBuilderRemoveNode(dockspace_id);
+    ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+    ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
+    ImGuiID dock_main_id = dockspace_id;
+    ImGuiID dock_id_bottom = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.3F,
+                                                        nullptr, &dock_main_id);
+    ImGuiID dock_id_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.25F,
+                                                        nullptr, &dock_main_id);
+    ImGuiID dock_id_right = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.25F,
+                                                        nullptr, &dock_main_id);
+    ImGui::DockBuilderDockWindow("Info", dock_id_left);
+    ImGui::DockBuilderDockWindow("Resource Manager", dock_id_bottom);
+    ImGui::DockBuilderDockWindow("Renderer", dock_id_left);
+    ImGui::DockBuilderDockWindow("Entity Inspector", dock_id_right);
+    ImGui::DockBuilderFinish(dockspace_id);
+  }
 
   {
     if (ImGui::BeginMainMenuBar()) {
@@ -303,6 +341,11 @@ void LevelEditor::Render(GameWindow& window) {
             SaveLevel(current_scene_path, registry);
           }
         }
+        if (ImGui::MenuItem("Play This Level")) {
+          SaveLevel("level.txt", registry);
+          scene_manager.PopScene();
+          scene_manager.PushScene(std::make_unique<GameScene>(scene_manager));
+        }
         ImGui::EndMenu();
       }
 
@@ -320,6 +363,7 @@ void LevelEditor::Render(GameWindow& window) {
       }
       ImGui::EndMainMenuBar();
     }
+
     ImGui::Begin("Info");
     if (ImGui::CollapsingHeader("Controls")) {
       ImGui::Text("Hold Middle Mouse Button to Pan");
@@ -332,23 +376,52 @@ void LevelEditor::Render(GameWindow& window) {
                        static_cast<int>(Toolkit::kSelect));
     ImGui::RadioButton("Move", reinterpret_cast<int*>(&current_tool),
                        static_cast<int>(Toolkit::kMove));
-    ImGui::SeparatorText("Resource Manager");
-    ImGui::Text("Textures:");
+    ImGui::End();
+    ImGui::Begin("Resource Manager");
     if (ImGui::Button("Reload Textures")) {
-      ResourceManager::Quit();
-      ResourceManager::Init();
+      ResourceManager::ReloadTextures();
     }
+    float thumbnail_size = 64.0F;
+    float padding = 16.0F;
+    float cell_size = thumbnail_size + (padding * 2);
+    float panel_width = ImGui::GetContentRegionAvail().x;
+    int column_count = static_cast<int>(panel_width / cell_size);
+    column_count = std::max(column_count, 1);
+    int i = 0;
     for (const auto& [key, value] : ResourceManager::texture_atlas) {
-      if (ImGui::CollapsingHeader(key.c_str())) {
+      ImGui::PushID(key.c_str());
+      ImGui::BeginGroup();
+      ImVec2 size = ImVec2(thumbnail_size, thumbnail_size);
+      if (value.texture->width > value.texture->height) {
+        size.x = thumbnail_size;
+        size.y = value.texture->height / thumbnail_size;
+      } else {
+        size.y = thumbnail_size;
+        size.x = value.texture->width / thumbnail_size;
+      }
+      if (ImGui::ImageButton("", value.texture->id,
+                       ImVec2(thumbnail_size, thumbnail_size),
+                       ImVec2(1, 1), ImVec2(0, 0))) {}
+
+      if (ImGui::BeginDragDropSource()) {
+        ImGui::SetDragDropPayload("SPRITE_TEXTURE", key.c_str(), key.size() + 1);
         ImGui::Image(value.texture->id,
-                     ImVec2(static_cast<float>(value.texture->width),
-                            static_cast<float>(value.texture->height)));
-        ImGui::Text("Dimensions: %dx%d", value.texture->width,
-                    value.texture->height);
-        ImGui::Text("File: %s", value.texture->path.c_str());
+               ImVec2(32, 32),
+               ImVec2(1, 1), ImVec2(0, 0));
+        ImGui::EndDragDropSource();
+      }
+
+      ImGui::TextWrapped("%s", key.c_str());
+      ImGui::EndGroup();
+      ImGui::PopID();
+      i++;
+      if (i % column_count != 0) {
+        ImGui::SameLine();
       }
     }
-    ImGui::SeparatorText("Renderer");
+    ImGui::End();
+    ImGui::Begin("Renderer");
+    auto camera = GetCamera();
     ImGui::Text("Position: (%.2f, %.2f)", camera.position.x, camera.position.y);
     ImGui::Text("Window PPU: %.2f", window.GetPixelsPerUnit());
     ImGui::Text("Camera Type: %s", camera.GetType() == CameraType::kWorld
@@ -374,7 +447,8 @@ void LevelEditor::Render(GameWindow& window) {
         }
       }
     }
-    ImGui::SeparatorText("Entity Info");
+    ImGui::End();
+    ImGui::Begin("Entity Inspector");
     if (registry.try_get<Transform>(selected_entity) == nullptr) {
       selected_entity = entt::null;
     }
@@ -389,14 +463,21 @@ void LevelEditor::Render(GameWindow& window) {
       if (ImGui::CollapsingHeader("Sprite")) {
         if (registry.any_of<Sprite>(selected_entity)) {
           auto& sprite = registry.get<Sprite>(selected_entity);
-          if (ImGui::InputText("Color Tag", &sprite.texture_tag)) {
-            sprite.texture =
-                ResourceManager::GetTexture(sprite.texture_tag).texture;
+          ImGui::BeginGroup();
+          if (sprite.texture) {
+            ImGui::Image(sprite.texture->id, ImVec2(thumbnail_size, thumbnail_size), ImVec2(1, 1), ImVec2(0, 0));
+          } else {
+            ImGui::TextColored(ImVec4(1, 0, 0, 1), "No Image Found.");
           }
-          static std::string normal_texture_tag = sprite.texture_tag;
-          if (ImGui::InputText("Normal Map Tag", &normal_texture_tag)) {
-            sprite.normal =
-                ResourceManager::GetTexture(normal_texture_tag).texture;
+          ImGui::Text("Tag: %s", sprite.texture_tag.c_str());
+          ImGui::EndGroup();
+          if (ImGui::BeginDragDropTarget()) {
+            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SPRITE_TEXTURE")) {
+              const char* new_tag = static_cast<const char*>(payload->Data);
+              sprite.texture_tag = new_tag;
+              sprite.texture = ResourceManager::GetTexture(sprite.texture_tag).texture;
+            }
+            ImGui::EndDragDropTarget();
           }
         }
       }

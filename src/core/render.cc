@@ -168,21 +168,6 @@ void render::Render(entt::registry& registry) {
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, combine_framebuffer->colorbuffer);
   core::quad::Render(core::quad::FULL_QUAD);
-
-  ImGui::Begin("Framebuffer Inspector");
-  ImGui::Text("Default Framebuffer:");
-  ImGui::Image(default_framebuffer->colorbuffer, ImVec2(200, 200));
-  ImGui::Text("Color Framebuffer:");
-  ImGui::Image(color_framebuffer->colorbuffer, ImVec2(200, 200));
-  ImGui::Text("Normal Framebuffer:");
-  ImGui::Image(normal_framebuffer->colorbuffer, ImVec2(200, 200));
-  ImGui::Text("Bloom Framebuffer:");
-  ImGui::Image(bloom_framebuffer->colorbuffer, ImVec2(200, 200));
-  ImGui::Text("Bloom Framebuffer 2:");
-  ImGui::Image(bloom_framebuffer_2->colorbuffer, ImVec2(200, 200));
-  ImGui::Text("Combine Framebuffer:");
-  ImGui::Image(combine_framebuffer->colorbuffer, ImVec2(200, 200));
-  ImGui::End();
 }
 
 void render::RecreateFramebuffers(int width, int height) {

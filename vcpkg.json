@@ -11,13 +11,15 @@
     {
         "name": "imgui",
         "features": [
-            "freetype",
-            "glfw-binding",
-            "opengl3-binding"
+          "docking-experimental",
+          "freetype",
+          "glfw-binding",
+          "opengl3-binding"
         ]
     },
     "tinyfiledialogs",
     "opengl",
+    "openal-soft",
     "pugixml",
     "stb"
   ]

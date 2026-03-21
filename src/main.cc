@@ -61,6 +61,7 @@ int main() {
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO& imgui_io = ImGui::GetIO();
+  imgui_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
   ResourceManager::Init();
   imgui_io.Fonts->AddFontFromFileTTF(
       ResourceManager::GetFont("Debug").file.c_str(), 15.5F);

@@ -5,6 +5,7 @@ project(DyingAnima
 )
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(OpenAL CONFIG REQUIRED)
 find_package(box2d CONFIG REQUIRED)
 find_package(Freetype CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
@@ -53,6 +54,7 @@ target_link_libraries(DyingAnima PRIVATE
   glfw
   glm::glm
   OpenGL::GL
+  OpenAL::OpenAL
   imgui::imgui
   pugixml::pugixml
   EnTT::EnTT

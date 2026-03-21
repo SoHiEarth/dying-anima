@@ -172,9 +172,6 @@ void GameScene::Update(double dt) {
 
 void GameScene::Render(GameWindow& window) {
   auto& camera_position = GetCamera().position;
-  ImGui_ImplOpenGL3_NewFrame();
-  ImGui_ImplGlfw_NewFrame();
-  ImGui::NewFrame();
 
   window.SetProjection(ProjectionType::CENTERED);
   GetCamera().SetType(CameraType::kWorld);
@@ -222,56 +219,4 @@ void GameScene::Render(GameWindow& window) {
     previous_seconds = current_seconds;
     frame_count = 0;
   }
-
-  ImGui::Begin("Telemetry & More");
-  ImGui::DragFloat("render::exposure", &render::exposure, 0.01F, 0.0F, 10.0F);
-  ImGui::Text("FPS: %.2f", fps);
-  auto& player_transform = registry.get<Transform>(player);
-  if (ImGui::DragFloat3("Position",
-                        glm::value_ptr(player_transform.position))) {
-    b2Body_SetTransform(
-        player_body,
-        b2Vec2(player_transform.position.x, player_transform.position.y),
-        b2Body_GetRotation(player_body));
-    b2Body_SetLinearVelocity(player_body, b2Vec2(0.0F, 0.0F));
   }
-  auto velocity = b2Body_GetLinearVelocity(player_body);
-  ImGui::Text("Velocity: (%.2f, %.2f)", velocity.x, velocity.y);
-  ImGui::Text("On Ground: %s", IsOnGround(player_body) ? "Yes" : "No");
-  ImGui::Text("Camera Position: (%.2f, %.2f)", camera_position.x,
-              camera_position.y);
-  if (ImGui::Button("Add Physics Bodies to All Transforms")) {
-    for (auto entity : registry.view<Transform>()) {
-      if (!registry.any_of<PhysicsBody>(entity)) {
-        auto& transform = registry.get<Transform>(entity);
-        if (transform.scale.x == 0 || transform.scale.y == 0) {
-          continue;  // Skip entities with zero scale
-        }
-        auto body = physics::CreateBody(transform, false);
-        registry.emplace<PhysicsBody>(entity, body);
-      }
-    }
-  }
-  ImGui::SeparatorText("Input Status");
-  for (auto& [key, state] : core::input::states) {
-    if (state) ImGui::Text("%s: Pressed", glfwGetKeyName(key, 0));
-  }
-  ImGui::End();
-
-  ImGui::Begin("Player Tweaker");
-  auto& player_speed = registry.get<PlayerSpeed>(player);
-  ImGui::DragFloat("Air Control Multiplier",
-                   &player_speed.air_control_multiplier, 0.01F, 0.0F, 1.0F);
-  ImGui::DragFloat("Max Speed", &player_speed.max_speed, 0.1F, 0.0F);
-  ImGui::DragFloat("Max Boost Speed", &player_speed.max_boost_speed, 0.1F,
-                   0.0F);
-  ImGui::DragFloat("Speed", &player_speed.speed, 0.01F, 0.0F);
-  ImGui::DragFloat("Deceleration", &player_speed.deceleration, 0.01F, 0.0F);
-  ImGui::DragFloat("Boost Speed", &player_speed.boost_speed, 1.0F, 0.0F);
-  ImGui::DragFloat("Jump Impulse", &player_speed.jump_impulse, 1.0F, 0.0F);
-  ImGui::End();
-
-  ImGui::Render();
-  ImGui::EndFrame();
-  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
