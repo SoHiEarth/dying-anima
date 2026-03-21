@@ -25,7 +25,7 @@ void IntroScene::Init() {
 
 void IntroScene::Quit() {
   game::save_data.completion_markers.emplace_back(
-      Progression::INTRO_COMPLETE_MARKER);
+      completion::kIntroCompleteMarker);
 }
 
 void IntroScene::Update(double dt) {

@@ -401,14 +401,6 @@ void LevelEditor::Render(GameWindow& window) {
     for (const auto& [key, value] : ResourceManager::texture_atlas) {
       ImGui::PushID(key.c_str());
       ImGui::BeginGroup();
-      ImVec2 size = ImVec2(thumbnail_size, thumbnail_size);
-      if (value.texture->width > value.texture->height) {
-        size.x = thumbnail_size;
-        size.y = value.texture->height / thumbnail_size;
-      } else {
-        size.y = thumbnail_size;
-        size.x = value.texture->width / thumbnail_size;
-      }
       if (ImGui::ImageButton("", value.texture->id,
                        ImVec2(thumbnail_size, thumbnail_size),
                        ImVec2(1, 1), ImVec2(0, 0))) {}

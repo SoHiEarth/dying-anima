@@ -73,7 +73,7 @@ void MenuScene::Update(double /* dt */) {
         scene_manager.PushScene(std::make_unique<GameScene>(scene_manager));
         if (std::ranges::find(game::save_data.completion_markers,
 
-                              Progression::INTRO_COMPLETE_MARKER) ==
+                              completion::kIntroCompleteMarker) ==
             game::save_data.completion_markers.end()) {
           scene_manager.PushScene(std::make_unique<IntroScene>(scene_manager));
         }
