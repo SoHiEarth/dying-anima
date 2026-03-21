@@ -34,8 +34,8 @@
 #include "util/calculate.h"
 #include "game/game.h"
 
-enum class Toolkit { kSelect, kMove };
 namespace {
+enum class Toolkit { kSelect, kMove };
 Toolkit current_tool = Toolkit::kSelect;
 entt::entity selected_entity = entt::null;
 glm::dvec2 mouse_position, last_mouse_position;
@@ -307,7 +307,7 @@ void LevelEditor::Render(GameWindow& window) {
                                                         nullptr, &dock_main_id);
     ImGuiID dock_id_right = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.25F,
                                                         nullptr, &dock_main_id);
-    ImGui::DockBuilderDockWindow("Info", dock_id_left);
+    ImGui::DockBuilderDockWindow("Scene", dock_id_left);
     ImGui::DockBuilderDockWindow("Resource Manager", dock_id_bottom);
     ImGui::DockBuilderDockWindow("Renderer", dock_id_left);
     ImGui::DockBuilderDockWindow("Entity Inspector", dock_id_right);
@@ -364,7 +364,7 @@ void LevelEditor::Render(GameWindow& window) {
       ImGui::EndMainMenuBar();
     }
 
-    ImGui::Begin("Info");
+    ImGui::Begin("Scene");
     if (ImGui::CollapsingHeader("Controls")) {
       ImGui::Text("Hold Middle Mouse Button to Pan");
       ImGui::Text("Hold Left Control + Left Mouse Button to Select/Place");
@@ -376,7 +376,17 @@ void LevelEditor::Render(GameWindow& window) {
                        static_cast<int>(Toolkit::kSelect));
     ImGui::RadioButton("Move", reinterpret_cast<int*>(&current_tool),
                        static_cast<int>(Toolkit::kMove));
+    ImGui::SeparatorText("Entities");
+    auto transform_view = registry.view<const Transform>();
+    int entity_count = 0;
+    for (auto [entity, transform] : transform_view.each()) {
+      if (entity == spotlight) { continue; }
+      if (ImGui::Selectable(std::format("Entity {}", ++entity_count).c_str(), selected_entity == entity)) {
+        selected_entity = entity;
+      }
+    }
     ImGui::End();
+
     ImGui::Begin("Resource Manager");
     if (ImGui::Button("Reload Textures")) {
       ResourceManager::ReloadTextures();
@@ -480,6 +490,9 @@ void LevelEditor::Render(GameWindow& window) {
             ImGui::EndDragDropTarget();
           }
         }
+        if (ImGui::Button("Remove Sprite")) {
+          registry.remove<Sprite>(selected_entity);
+        }
       }
       // Check if it has a physics body component
       if (registry.any_of<PhysicsBody>(selected_entity)) {
@@ -487,6 +500,9 @@ void LevelEditor::Render(GameWindow& window) {
           auto& physics_body = registry.get<PhysicsBody>(selected_entity);
           ImGui::Checkbox("Is Dynamic", &physics_body.is_dynamic);
           ImGui::Checkbox("Is Chained", &physics_body.is_chained);
+          if (ImGui::Button("Remove Physics Body")) {
+            registry.remove<PhysicsBody>(selected_entity);
+          }
         }
       }
       // Check if it has a light component
@@ -503,6 +519,9 @@ void LevelEditor::Render(GameWindow& window) {
             ImGui::DragFloat("Light Volumetric Intensity",
                              &light.volumetric_intensity, 0.1F, 0.0F);
           }
+          if (ImGui::Button("Remove Light")) {
+            registry.remove<Light>(selected_entity);
+          }
         }
       }
 
@@ -516,6 +535,9 @@ void LevelEditor::Render(GameWindow& window) {
                             glm::value_ptr(damager.knockback_direction), 0.1F);
           ImGui::DragFloat("Time Until Next Hit", &damager.time_until_next_hit,
                            0.1F, 0.0F);
+        }
+        if (ImGui::Button("Remove Player Damager")) {
+          registry.remove<PlayerDamager>(selected_entity);
         }
       }
 
@@ -531,6 +553,9 @@ void LevelEditor::Render(GameWindow& window) {
           if (ImGui::Button("Edit Animation")) {
             editor::ShowAnimationWindow(true);
           }
+        }
+        if (ImGui::Button("Remove Animation")) {
+          registry.remove<Animation>(selected_entity);
         }
       }
 
