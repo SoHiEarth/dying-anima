@@ -10,7 +10,6 @@
 #include "core/window.h"
 #include "util/colors.h"
 #include <imgui.h>
-#include <imgui_internal.h>
 
 constexpr float kLogMargin = 50.0f;
 
@@ -105,14 +104,6 @@ void game::Log::RenderLog(DegradationLevel degrade_level) {
       }
       i++;
     }
-    #ifndef NDEBUG
-    if (ImGui::Button("Add Dummy Log")) {
-      LogEntry dummy_entry;
-      dummy_entry.title[DegradationLevel::LEVEL_0] = std::format("Dummy Title {}", i+1);
-      dummy_entry.description[DegradationLevel::LEVEL_0] = std::format("Dummy Description {}", i+1);
-      NewLog(dummy_entry);
-    }
-    #endif
     ImGui::EndChild();
   }
   ImGui::SameLine();

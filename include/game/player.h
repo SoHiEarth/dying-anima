@@ -16,3 +16,7 @@ struct PlayerSpeed {
 };
 
 bool IsOnGround(b2BodyId body);
+
+namespace game {
+void RenderPlayerInfo();
+}

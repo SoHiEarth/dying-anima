@@ -34,6 +34,7 @@
 
 namespace {
 bool show_log = false;
+bool show_player_info = false;
 }
 
 SaveData game::save_data{};
@@ -176,6 +177,10 @@ void GameScene::Update(double dt) {
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_TAB)) {
     show_log = !show_log;
   }
+
+  if (core::input::IsKeyPressedThisFrame(GLFW_KEY_P)) {
+    show_player_info = !show_player_info;
+  }
 }
 
 void GameScene::Render(GameWindow& window) {
@@ -222,6 +227,10 @@ void GameScene::Render(GameWindow& window) {
 
   if (show_log) {
     player_log.RenderLog(game::LEVEL_0);
+  }
+
+  if (show_player_info) {
+    game::RenderPlayerInfo();
   }
 
   ImGui::Render();

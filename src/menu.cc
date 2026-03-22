@@ -76,6 +76,7 @@ void MenuScene::Update(double /* dt */) {
                               completion::kIntroCompleteMarker) ==
             game::save_data.completion_markers.end()) {
           scene_manager.PushScene(std::make_unique<IntroScene>(scene_manager));
+          printf("Pushing Intro Scene.\n");
         }
         break;
       case AppState::EXIT:

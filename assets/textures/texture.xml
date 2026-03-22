@@ -13,4 +13,7 @@
 	<texture name="game.ui.heart_full" path="heart_full.png"/>
 	<texture name="game.city.awning" path="awning.png"/>
 	<texture name="testing.dummy" path="dummy.png"/>
+	<texture name="ui.movement" path="movement.png"/>
+	<texture name="ui.journal" path="journal.png"/>
+	<texture name="ui.character" path="character.png"/>
 </textures>

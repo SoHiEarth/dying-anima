@@ -1,7 +1,10 @@
 #include "game/player.h"
 
 #include <vector>
+#include <imgui.h>
+#include <core/window.h>
 
+constexpr float kPlayerInfoMargin = 50.0f;
 /*
 bool IsOnGround(b2BodyId body) {
   int capacity = b2Body_GetContactCapacity(body);
@@ -28,4 +31,19 @@ bool IsOnGround(b2BodyId body) {
 bool IsOnGround(b2BodyId body) {
   auto velocity = b2Body_GetLinearVelocity(body);
   return velocity.y == 0;
+}
+
+void game::RenderPlayerInfo() {
+  ImGui::SetNextWindowPos(ImVec2(kPlayerInfoMargin, kPlayerInfoMargin),
+                          ImGuiCond_Always);
+  auto size = ImVec2(GetGameWindow().width - kPlayerInfoMargin * 2,
+                     GetGameWindow().height - kPlayerInfoMargin * 2);
+  ImGui::SetNextWindowSize(size, ImGuiCond_Always);
+  ImGui::Begin("PlayerInfo", nullptr,
+               ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
+                   ImGuiWindowFlags_NoResize);
+  ImGui::Text("Player Info");
+  ImGui::Text("Death Count: %d", 0); // temp
+
+  ImGui::End();
 }
