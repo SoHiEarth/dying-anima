@@ -20,6 +20,7 @@
 #include "core/scene.h"
 #include "core/window.h"
 #include "menu.h"
+#include "util/colors.h"
 
 namespace {
 void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {
@@ -62,6 +63,22 @@ int main() {
   ImGui::CreateContext();
   ImGuiIO& imgui_io = ImGui::GetIO();
   imgui_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+  ImGuiStyle& style = ImGui::GetStyle();
+  style.WindowRounding = 8.0f;
+  style.FrameRounding = 2.5f;
+  style.ScrollbarRounding = 0;
+  style.Colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 0.90f);
+  style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
+  style.Colors[ImGuiCol_WindowBg] = ImVec4(0.09f, 0.09f, 0.15f, 1.00f);
+  style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.85f);
+  style.Colors[ImGuiCol_Button] = ImVec4(0.48f, 0.72f, 0.89f, 0.49f);
+  style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.50f, 0.69f, 0.99f, 0.68f);
+  style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.80f, 0.50f, 0.50f, 1.00f);
+  style.Colors[ImGuiCol_Header] = ImVec4(0.30f, 0.69f, 1.00f, 0.53f);
+  style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.44f, 0.61f, 0.86f, 1.00f);
+  style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.38f, 0.62f, 0.83f, 1.00f);
+
   ResourceManager::Init();
   imgui_io.Fonts->AddFontFromFileTTF(
       ResourceManager::GetFont("Debug").file.c_str(), 15.5F);

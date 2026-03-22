@@ -8,7 +8,7 @@
 #include "core/window.h"
 #include "util/calculate.h"
 
-using glm::vec2;
+constexpr float kDialogueMargin = 50.0f;
 
 DialogueData Game::LoadDialogue(std::string_view file) {
   DialogueData dialogue;
@@ -50,46 +50,24 @@ void Game::SaveDialogue(const DialogueData& dialogue, std::string_view file) {
 }
 
 void Game::RenderDialogue(DialogueData& dialogue) {
-  static std::shared_ptr<Font> font = nullptr;
-  if (!font) {
-    font = ResourceManager::GetFont("dialouge").font;
+  ImGui::SetNextWindowPos(
+      ImVec2(GetGameWindow().width / 2.0f, GetGameWindow().height - 150.0f),
+                          ImGuiCond_Always, ImVec2(0.5f, 1.0f));
+  ImGui::SetNextWindowSize(ImVec2(GetGameWindow().width - kDialogueMargin * 2.0f, 150.0f),
+                           ImGuiCond_Always);
+  ImGui::Begin("DialougeWindow", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
+                   ImGuiWindowFlags_NoResize);
+  if (ImGui::BeginChild("CharacterInfo", ImVec2(150.0f, 0.0f), false)) {
+    const auto& meta = dialogue.data[0];
+    ImGui::Image(meta.character_image->id,
+                 ImVec2(100.0f, 100.0f), ImVec2(1, 1), ImVec2(0, 0));
+    ImGui::Text("%s", meta.character_name.c_str());
+    ImGui::EndChild();
   }
-
-  static std::shared_ptr<Shader> font_shader = nullptr;
-  if (!font_shader) {
-    font_shader = ResourceManager::GetShader("font").shader;
+  if (ImGui::BeginChild("DialogueText", ImVec2(0.0f, 0.0f), false)) {
+    const auto& meta = dialogue.data[0];
+    ImGui::Text("%s", meta.dialogue_lines[dialogue.state.current_line].c_str());
+    ImGui::EndChild();
   }
-
-  static std::shared_ptr<Shader> texture_shader = nullptr;
-  if (!texture_shader) {
-    texture_shader = ResourceManager::GetShader("texture").shader;
-  }
-
-  static std::shared_ptr<Shader> rect_shader = nullptr;
-  if (!rect_shader) {
-    rect_shader = ResourceManager::GetShader("rect").shader;
-  }
-  if (dialogue.data.empty()) return;
-  if (std::cmp_greater_equal(dialogue.state.current_line,
-                             dialogue.data.size())) {
-    std::print(
-        "Warn: Dialogue current_line out of bounds, setting to last line\n");
-    dialogue.state.current_line = static_cast<int>(dialogue.data.size()) - 1;
-  }
-  auto& window = GetGameWindow();
-  window.SetProjection(ProjectionType::SCREEN_SPACE);
-  GetCamera().SetType(CameraType::kUi);
-  auto meta = dialogue.data.at(dialogue.state.current_line);
-  if (meta.character_image) {
-    meta.character_image->Render(
-        texture_shader,
-        CalculateModelMatrix(glm::vec2{50.0F, window.height * 0.25F}, 0.0F,
-                             glm::vec2(100.0F, 100.0F)));
-  }
-  font->RenderUI(meta.character_name, glm::vec2{200.0F, window.height * 0.15F},
-                 vec2(1.0F), glm::vec3(1.0F), font_shader);
-  for (auto& line : meta.dialogue_lines) {
-    font->RenderUI(line, glm::vec2{200.0F, window.height * 0.25F},
-                   glm::vec2(1.0F), glm::vec3(1.0F), font_shader);
-  }
+  ImGui::End();
 }

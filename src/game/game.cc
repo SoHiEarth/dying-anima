@@ -32,6 +32,10 @@
 #include "util/calculate.h"
 #include "core/animation.h"
 
+namespace {
+bool show_log = false;
+}
+
 SaveData game::save_data{};
 
 void GameScene::Init() {
@@ -168,9 +172,17 @@ void GameScene::Update(double dt) {
       });
   game::UpdatePlayerDamagers(registry, static_cast<float>(dt));
   UpdateAnimations(registry, static_cast<float>(dt));
+
+  if (core::input::IsKeyPressedThisFrame(GLFW_KEY_TAB)) {
+    show_log = !show_log;
+  }
 }
 
 void GameScene::Render(GameWindow& window) {
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+
   auto& camera_position = GetCamera().position;
 
   window.SetProjection(ProjectionType::CENTERED);
@@ -208,15 +220,11 @@ void GameScene::Render(GameWindow& window) {
                                               {40.0f, 40.0f}));
   }
 
-  // debug info: fps
-  static double previous_seconds = glfwGetTime();
-  static int frame_count = 0;
-  double current_seconds = glfwGetTime();
-  frame_count++;
-  double fps =
-      static_cast<double>(frame_count) / (current_seconds - previous_seconds);
-  if (current_seconds - previous_seconds >= 1.0) {
-    previous_seconds = current_seconds;
-    frame_count = 0;
+  if (show_log) {
+    player_log.RenderLog(game::LEVEL_0);
   }
-  }
+
+  ImGui::Render();
+  ImGui::EndFrame();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}

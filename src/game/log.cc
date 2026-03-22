@@ -4,7 +4,15 @@
 #include <iomanip>
 #include <pugixml.hpp>
 #include <sstream>
+#include "core/resource_manager.h"
+#include "util/colors.h"
 #define LOG_FILE "player_log.xml"
+#include "core/window.h"
+#include "util/colors.h"
+#include <imgui.h>
+#include <imgui_internal.h>
+
+constexpr float kLogMargin = 50.0f;
 
 void game::Log::NewLog(const LogEntry& entry) {
   auto now = std::chrono::system_clock::now();
@@ -44,6 +52,8 @@ void game::Log::LoadLog() {
           description.attribute("level").as_int());
       log_entry.description[level] = description.text().as_string();
     }
+    log_entry.texture = ResourceManager::GetTexture(
+        entry.child("texture").attribute("tag").as_string());
     log.push_back(log_entry);
   }
 }
@@ -55,19 +65,68 @@ void game::Log::SaveLog() {
     auto entry_node = logs_node.append_child("entry");
     entry_node.append_child("timestamp").text().set(entry.timestamp.c_str());
     auto title_node = entry_node.append_child("title");
-    for (const auto& title : entry.title) {
+    for (const auto& [level, title] : entry.title) {
       auto degradation_node = title_node.append_child("degradation");
       degradation_node.append_attribute("level") =
-          static_cast<int>(title.first);
-      degradation_node.text().set(title.second.c_str());
+          static_cast<int>(level);
+      degradation_node.text().set(title.c_str());
     }
     auto description_node = entry_node.append_child("description");
-    for (const auto& description : entry.description) {
+    for (const auto& [level, description] : entry.description) {
       auto degradation_node = description_node.append_child("degradation");
       degradation_node.append_attribute("level") =
-          static_cast<int>(description.first);
-      degradation_node.text().set(description.second.c_str());
+          static_cast<int>(level);
+      degradation_node.text().set(description.c_str());
     }
+    auto texture_node = entry_node.append_child("texture");
+    texture_node.append_attribute("tag") = entry.texture.tag.c_str();
   }
   doc.save_file(LOG_FILE);
+}
+
+int selected_log_index = -1;
+
+void game::Log::RenderLog(DegradationLevel degrade_level) {
+  ImGui::SetNextWindowPos(ImVec2(kLogMargin, kLogMargin), ImGuiCond_Always);
+  auto size = ImVec2(GetGameWindow().width - kLogMargin * 2, GetGameWindow().height - kLogMargin * 2);
+  ImGui::SetNextWindowSize(size, ImGuiCond_Always); 
+  ImGui::Begin("PlayerLog", nullptr,
+               ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
+                   ImGuiWindowFlags_NoResize);
+  ImGui::Text("Journal");
+  if (ImGui::BeginChild("EntryList", ImVec2(ImGui::GetContentRegionAvail().x / 3.0f, 0))) {
+    ImGui::Text("All Entries");
+    int i = 0;
+    for (const auto& entry : log) {
+      for (const auto& title : entry.title) {
+        if (ImGui::Selectable(std::format("{}##{}", title.second, i).c_str())) {
+          selected_log_index = i;
+        }
+      }
+      i++;
+    }
+    #ifndef NDEBUG
+    if (ImGui::Button("Add Dummy Log")) {
+      LogEntry dummy_entry;
+      dummy_entry.title[DegradationLevel::LEVEL_0] = std::format("Dummy Title {}", i+1);
+      dummy_entry.description[DegradationLevel::LEVEL_0] = std::format("Dummy Description {}", i+1);
+      NewLog(dummy_entry);
+    }
+    #endif
+    ImGui::EndChild();
+  }
+  ImGui::SameLine();
+  if (selected_log_index >= 0 && selected_log_index < log.size()) {
+    if (ImGui::BeginChild("EntryDetails", ImVec2(0, 0))) {
+      auto entry = log.at(selected_log_index);
+      ImGui::Text("Details");
+      ImGui::Image(entry.texture.texture ? entry.texture.texture->id : 0,
+                   ImVec2(ImGui::GetWindowSize().x, 200),
+                   IMGUI_TEXTURE_FLIP);
+      ImGui::Separator();
+      ImGui::Text(entry.description.at(degrade_level).c_str());
+      ImGui::EndChild();
+    }
+  }
+  ImGui::End();
 }

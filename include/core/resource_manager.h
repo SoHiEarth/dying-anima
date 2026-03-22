@@ -1,6 +1,7 @@
 #ifndef RESOURCE_MANAGER_H
 #define RESOURCE_MANAGER_H
 #include "core/atlas.h"
+#define IMGUI_TEXTURE_FLIP ImVec2(0, 1), ImVec2(1, 0)
 
 namespace ResourceManager {
 extern TEXTURE_ATLAS texture_atlas;

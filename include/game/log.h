@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "core/resource_manager.h"
+#include "core/font.h"
 #include "core/texture.h"
 #include "game/degradation.h"
 
@@ -12,7 +14,7 @@ struct LogEntry {
   std::map<DegradationLevel, std::string> title;
   std::map<DegradationLevel, std::string> description;
   std::string timestamp;
-  std::shared_ptr<Texture> texture;
+  TextureHandle texture;
 };
 // Consider moving Load/Save to SaveData and let savedata handle operations
 struct Log {
@@ -20,7 +22,7 @@ struct Log {
   void LoadLog();
   void SaveLog();
   std::vector<LogEntry> GetLogs() { return log; }
-
+  void RenderLog(DegradationLevel degrade_level);
  private:
   std::vector<LogEntry> log;
 };

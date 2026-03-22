@@ -403,13 +403,12 @@ void LevelEditor::Render(GameWindow& window) {
       ImGui::BeginGroup();
       if (ImGui::ImageButton("", value.texture->id,
                        ImVec2(thumbnail_size, thumbnail_size),
-                       ImVec2(1, 1), ImVec2(0, 0))) {}
+                       IMGUI_TEXTURE_FLIP)) {}
 
       if (ImGui::BeginDragDropSource()) {
         ImGui::SetDragDropPayload("SPRITE_TEXTURE", key.c_str(), key.size() + 1);
         ImGui::Image(value.texture->id,
-               ImVec2(32, 32),
-               ImVec2(1, 1), ImVec2(0, 0));
+               ImVec2(32, 32), IMGUI_TEXTURE_FLIP);
         ImGui::EndDragDropSource();
       }
 
@@ -467,7 +466,7 @@ void LevelEditor::Render(GameWindow& window) {
           auto& sprite = registry.get<Sprite>(selected_entity);
           ImGui::BeginGroup();
           if (sprite.texture) {
-            ImGui::Image(sprite.texture->id, ImVec2(thumbnail_size, thumbnail_size), ImVec2(1, 1), ImVec2(0, 0));
+            ImGui::Image(sprite.texture->id, ImVec2(thumbnail_size, thumbnail_size), IMGUI_TEXTURE_FLIP);
           } else {
             ImGui::TextColored(ImVec4(1, 0, 0, 1), "No Image Found.");
           }
