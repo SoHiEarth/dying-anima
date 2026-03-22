@@ -266,10 +266,6 @@ void LevelEditor::Update(double /* dt */) {
 }
 
 void LevelEditor::Render(GameWindow& window) {
-  ImGui_ImplOpenGL3_NewFrame();
-  ImGui_ImplGlfw_NewFrame();
-  ImGui::NewFrame();
-
   window.SetProjection(ProjectionType::CENTERED);
   GetCamera().SetType(CameraType::kWorld);
   render::Render(registry);
@@ -612,8 +608,4 @@ void LevelEditor::Render(GameWindow& window) {
   if (editor::internal::show_animation_window) {
     editor::AnimationWindow(registry.get<Animation>(selected_entity));
   }
-
-  ImGui::Render();
-  ImGui::EndFrame();
-  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

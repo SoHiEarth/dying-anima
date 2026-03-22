@@ -21,6 +21,7 @@
 #include "core/window.h"
 #include "menu.h"
 #include "util/colors.h"
+#include "game/game.h"
 
 namespace {
 void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {
@@ -89,7 +90,11 @@ int main() {
   SceneManager scene_manager;
   scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
   scene_manager.ProcessSceneChanges();
-
+  if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
+    std::filesystem::create_directory("saves");
+  } else if (!game::save_data.valid) {
+    game::save_data = SaveManager::LoadLatestSave();
+  }
   double last_time = glfwGetTime();
   constexpr double kMaxDeltaTime = 0.1;
 
@@ -99,6 +104,9 @@ int main() {
     last_time = current_time;
 
     delta_time = std::min(delta_time, kMaxDeltaTime);
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
 
     glfwPollEvents();
     core::input::Update(window);
@@ -130,6 +138,9 @@ int main() {
     glClearColor(0.0F, 0.0F, 0.0F, 1.0F);
     glClear(GL_COLOR_BUFFER_BIT);
     scene_manager.Render(window);
+    ImGui::Render();
+    ImGui::EndFrame();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(window.window);
 
     while (window.IsMinimized()) {

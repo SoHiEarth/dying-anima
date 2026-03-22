@@ -81,10 +81,6 @@ void IntroScene::Render(GameWindow& window) {
         {window.width / 2.0F, font->GetHeight("Press Space To Continue")},
         glm::vec2(0.5F), glm::vec3(0.5F), text_shader);
   } else {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
     ImGui::SetNextWindowPos(ImVec2(kIntroMargin, kIntroMargin),
                             ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(window.width - kIntroMargin * 2,
@@ -119,8 +115,5 @@ void IntroScene::Render(GameWindow& window) {
       scene_manager.PopScene();
     }
     ImGui::End();
-    ImGui::Render();
-    ImGui::EndFrame();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
   }
 }

@@ -54,7 +54,12 @@ void MenuScene::Init() {
       .AddElement(std::make_unique<ui::Button>(
           "Play", font,
           [this]() {
+            scene_manager.PopScene();
             scene_manager.PushScene(std::make_unique<GameScene>(scene_manager));
+            if (game::save_data.completion_markers.empty()) {
+              scene_manager.PushScene(
+                  std::make_unique<IntroScene>(scene_manager));
+            }
           }))
       ->size.y = kLabelSizeY;
   menu_layout.AddElement(std::make_unique<ui::Label>("Dying Anima", font))
@@ -71,12 +76,8 @@ void MenuScene::Update(double /* dt */) {
       case AppState::PLAYING:
         scene_manager.PopScene();
         scene_manager.PushScene(std::make_unique<GameScene>(scene_manager));
-        if (std::ranges::find(game::save_data.completion_markers,
-
-                              completion::kIntroCompleteMarker) ==
-            game::save_data.completion_markers.end()) {
+        if (game::save_data.completion_markers.empty()) {
           scene_manager.PushScene(std::make_unique<IntroScene>(scene_manager));
-          printf("Pushing Intro Scene.\n");
         }
         break;
       case AppState::EXIT:

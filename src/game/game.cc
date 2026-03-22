@@ -184,10 +184,6 @@ void GameScene::Update(double dt) {
 }
 
 void GameScene::Render(GameWindow& window) {
-  ImGui_ImplOpenGL3_NewFrame();
-  ImGui_ImplGlfw_NewFrame();
-  ImGui::NewFrame();
-
   auto& camera_position = GetCamera().position;
 
   window.SetProjection(ProjectionType::CENTERED);
@@ -232,8 +228,4 @@ void GameScene::Render(GameWindow& window) {
   if (show_player_info) {
     game::RenderPlayerInfo();
   }
-
-  ImGui::Render();
-  ImGui::EndFrame();
-  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
