@@ -23,7 +23,7 @@ struct IntroScene : public Scene {
   void Quit() override;
   void Update(double dt) override;
   void Render(GameWindow& window) override;
-  bool IsTransparent() { return true; };
+  bool IsTransparent() override { return true; };
 };
 
 #endif  // INTRO_H

@@ -1,5 +1,7 @@
 #include "game/intro.h"
 
+#include <imgui.h>
+
 #include <algorithm>
 #include <utility>
 
@@ -9,7 +11,6 @@
 #include "core/resource_manager.h"
 #include "game/game.h"
 #include "game/progression.h"
-#include <imgui.h>
 
 namespace {
 std::string current_text;
@@ -21,9 +22,9 @@ constexpr float kIntroMargin = 50.0F;
 }  // namespace
 
 void IntroScene::Init() {
-  text_shader = ResourceManager::GetShader("Text").shader;
-  rect_shader = ResourceManager::GetShader("Rect").shader;
-  font = ResourceManager::GetFont("Special").font;
+  text_shader = resource_manager::GetShader("Text").shader;
+  rect_shader = resource_manager::GetShader("Rect").shader;
+  font = resource_manager::GetFont("Special").font;
 }
 
 void IntroScene::Quit() {
@@ -57,7 +58,7 @@ void IntroScene::Update(double dt) {
     current_text = intro_text[text_index].substr(0, character_index);
   }
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_SPACE) || update_text) {
-      text_index++;
+    text_index++;
     update_text = false;
     if (std::cmp_greater_equal(text_index, intro_text.size())) {
       show_controls = true;
@@ -67,7 +68,7 @@ void IntroScene::Update(double dt) {
 
 void IntroScene::Render(GameWindow& window) {
   if (!show_controls) {
-    window.SetProjection(ProjectionType::SCREEN_SPACE);
+    window.SetProjection(ProjectionType::kScreenSpace);
     GetCamera().SetType(CameraType::kUi);
     Rect rect;
     rect.position = glm::vec2(window.width / 2.0F, window.height / 2.0F);
@@ -83,27 +84,27 @@ void IntroScene::Render(GameWindow& window) {
   } else {
     ImGui::SetNextWindowPos(ImVec2(kIntroMargin, kIntroMargin),
                             ImGuiCond_Always);
-    ImGui::SetNextWindowSize(ImVec2(window.width - kIntroMargin * 2,
-                                    window.height - kIntroMargin * 2),
+    ImGui::SetNextWindowSize(ImVec2(window.width - (kIntroMargin * 2),
+                                    window.height - (kIntroMargin * 2)),
                              ImGuiCond_Always);
     ImGui::Begin("Intro", nullptr,
                  ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
                      ImGuiWindowFlags_NoResize);
     ImGui::Text("Controls");
     ImGui::SeparatorText("Movement");
-    ImGui::Image(ResourceManager::GetTexture("ui.movement").texture->id,
+    ImGui::Image(resource_manager::GetTexture("ui.movement").texture->id,
                  ImVec2(ImGui::GetContentRegionAvail().x, 200),
                  IMGUI_TEXTURE_FLIP);
     ImGui::Text("Use WASD to Move.");
     ImGui::SeparatorText("Journal");
-    ImGui::Image(ResourceManager::GetTexture("ui.journal").texture->id,
+    ImGui::Image(resource_manager::GetTexture("ui.journal").texture->id,
                  ImVec2(ImGui::GetContentRegionAvail().x, 200),
                  IMGUI_TEXTURE_FLIP);
     ImGui::Text("Press TAB to open your journal.");
     ImGui::Text(
         "Your journey throughout Mer will be recorded in your journal.");
     ImGui::SeparatorText("Your Character");
-    ImGui::Image(ResourceManager::GetTexture("ui.character").texture->id,
+    ImGui::Image(resource_manager::GetTexture("ui.character").texture->id,
                  ImVec2(ImGui::GetContentRegionAvail().x, 200),
                  IMGUI_TEXTURE_FLIP);
     ImGui::Text("You are a lost soul moving throughout Mer.");
@@ -112,7 +113,7 @@ void IntroScene::Render(GameWindow& window) {
         "window. Press P to open it.");
     if (ImGui::Button("Start Your Journey",
                       ImVec2(ImGui::GetContentRegionAvail().x, 50))) {
-      scene_manager.PopScene();
+      scene_manager_.PopScene();
     }
     ImGui::End();
   }

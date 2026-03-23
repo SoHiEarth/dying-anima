@@ -3,12 +3,12 @@
 #include <glm/glm.hpp>
 namespace game {
 enum DegradationLevel {
-  LEVEL_0,  // Softening, artifacts
-  LEVEL_1,  // Washed color, log degrades
-  LEVEL_2,  // Vignetting, extreme blur. further log degradation
-  LEVEL_3   // Silhouettes, dialogue degradation, only combat remains
+  kLevel0,  // Softening, artifacts
+  kLevel1,  // Washed color, log degrades
+  kLevel2,  // Vignetting, extreme blur. further log degradation
+  kLevel3   // Silhouettes, dialogue degradation, only combat remains
 };
 glm::vec3 DegradeColor(const glm::vec3& color, DegradationLevel level);
-}
+}  // namespace game
 
 #endif  // DEGRADATION_H

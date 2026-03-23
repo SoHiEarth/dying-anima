@@ -23,5 +23,5 @@ void Rect::Render(const std::shared_ptr<Shader>& shader) const {
   shader->SetUniform("mvp",
                      last_vp * CalculateModelMatrix(position, 0.0F, scale));
   shader->SetUniform("rect_color", color);
-  core::quad::Render(core::quad::QuadType::QUAD_ONLY);
+  core::quad::Render(core::quad::QuadType::kQuadOnly);
 }

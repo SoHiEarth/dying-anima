@@ -18,33 +18,33 @@ glm::ivec2 GetMousePos() {
 }  // namespace
 
 void PauseScene::Init() {
-  rect_shader = ResourceManager::GetShader("Rect").shader;
-  text_shader = ResourceManager::GetShader("Text").shader;
-  title_font = ResourceManager::GetFont("Title").font;
-  ui_font = ResourceManager::GetFont("UI").font;
+  rect_shader_ = resource_manager::GetShader("Rect").shader;
+  text_shader_ = resource_manager::GetShader("Text").shader;
+  title_font_ = resource_manager::GetFont("Title").font;
+  ui_font_ = resource_manager::GetFont("UI").font;
   glfwSwapInterval(1);  // Save resources
   layout = std::make_unique<ui::VerticalLayout>();
   layout->SetSpacing(20);
   layout->SetPadding(20, 20, 20, 20);
 #ifndef NDEBUG
   layout->AddElement(
-      std::make_unique<ui::Button>("Level Editor", ui_font, [this]() {
-        scene_manager.PopScene();
-        scene_manager.PopScene();  // Pop the game scene
-        scene_manager.PushScene(std::make_unique<LevelEditor>(scene_manager));
+      std::make_unique<ui::Button>("Level Editor", ui_font_, [this]() {
+        scene_manager_.PopScene();
+        scene_manager_.PopScene();  // Pop the game scene
+        scene_manager_.PushScene(std::make_unique<LevelEditor>(scene_manager_));
       }));
 #endif
-  layout->AddElement(std::make_unique<ui::Button>("Exit", ui_font, []() {
+  layout->AddElement(std::make_unique<ui::Button>("Exit", ui_font_, []() {
     glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
   }));
-  layout->AddElement(std::make_unique<ui::Button>("Menu", ui_font, [this]() {
-    scene_manager.PopScene();
-    scene_manager.PopScene();  // Pop the game scene
-    scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
+  layout->AddElement(std::make_unique<ui::Button>("Menu", ui_font_, [this]() {
+    scene_manager_.PopScene();
+    scene_manager_.PopScene();  // Pop the game scene
+    scene_manager_.PushScene(std::make_unique<MenuScene>(scene_manager_));
   }));
   layout->AddElement(std::make_unique<ui::Button>(
-      "Resume", ui_font, [this]() { scene_manager.PopScene(); }));
-  layout->AddElement(std::make_unique<ui::Label>("PAUSED", title_font));
+      "Resume", ui_font_, [this]() { scene_manager_.PopScene(); }));
+  layout->AddElement(std::make_unique<ui::Label>("PAUSED", title_font_));
 }
 
 void PauseScene::Quit() {
@@ -54,27 +54,27 @@ void PauseScene::Quit() {
 void PauseScene::Update(double dt) {
   layout->SetPosition(
       {30, (GetGameWindow().height - layout->GetLayoutSize()) / 2});
-  time_since_open += dt;
+  time_since_open_ += dt;
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
-    scene_manager.PopScene();
+    scene_manager_.PopScene();
   }
   auto mouse_pos = GetMousePos();
   layout->Update(mouse_pos, core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_LEFT));
 }
 
 void PauseScene::Render(GameWindow& window) {
-  window.SetProjection(ProjectionType::SCREEN_SPACE);
+  window.SetProjection(ProjectionType::kScreenSpace);
   GetCamera().SetType(CameraType::kUi);
   Rect pause_rect;
   pause_rect.position = glm::vec2(window.width / 2.0F, window.height / 2.0F);
   pause_rect.scale = {window.width, window.height};
   pause_rect.color = glm::vec4(0.0F, 0.0F, 0.0F, 0.5F);
-  pause_rect.Render(rect_shader);
+  pause_rect.Render(rect_shader_);
 
   Rect pause_rect_2;
   pause_rect_2.position = glm::vec2(window.width / 6.0F, window.height / 2.0F);
   pause_rect_2.scale = {window.width / 3.0F, window.height};
   pause_rect_2.color = glm::vec4(0.0F, 0.0F, 0.0F, 0.7F);
-  pause_rect_2.Render(rect_shader);
-  layout->Render(text_shader, rect_shader);
+  pause_rect_2.Render(rect_shader_);
+  layout->Render(text_shader_, rect_shader_);
 }

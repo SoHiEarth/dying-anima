@@ -1,7 +1,8 @@
 #include "core/animation.h"
 
-#include <pugixml.hpp>
 #include <print>
+#include <pugixml.hpp>
+
 #include "core/resource_manager.h"
 #include "sprite.h"
 
@@ -19,12 +20,14 @@ void UpdateAnimations(entt::registry& registry, float dt) {
       } else {
         animation.current_frame_index = animation.current_frame_index + 1;
       }
-      animation.current_frame_index = std::min(animation.current_frame_index, animation.frames.size() - 1);
+      animation.current_frame_index =
+          std::min(animation.current_frame_index, animation.frames.size() - 1);
       if (!registry.try_get<Sprite>(entity)) {
         registry.emplace<Sprite>(entity);
       }
       auto& sprite = registry.get<Sprite>(entity);
-      sprite.texture = animation.frames.at(animation.current_frame_index).texture.texture;
+      sprite.texture =
+          animation.frames.at(animation.current_frame_index).texture.texture;
     }
   }
 }
@@ -41,7 +44,9 @@ Animation LoadAnimationFromFile(std::string_view filename) {
   for (auto frame : root.children("Frame")) {
     std::string texture_name = frame.attribute("texture").as_string();
     float duration = frame.attribute("duration").as_float();
-    animation.frames.push_back({ResourceManager::GetTexture(texture_name), duration});
+    animation.frames.push_back(
+        {.texture = resource_manager::GetTexture(texture_name),
+         .duration = duration});
   }
   return animation;
 }

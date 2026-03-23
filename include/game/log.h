@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "core/resource_manager.h"
 #include "core/font.h"
+#include "core/resource_manager.h"
 #include "core/texture.h"
 #include "game/degradation.h"
 
@@ -21,10 +21,13 @@ struct Log {
   void NewLog(const LogEntry& entry);
   void LoadLog();
   void SaveLog();
-  std::vector<LogEntry> GetLogs() { return log; }
+  std::vector<LogEntry> GetLogs() { return log_; }
+  // Check if a log w/ a title at the level exists.
+  bool LogExists(const std::string& title, DegradationLevel level);
   void RenderLog(DegradationLevel degrade_level);
+
  private:
-  std::vector<LogEntry> log;
+  std::vector<LogEntry> log_;
 };
 }  // namespace game
 

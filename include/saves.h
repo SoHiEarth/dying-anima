@@ -11,8 +11,8 @@ struct SaveData {
   std::vector<std::string> completion_markers;
 };
 
-namespace SaveManager {
+namespace save_manager {
 void SaveGame(const SaveData& data);
 SaveData LoadGame(std::string_view filename);
 SaveData LoadLatestSave();
-}  // namespace SaveManager
+}  // namespace save_manager

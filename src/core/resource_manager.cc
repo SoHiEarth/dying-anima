@@ -4,19 +4,19 @@
 #include <print>
 #include <stdexcept>
 
-namespace ResourceManager {
+namespace resource_manager {
 TEXTURE_ATLAS texture_atlas;
 SHADER_ATLAS shader_atlas;
 FONT_ATLAS font_atlas;
-}  // namespace ResourceManager
+}  // namespace resource_manager
 
-void ResourceManager::Init() {
+void resource_manager::Init() {
   texture_atlas = LoadTextureAtlas("assets/textures/texture.xml");
   shader_atlas = LoadShaderAtlas("assets/shaders/shader.xml");
   font_atlas = LoadFontAtlas("assets/fonts/font.xml");
 }
 
-TextureHandle ResourceManager::GetTexture(std::string_view tag) {
+TextureHandle resource_manager::GetTexture(std::string_view tag) {
   if (auto it = texture_atlas.find(std::string(tag));
       it != texture_atlas.end()) {
     return it->second;
@@ -31,7 +31,7 @@ TextureHandle ResourceManager::GetTexture(std::string_view tag) {
       "Fallback texture 'util.notexture' not found in atlas");
 }
 
-ShaderHandle ResourceManager::GetShader(std::string_view tag) {
+ShaderHandle resource_manager::GetShader(std::string_view tag) {
   if (auto it = shader_atlas.find(std::string(tag)); it != shader_atlas.end()) {
     return it->second;
   }
@@ -39,7 +39,7 @@ ShaderHandle ResourceManager::GetShader(std::string_view tag) {
       std::format("Shader with tag '{}' not found in atlas", tag));
 }
 
-FontHandle ResourceManager::GetFont(std::string_view tag) {
+FontHandle resource_manager::GetFont(std::string_view tag) {
   if (auto it = font_atlas.find(std::string(tag)); it != font_atlas.end()) {
     return it->second;
   }
@@ -52,22 +52,22 @@ FontHandle ResourceManager::GetFont(std::string_view tag) {
 }
 
 // Will destroy all existing textures. Reaquire textures again.
-void ResourceManager::ReloadTextures() {
+void resource_manager::ReloadTextures() {
   texture_atlas.clear();
   texture_atlas = LoadTextureAtlas("assets/textures/texture.xml");
 }
 
-void ResourceManager::ReloadShaders() {
+void resource_manager::ReloadShaders() {
   shader_atlas.clear();
   shader_atlas = LoadShaderAtlas("assets/shaders/shader.xml");
 }
 
-void ResourceManager::ReloadFonts() {
+void resource_manager::ReloadFonts() {
   font_atlas.clear();
   font_atlas = LoadFontAtlas("assets/fonts/font.xml");
 }
 
-void ResourceManager::Quit() {
+void resource_manager::Quit() {
   texture_atlas.clear();
   shader_atlas.clear();
   font_atlas.clear();

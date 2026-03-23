@@ -5,7 +5,7 @@
 #include <iostream>
 #include <pugixml.hpp>
 
-void SaveManager::SaveGame(const SaveData& data) {
+void save_manager::SaveGame(const SaveData& data) {
   pugi::xml_document doc;
   auto root = doc.append_child("SaveData");
   auto player_node = root.append_child("Player");
@@ -31,7 +31,7 @@ void SaveManager::SaveGame(const SaveData& data) {
   doc.save_file(file_name.c_str());
 }
 
-SaveData SaveManager::LoadGame(std::string_view filename) {
+SaveData save_manager::LoadGame(std::string_view filename) {
   SaveData data{};
   pugi::xml_document doc;
   if (!doc.load_file(filename.data())) {
@@ -54,7 +54,7 @@ SaveData SaveManager::LoadGame(std::string_view filename) {
   return data;
 }
 
-SaveData SaveManager::LoadLatestSave() {
+SaveData save_manager::LoadLatestSave() {
   std::string largest_save_id;
   for (const auto& entry : std::filesystem::directory_iterator("saves")) {
     if (entry.is_regular_file() && entry.path().extension() == ".save") {

@@ -1,5 +1,5 @@
 #pragma once
 
-enum class AppState { PLAYING, EXIT, LEVEL_EDITOR, MENU };
+enum class AppState { kPlaying, kExit, kLevelEditor, kMenu };
 
-enum class GameState { RUNNING, PAUSED, LOADING };
+enum class GameState { kRunning, kPaused, kLoading };

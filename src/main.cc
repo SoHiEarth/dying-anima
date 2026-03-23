@@ -19,9 +19,9 @@
 #include "core/resource_manager.h"
 #include "core/scene.h"
 #include "core/window.h"
+#include "game/game.h"
 #include "menu.h"
 #include "util/colors.h"
-#include "game/game.h"
 
 namespace {
 void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {
@@ -66,23 +66,23 @@ int main() {
   imgui_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   ImGuiStyle& style = ImGui::GetStyle();
-  style.WindowRounding = 8.0f;
-  style.FrameRounding = 2.5f;
+  style.WindowRounding = 8.0F;
+  style.FrameRounding = 2.5F;
   style.ScrollbarRounding = 0;
-  style.Colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 0.90f);
-  style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
-  style.Colors[ImGuiCol_WindowBg] = ImVec4(0.09f, 0.09f, 0.15f, 1.00f);
-  style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.85f);
-  style.Colors[ImGuiCol_Button] = ImVec4(0.48f, 0.72f, 0.89f, 0.49f);
-  style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.50f, 0.69f, 0.99f, 0.68f);
-  style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.80f, 0.50f, 0.50f, 1.00f);
-  style.Colors[ImGuiCol_Header] = ImVec4(0.30f, 0.69f, 1.00f, 0.53f);
-  style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.44f, 0.61f, 0.86f, 1.00f);
-  style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.38f, 0.62f, 0.83f, 1.00f);
+  style.Colors[ImGuiCol_Text] = ImVec4(0.90F, 0.90F, 0.90F, 0.90F);
+  style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60F, 0.60F, 0.60F, 1.00F);
+  style.Colors[ImGuiCol_WindowBg] = ImVec4(0.09F, 0.09F, 0.15F, 1.00F);
+  style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05F, 0.05F, 0.10F, 0.85F);
+  style.Colors[ImGuiCol_Button] = ImVec4(0.48F, 0.72F, 0.89F, 0.49F);
+  style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.50F, 0.69F, 0.99F, 0.68F);
+  style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.80F, 0.50F, 0.50F, 1.00F);
+  style.Colors[ImGuiCol_Header] = ImVec4(0.30F, 0.69F, 1.00F, 0.53F);
+  style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.44F, 0.61F, 0.86F, 1.00F);
+  style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.38F, 0.62F, 0.83F, 1.00F);
 
-  ResourceManager::Init();
+  resource_manager::Init();
   imgui_io.Fonts->AddFontFromFileTTF(
-      ResourceManager::GetFont("Debug").file.c_str(), 15.5F);
+      resource_manager::GetFont("Debug").file.c_str(), 15.5F);
   ImGui_ImplGlfw_InitForOpenGL(window.window, true);
   ImGui_ImplOpenGL3_Init("#version 150");
   render::Init();
@@ -93,7 +93,7 @@ int main() {
   if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
     std::filesystem::create_directory("saves");
   } else if (!game::save_data.valid) {
-    game::save_data = SaveManager::LoadLatestSave();
+    game::save_data = save_manager::LoadLatestSave();
   }
   double last_time = glfwGetTime();
   constexpr double kMaxDeltaTime = 0.1;
@@ -155,7 +155,7 @@ int main() {
   }
   scene_manager.PopScene();
   core::quad::Quit();
-  ResourceManager::Quit();
+  resource_manager::Quit();
   render::Quit();
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();

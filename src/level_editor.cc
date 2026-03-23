@@ -25,6 +25,7 @@
 #include "core/window.h"
 #include "editor/animation.h"
 #include "game/enemy.h"
+#include "game/game.h"
 #include "game/spawn.h"
 #include "level_editor.h"
 #include "level_utils.h"
@@ -32,7 +33,6 @@
 #include "sprite.h"
 #include "tinyfiledialogs/tinyfiledialogs.h"
 #include "util/calculate.h"
-#include "game/game.h"
 
 namespace {
 enum class Toolkit { kSelect, kMove };
@@ -148,8 +148,8 @@ void LevelEditor::Init() {
     current_scene_path = level_path;
     registry = LoadLevel(current_scene_path);
   }
-  rect_shader = ResourceManager::GetShader("Rect").shader;
-  sprite_shader = ResourceManager::GetShader("Sprite").shader;
+  rect_shader = resource_manager::GetShader("Rect").shader;
+  sprite_shader = resource_manager::GetShader("Sprite").shader;
   glfwSetScrollCallback(GetGameWindow().window, MouseScrollCallback);
   REGISTER_COMPONENT(Animation);
   REGISTER_COMPONENT(Transform);
@@ -175,8 +175,8 @@ void LevelEditor::Quit() {
 void LevelEditor::Update(double /* dt */) {
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
     // add menu
-    scene_manager.PopScene();
-    scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
+    scene_manager_.PopScene();
+    scene_manager_.PushScene(std::make_unique<MenuScene>(scene_manager_));
   }
   if (core::input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL) &&
       core::input::IsKeyPressed(GLFW_KEY_S)) {
@@ -202,7 +202,7 @@ void LevelEditor::Update(double /* dt */) {
       registry.emplace<Light>(spotlight);
     }
     auto& light = registry.get<Light>(spotlight);
-    light.type = LightType::POINT;
+    light.type = LightType::kPoint;
     light.color = glm::vec3(1.0F, 1.0F, 1.0F);
     light.intensity = 1.0F;
     light.radial_falloff = 50.0F;
@@ -247,9 +247,9 @@ void LevelEditor::Update(double /* dt */) {
           auto& sprite = registry.emplace<Sprite>(entity);
           sprite.texture_tag = "util.notexture";
           sprite.texture =
-              ResourceManager::GetTexture(sprite.texture_tag).texture;
+              resource_manager::GetTexture(sprite.texture_tag).texture;
           sprite.normal =
-              ResourceManager::GetTexture(sprite.texture_tag).texture;
+              resource_manager::GetTexture(sprite.texture_tag).texture;
           selected_entity = entity;
         }
       }
@@ -266,7 +266,7 @@ void LevelEditor::Update(double /* dt */) {
 }
 
 void LevelEditor::Render(GameWindow& window) {
-  window.SetProjection(ProjectionType::CENTERED);
+  window.SetProjection(ProjectionType::kCentered);
   GetCamera().SetType(CameraType::kWorld);
   render::Render(registry);
 
@@ -274,21 +274,24 @@ void LevelEditor::Render(GameWindow& window) {
   if (enable_grid) {
     DrawGrid(window, camera, rect_shader);
   }
-  
-  auto *viewport = ImGui::GetMainViewport();
+
+  auto* viewport = ImGui::GetMainViewport();
   ImGui::SetNextWindowPos(viewport->Pos);
   ImGui::SetNextWindowSize(viewport->Size);
   ImGui::SetNextWindowViewport(viewport->ID);
   ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0F);
   ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0F);
   auto window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
-                                  ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-                                  ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
-                                  ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBackground;
+                      ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+                      ImGuiWindowFlags_NoMove |
+                      ImGuiWindowFlags_NoBringToFrontOnFocus |
+                      ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_MenuBar |
+                      ImGuiWindowFlags_NoBackground;
   ImGui::Begin("DockSpace", nullptr, window_flags);
   ImGui::PopStyleVar(2);
   ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-  ImGui::DockSpace(dockspace_id, ImVec2(0.0F, 0.0F), ImGuiDockNodeFlags_PassthruCentralNode);
+  ImGui::DockSpace(dockspace_id, ImVec2(0.0F, 0.0F),
+                   ImGuiDockNodeFlags_PassthruCentralNode);
   ImGui::End();
   static bool first_dock_layout = true;
   if (first_dock_layout) {
@@ -297,12 +300,12 @@ void LevelEditor::Render(GameWindow& window) {
     ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
     ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
     ImGuiID dock_main_id = dockspace_id;
-    ImGuiID dock_id_bottom = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.3F,
-                                                        nullptr, &dock_main_id);
-    ImGuiID dock_id_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.25F,
-                                                        nullptr, &dock_main_id);
-    ImGuiID dock_id_right = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.25F,
-                                                        nullptr, &dock_main_id);
+    ImGuiID dock_id_bottom = ImGui::DockBuilderSplitNode(
+        dock_main_id, ImGuiDir_Down, 0.3F, nullptr, &dock_main_id);
+    ImGuiID dock_id_left = ImGui::DockBuilderSplitNode(
+        dock_main_id, ImGuiDir_Left, 0.25F, nullptr, &dock_main_id);
+    ImGuiID dock_id_right = ImGui::DockBuilderSplitNode(
+        dock_main_id, ImGuiDir_Right, 0.25F, nullptr, &dock_main_id);
     ImGui::DockBuilderDockWindow("Scene", dock_id_left);
     ImGui::DockBuilderDockWindow("Resource Manager", dock_id_bottom);
     ImGui::DockBuilderDockWindow("Renderer", dock_id_left);
@@ -339,8 +342,8 @@ void LevelEditor::Render(GameWindow& window) {
         }
         if (ImGui::MenuItem("Play This Level")) {
           SaveLevel("level.txt", registry);
-          scene_manager.PopScene();
-          scene_manager.PushScene(std::make_unique<GameScene>(scene_manager));
+          scene_manager_.PopScene();
+          scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_));
         }
         ImGui::EndMenu();
       }
@@ -376,8 +379,11 @@ void LevelEditor::Render(GameWindow& window) {
     auto transform_view = registry.view<const Transform>();
     int entity_count = 0;
     for (auto [entity, transform] : transform_view.each()) {
-      if (entity == spotlight) { continue; }
-      if (ImGui::Selectable(std::format("Entity {}", ++entity_count).c_str(), selected_entity == entity)) {
+      if (entity == spotlight) {
+        continue;
+      }
+      if (ImGui::Selectable(std::format("Entity {}", ++entity_count).c_str(),
+                            selected_entity == entity)) {
         selected_entity = entity;
       }
     }
@@ -385,7 +391,7 @@ void LevelEditor::Render(GameWindow& window) {
 
     ImGui::Begin("Resource Manager");
     if (ImGui::Button("Reload Textures")) {
-      ResourceManager::ReloadTextures();
+      resource_manager::ReloadTextures();
     }
     float thumbnail_size = 64.0F;
     float padding = 16.0F;
@@ -394,17 +400,18 @@ void LevelEditor::Render(GameWindow& window) {
     int column_count = static_cast<int>(panel_width / cell_size);
     column_count = std::max(column_count, 1);
     int i = 0;
-    for (const auto& [key, value] : ResourceManager::texture_atlas) {
+    for (const auto& [key, value] : resource_manager::texture_atlas) {
       ImGui::PushID(key.c_str());
       ImGui::BeginGroup();
       if (ImGui::ImageButton("", value.texture->id,
-                       ImVec2(thumbnail_size, thumbnail_size),
-                       IMGUI_TEXTURE_FLIP)) {}
+                             ImVec2(thumbnail_size, thumbnail_size),
+                             IMGUI_TEXTURE_FLIP)) {
+      }
 
       if (ImGui::BeginDragDropSource()) {
-        ImGui::SetDragDropPayload("SPRITE_TEXTURE", key.c_str(), key.size() + 1);
-        ImGui::Image(value.texture->id,
-               ImVec2(32, 32), IMGUI_TEXTURE_FLIP);
+        ImGui::SetDragDropPayload("SPRITE_TEXTURE", key.c_str(),
+                                  key.size() + 1);
+        ImGui::Image(value.texture->id, ImVec2(32, 32), IMGUI_TEXTURE_FLIP);
         ImGui::EndDragDropSource();
       }
 
@@ -462,17 +469,21 @@ void LevelEditor::Render(GameWindow& window) {
           auto& sprite = registry.get<Sprite>(selected_entity);
           ImGui::BeginGroup();
           if (sprite.texture) {
-            ImGui::Image(sprite.texture->id, ImVec2(thumbnail_size, thumbnail_size), IMGUI_TEXTURE_FLIP);
+            ImGui::Image(sprite.texture->id,
+                         ImVec2(thumbnail_size, thumbnail_size),
+                         IMGUI_TEXTURE_FLIP);
           } else {
             ImGui::TextColored(ImVec4(1, 0, 0, 1), "No Image Found.");
           }
           ImGui::Text("Tag: %s", sprite.texture_tag.c_str());
           ImGui::EndGroup();
           if (ImGui::BeginDragDropTarget()) {
-            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SPRITE_TEXTURE")) {
+            if (const ImGuiPayload* payload =
+                    ImGui::AcceptDragDropPayload("SPRITE_TEXTURE")) {
               const char* new_tag = static_cast<const char*>(payload->Data);
               sprite.texture_tag = new_tag;
-              sprite.texture = ResourceManager::GetTexture(sprite.texture_tag).texture;
+              sprite.texture =
+                  resource_manager::GetTexture(sprite.texture_tag).texture;
             }
             ImGui::EndDragDropTarget();
           }
@@ -500,7 +511,7 @@ void LevelEditor::Render(GameWindow& window) {
                        "DIRECTIONAL\0POINT\0");
           ImGui::ColorEdit3("Light Color", glm::value_ptr(light.color));
           ImGui::DragFloat("Light Intensity", &light.intensity, 0.1F, 0.0F);
-          if (light.type == LightType::POINT) {
+          if (light.type == LightType::kPoint) {
             ImGui::DragFloat("Light Radial Falloff", &light.radial_falloff,
                              0.1F, 0.0F);
             ImGui::DragFloat("Light Volumetric Intensity",
@@ -565,12 +576,9 @@ void LevelEditor::Render(GameWindow& window) {
 
           std::string lower_name = component.name;
           std::string lower_search = search;
-          std::transform(lower_name.begin(), lower_name.end(),
-                         lower_name.begin(), ::tolower);
-          std::transform(lower_search.begin(), lower_search.end(),
-                         lower_search.begin(), ::tolower);
-          if (!lower_search.empty() &&
-              lower_name.find(search) == std::string::npos) {
+          std::ranges::transform(lower_name, lower_name.begin(), ::tolower);
+          std::ranges::transform(lower_search, lower_search.begin(), ::tolower);
+          if (!lower_search.empty() && !lower_name.contains(search)) {
             continue;
           }
 

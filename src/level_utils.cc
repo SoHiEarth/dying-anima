@@ -3,6 +3,7 @@
 #include <print>
 #include <pugixml.hpp>
 
+#include "core/animation.h"
 #include "core/light.h"
 #include "core/physics.h"
 #include "core/resource_manager.h"
@@ -10,7 +11,6 @@
 #include "game/enemy.h"
 #include "game/spawn.h"
 #include "sprite.h"
-#include "core/animation.h"
 
 entt::registry LoadLevel(std::string_view filename) {
   pugi::xml_document doc;
@@ -36,7 +36,7 @@ entt::registry LoadLevel(std::string_view filename) {
       auto sprite_node = object_node.child("Sprite");
       auto& sprite = registry.emplace<Sprite>(entity);
       sprite.texture_tag = sprite_node.attribute("texture_tag").as_string();
-      sprite.texture = ResourceManager::GetTexture(sprite.texture_tag).texture;
+      sprite.texture = resource_manager::GetTexture(sprite.texture_tag).texture;
     }
     {
       auto physics_node = object_node.child("Physics");
@@ -91,7 +91,8 @@ entt::registry LoadLevel(std::string_view filename) {
       auto animation_node = object_node.child("Animation");
       if (animation_node) {
         auto& animation = registry.emplace<Animation>(entity);
-        animation = LoadAnimationFromFile(animation_node.attribute("file_path").as_string());
+        animation = LoadAnimationFromFile(
+            animation_node.attribute("file_path").as_string());
       }
     }
   }
@@ -174,7 +175,8 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
     if (registry.try_get<Animation>(entity)) {
       const auto& animation = registry.get<Animation>(entity);
       auto animation_node = object_node.append_child("Animation");
-      animation_node.append_attribute("file_path") = animation.file_path.c_str();
+      animation_node.append_attribute("file_path") =
+          animation.file_path.c_str();
     }
   }
   if (!doc.save_file(filename.data())) {

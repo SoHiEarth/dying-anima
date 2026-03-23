@@ -14,11 +14,11 @@ struct PauseScene : public Scene {
   bool IsTransparent() override { return true; }
 
  private:
-  std::shared_ptr<Font> title_font;
-  std::shared_ptr<Font> ui_font;
-  std::shared_ptr<Shader> rect_shader;
-  std::shared_ptr<Shader> text_shader;
-  double time_since_open = 0.0f;
+  std::shared_ptr<Font> title_font_;
+  std::shared_ptr<Font> ui_font_;
+  std::shared_ptr<Shader> rect_shader_;
+  std::shared_ptr<Shader> text_shader_;
+  double time_since_open_ = 0.0F;
 };
 
 #endif  // PAUSE_H

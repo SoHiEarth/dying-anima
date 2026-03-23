@@ -3,7 +3,7 @@
 #include "core/physics.h"
 #include "game/player.h"
 
-void UpdateCharacters(entt::registry& registry, float dt) {
+void UpdateCharacters(entt::registry& registry, float /*dt*/) {
   auto player_view = registry.view<PlayerSpeed, Health>();
   auto character_view = registry.view<Character>();
   for (auto player_entity : player_view) {

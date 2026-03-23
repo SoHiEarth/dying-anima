@@ -80,13 +80,13 @@ void core::quad::Init() {
 
 void core::quad::Render(QuadType type) {
   switch (type) {
-    case QuadType::QUAD_ONLY:
+    case QuadType::kQuadOnly:
       glBindVertexArray(internal::quad_vertex_attrib);
       break;
-    case QuadType::WITH_TEXCOORDS:
+    case QuadType::kWithTexcoords:
       glBindVertexArray(internal::tex_vertex_attrib);
       break;
-    case QuadType::FULL_QUAD:
+    case QuadType::kFullQuad:
       glBindVertexArray(internal::full_quad_vertex_attrib);
       break;
   }

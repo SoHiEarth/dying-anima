@@ -15,8 +15,8 @@ struct Character {
 struct Font {
   unsigned int vertex_attrib;
   unsigned int vertex_buffer;
-  std::map<char, Character> characters{};
-  Font(std::string_view font_path);
+  std::map<char, Character> characters;
+  explicit Font(std::string_view font_path);
   ~Font();
   int GetWidth(std::string_view text) const;
   int GetHeight(std::string_view text) const;

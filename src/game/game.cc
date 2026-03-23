@@ -13,6 +13,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <pugixml.hpp>
 
+#include "core/animation.h"
 #include "core/atlas.h"
 #include "core/camera.h"
 #include "core/input.h"
@@ -30,12 +31,11 @@
 #include "saves.h"
 #include "sprite.h"
 #include "util/calculate.h"
-#include "core/animation.h"
 
 namespace {
 bool show_log = false;
 bool show_player_info = false;
-}
+}  // namespace
 
 SaveData game::save_data{};
 
@@ -51,22 +51,22 @@ void GameScene::Init() {
                         player, physics::CreateBody(player_transform, true))
                     .body;
   registry.emplace<Sprite>(player, "game.player",
-                           ResourceManager::GetTexture("game.player").texture);
+                           resource_manager::GetTexture("game.player").texture);
   if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
     std::filesystem::create_directory("saves");
   } else if (!game::save_data.valid) {
-    game::save_data = SaveManager::LoadLatestSave();
+    game::save_data = save_manager::LoadLatestSave();
     player_transform = game::save_data.player_transform;
     player_health = game::save_data.player_health;
   }
   player_log.LoadLog();
 
-  sprite_shader = ResourceManager::GetShader("Sprite").shader;
-  rect_shader = ResourceManager::GetShader("Rect").shader;
-  text_shader = ResourceManager::GetShader("Text").shader;
-  special_font = ResourceManager::GetFont("Special").font;
-  title_font = ResourceManager::GetFont("Title").font;
-  ui_font = ResourceManager::GetFont("UI").font;
+  sprite_shader = resource_manager::GetShader("Sprite").shader;
+  rect_shader = resource_manager::GetShader("Rect").shader;
+  text_shader = resource_manager::GetShader("Text").shader;
+  special_font = resource_manager::GetFont("Special").font;
+  title_font = resource_manager::GetFont("Title").font;
+  ui_font = resource_manager::GetFont("UI").font;
   sprite_shader->Use();
   sprite_shader->SetUniform("texture1", 0);
   text_shader->Use();
@@ -81,12 +81,12 @@ void GameScene::Quit() {
   player_log.SaveLog();
   SaveData save_data{};
   if (!std::filesystem::is_empty("saves")) {
-    save_data = SaveManager::LoadLatestSave();
+    save_data = save_manager::LoadLatestSave();
   }
   save_data.player_transform = registry.get<Transform>(player);
   save_data.player_health = registry.get<Health>(player);
   save_data.completion_markers = game::save_data.completion_markers;
-  SaveManager::SaveGame(save_data);
+  save_manager::SaveGame(save_data);
   physics::Quit();
   registry.clear();
 }
@@ -96,7 +96,7 @@ void GameScene::Update(double dt) {
   player_body = registry.get<PhysicsBody>(player).body;
 
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
-    scene_manager.PushScene(std::make_unique<PauseScene>(scene_manager));
+    scene_manager_.PushScene(std::make_unique<PauseScene>(scene_manager_));
   }
 
   b2Vec2 velocity = b2Body_GetLinearVelocity(player_body);
@@ -138,10 +138,10 @@ void GameScene::Update(double dt) {
 
   if (velocity.x > 0) {
     auto& transform = registry.get<Transform>(player);
-    transform.scale.x = 1.0f;
+    transform.scale.x = 1.0F;
   } else if (velocity.x < 0) {
     auto& transform = registry.get<Transform>(player);
-    transform.scale.x = -1.0f;  // Flip sprite when moving left
+    transform.scale.x = -1.0F;  // Flip sprite when moving left
   }
   b2Body_SetLinearVelocity(player_body, velocity);
 
@@ -186,43 +186,41 @@ void GameScene::Update(double dt) {
 void GameScene::Render(GameWindow& window) {
   auto& camera_position = GetCamera().position;
 
-  window.SetProjection(ProjectionType::CENTERED);
+  window.SetProjection(ProjectionType::kCentered);
   GetCamera().SetType(CameraType::kWorld);
   render::Render(registry);
 
-  window.SetProjection(ProjectionType::SCREEN_SPACE);
+  window.SetProjection(ProjectionType::kScreenSpace);
   GetCamera().SetType(CameraType::kUi);
   auto& player_health = registry.get<Health>(player);
-  auto health_full_count = static_cast<int>(player_health.health / 10.0f);
+  auto health_full_count = static_cast<int>(player_health.health / 10.0F);
   auto health_partial_count =
-      (player_health.health - (health_full_count * 10.0)) / 10.0f;
+      (player_health.health - (health_full_count * 10.0)) / 10.0F;
   auto health_empty_count =
       10 - health_full_count - (health_partial_count > 0 ? 1 : 0);
   int health_x = 20;
   const int health_y = window.height - 40;
   for (int i = 0; i < health_full_count; i++) {
-    ResourceManager::GetTexture("game.ui.heart_full")
+    resource_manager::GetTexture("game.ui.heart_full")
         .texture->Render(sprite_shader,
-                         CalculateModelMatrix({health_x += 50, health_y}, 0.0f,
-                                              0.0f, {40.0f, 40.0f}));
+                         CalculateModelMatrix({health_x += 50, health_y}, 0.0F,
+                                              0.0F, {40.0F, 40.0F}));
   }
   for (int i = 0; i < health_partial_count; i++) {
-    ResourceManager::GetTexture("game.ui.heart_half")
+    resource_manager::GetTexture("game.ui.heart_half")
         .texture->Render(sprite_shader,
-                         CalculateModelMatrix({health_x += 50, health_y}, 0.0f,
-                                              0.0f,
-                                              {40.0f, 40.0f}));
+                         CalculateModelMatrix({health_x += 50, health_y}, 0.0F,
+                                              0.0F, {40.0F, 40.0F}));
   }
   for (int i = 0; i < health_empty_count; i++) {
-    ResourceManager::GetTexture("game.ui.heart_empty")
+    resource_manager::GetTexture("game.ui.heart_empty")
         .texture->Render(sprite_shader,
-                         CalculateModelMatrix({health_x += 50, health_y}, 0.0f,
-                                              0.0f,
-                                              {40.0f, 40.0f}));
+                         CalculateModelMatrix({health_x += 50, health_y}, 0.0F,
+                                              0.0F, {40.0F, 40.0F}));
   }
 
   if (show_log) {
-    player_log.RenderLog(game::LEVEL_0);
+    player_log.RenderLog(game::kLevel0);
   }
 
   if (show_player_info) {

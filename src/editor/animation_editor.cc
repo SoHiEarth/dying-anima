@@ -5,8 +5,8 @@
 #include <entt/entt.hpp>
 #include <utility>
 
-#include "editor/animation.h"
 #include "core/resource_manager.h"
+#include "editor/animation.h"
 
 namespace editor::internal {
 bool show_animation_window = false;
@@ -23,31 +23,33 @@ void editor::AnimationWindow(Animation& animation) {
 
   ImGui::Begin("Animation Editor", &editor::internal::show_animation_window);
 
-      for (size_t i = 0; i < animation.frames.size(); ++i) {
-        if (ImGui::CollapsingHeader(("Frame " + std::to_string(i)).c_str())) {
-        ImGui::Text("Texture: %s", animation.frames[i].texture.tag.c_str());
-        ImGui::SameLine();
-        if (ImGui::Button(("Change##" + std::to_string(i)).c_str())) {
-          ImGui::OpenPopup(("TexturePopup##" + std::to_string(i)).c_str());
-        }
-        static std::string tag;
-        if (ImGui::BeginPopup(("TexturePopup##" + std::to_string(i)).c_str())) {
-          if (ImGui::IsWindowAppearing()) {
-            tag.clear();
-          }
-          ImGui::InputText("Texture Tag", &tag);
-          if (ImGui::Button(("Load Texture##" + std::to_string(i)).c_str())) {
-            auto texture = ResourceManager::GetTexture(tag);
-            animation.frames[i].texture = texture;
-            ImGui::CloseCurrentPopup();
-          }
-          ImGui::EndPopup();
-        }
-        ImGui::InputFloat(("Duration##" + std::to_string(i)).c_str(), &animation.frames[i].duration);
-        }
+  for (size_t i = 0; i < animation.frames.size(); ++i) {
+    if (ImGui::CollapsingHeader(("Frame " + std::to_string(i)).c_str())) {
+      ImGui::Text("Texture: %s", animation.frames[i].texture.tag.c_str());
+      ImGui::SameLine();
+      if (ImGui::Button(("Change##" + std::to_string(i)).c_str())) {
+        ImGui::OpenPopup(("TexturePopup##" + std::to_string(i)).c_str());
       }
+      static std::string tag;
+      if (ImGui::BeginPopup(("TexturePopup##" + std::to_string(i)).c_str())) {
+        if (ImGui::IsWindowAppearing()) {
+          tag.clear();
+        }
+        ImGui::InputText("Texture Tag", &tag);
+        if (ImGui::Button(("Load Texture##" + std::to_string(i)).c_str())) {
+          auto texture = resource_manager::GetTexture(tag);
+          animation.frames[i].texture = texture;
+          ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+      }
+      ImGui::InputFloat(("Duration##" + std::to_string(i)).c_str(),
+                        &animation.frames[i].duration);
+    }
+  }
   if (ImGui::Button("Add Frame")) {
-    animation.frames.emplace_back(ResourceManager::GetTexture("util.notexture"), 0.1F);
+    animation.frames.emplace_back(
+        resource_manager::GetTexture("util.notexture"), 0.1F);
   }
 
   ImGui::SeparatorText("Utilities");

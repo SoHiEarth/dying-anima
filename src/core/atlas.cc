@@ -107,8 +107,10 @@ TEXTURE_ATLAS LoadTextureAtlas(std::string_view filename) {
     std::string name = texture_node.attribute("name").as_string();
     std::string path =
         (base_path / texture_node.attribute("path").as_string()).string();
-    texture_atlas.insert(
-        {name, {.tag = name, .path = path, .texture = std::make_shared<Texture>(path)}});
+    texture_atlas.insert({name,
+                          {.tag = name,
+                           .path = path,
+                           .texture = std::make_shared<Texture>(path)}});
   }
   std::call_once(
       texture_flag, [](TEXTURE_ATLAS atlas) { PrintTextureResults(atlas); },

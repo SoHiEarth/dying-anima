@@ -125,7 +125,7 @@ void render::Render(entt::registry& registry) {
   float aspect_ratio = static_cast<float>(GetGameWindow().width) /
                        static_cast<float>(GetGameWindow().height);
   deferred_shader->SetUniform("aspect_ratio", aspect_ratio);
-  core::quad::Render(core::quad::FULL_QUAD);
+  core::quad::Render(core::quad::kFullQuad);
 
   // bloom stuff
   BindFramebuffer(bloom_framebuffer);
@@ -134,7 +134,7 @@ void render::Render(entt::registry& registry) {
   glActiveTexture(GL_TEXTURE0);
   bloom_separate_shader->SetUniform("source", 0);
   glBindTexture(GL_TEXTURE_2D, default_framebuffer->colorbuffer);
-  core::quad::Render(core::quad::FULL_QUAD);
+  core::quad::Render(core::quad::kFullQuad);
 
   bloom_blur_shader->Use();
   bool horizontal = true;
@@ -146,7 +146,7 @@ void render::Render(entt::registry& registry) {
     glActiveTexture(GL_TEXTURE0);
     bloom_blur_shader->SetUniform("source", 0);
     glBindTexture(GL_TEXTURE_2D, source->colorbuffer);
-    core::quad::Render(core::quad::FULL_QUAD);
+    core::quad::Render(core::quad::kFullQuad);
     horizontal = !horizontal;
   }
 
@@ -160,14 +160,14 @@ void render::Render(entt::registry& registry) {
   glActiveTexture(GL_TEXTURE1);
   combine_shader->SetUniform("scene_texture", 1);
   glBindTexture(GL_TEXTURE_2D, default_framebuffer->colorbuffer);
-  core::quad::Render(core::quad::FULL_QUAD);
+  core::quad::Render(core::quad::kFullQuad);
 
   UnbindFramebuffer();
   fullscreen_shader->Use();
   fullscreen_shader->SetUniform("screen", 0);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, combine_framebuffer->colorbuffer);
-  core::quad::Render(core::quad::FULL_QUAD);
+  core::quad::Render(core::quad::kFullQuad);
 }
 
 void render::RecreateFramebuffers(int width, int height) {
@@ -214,12 +214,12 @@ void render::Init() {
   bloom_framebuffer = CreateFramebuffer(width, height);
   bloom_framebuffer_2 = CreateFramebuffer(width, height);
   combine_framebuffer = CreateFramebuffer(width, height);
-  deferred_shader = ResourceManager::GetShader("Deferred").shader;
-  fullscreen_shader = ResourceManager::GetShader("Fullscreen").shader;
-  sprite_shader = ResourceManager::GetShader("Sprite").shader;
-  bloom_separate_shader = ResourceManager::GetShader("bloom.separate").shader;
-  bloom_blur_shader = ResourceManager::GetShader("bloom.blur").shader;
-  combine_shader = ResourceManager::GetShader("bloom.combine").shader;
+  deferred_shader = resource_manager::GetShader("Deferred").shader;
+  fullscreen_shader = resource_manager::GetShader("Fullscreen").shader;
+  sprite_shader = resource_manager::GetShader("Sprite").shader;
+  bloom_separate_shader = resource_manager::GetShader("bloom.separate").shader;
+  bloom_blur_shader = resource_manager::GetShader("bloom.blur").shader;
+  combine_shader = resource_manager::GetShader("bloom.combine").shader;
   render::UnbindFramebuffer();
 }
 

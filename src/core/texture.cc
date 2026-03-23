@@ -61,5 +61,5 @@ void Texture::Render(const std::shared_ptr<Shader>& shader,
   shader->SetUniform("mvp", last_vp * model);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, id);
-  core::quad::Render(core::quad::QuadType::WITH_TEXCOORDS);
+  core::quad::Render(core::quad::QuadType::kWithTexcoords);
 }

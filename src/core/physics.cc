@@ -10,7 +10,7 @@ void physics::Init(const glm::vec2& gravity) {
 }
 
 void physics::SetGravity(const glm::vec2& gravity) {
-  b2World_SetGravity(world, {gravity.x, gravity.y});
+  b2World_SetGravity(world, {.x = gravity.x, .y = gravity.y});
 }
 
 b2BodyId physics::CreateChainBody(const std::vector<glm::vec2>& vertices) {
@@ -20,7 +20,7 @@ b2BodyId physics::CreateChainBody(const std::vector<glm::vec2>& vertices) {
   std::vector<b2Vec2> b2_vertices;
   b2_vertices.reserve(vertices.size());
   for (const auto& vertex : vertices) {
-    b2_vertices.push_back({vertex.x, vertex.y});
+    b2_vertices.push_back({.x = vertex.x, .y = vertex.y});
   }
 
   auto chain_def = b2DefaultChainDef();

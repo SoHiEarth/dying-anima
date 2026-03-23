@@ -20,13 +20,13 @@ struct DialogueState {
 };
 
 struct DialogueData {
-  std::vector<DialogueMeta> data{};
+  std::vector<DialogueMeta> data;
   DialogueState state{};
 };
 
-namespace Game {
+namespace game {
 DialogueData LoadDialogue(std::string_view file);
 void SaveDialogue(const DialogueData& dialogue, std::string_view file);
 void RenderDialogue(DialogueData& dialogue);
-}  // namespace Game
+}  // namespace game
 #endif

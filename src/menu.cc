@@ -30,35 +30,36 @@ int focus_index = 0;
 }
 void MenuScene::Init() {
   glfwSwapInterval(1);  // Save resources
-  font = ResourceManager::GetFont("menu.ui").font;
-  text_shader = ResourceManager::GetShader("Text").shader;
-  rect_shader = ResourceManager::GetShader("Rect").shader;
+  font = resource_manager::GetFont("menu.ui").font;
+  text_shader = resource_manager::GetShader("Text").shader;
+  rect_shader = resource_manager::GetShader("Rect").shader;
   text_shader->Use();
   text_shader->SetUniform("character", 0);
-// Commented out for demonstration purposes
-  //#ifndef NDEBUG
+  // Commented out for demonstration purposes
+  // #ifndef NDEBUG
   menu_layout
       .AddElement(std::make_unique<ui::Button>(
           "Editor", font,
           [this]() {
-            scene_manager.PushScene(
-                std::make_unique<LevelEditor>(scene_manager));
+            scene_manager_.PushScene(
+                std::make_unique<LevelEditor>(scene_manager_));
           }))
       ->size.y = kLabelSizeY;
-//#endif
+  // #endif
   menu_layout
       .AddElement(std::make_unique<ui::Button>(
-          "Exit", font, [this]() { scene_manager.PopScene(); }))
+          "Exit", font, [this]() { scene_manager_.PopScene(); }))
       ->size.y = kLabelSizeY;
   menu_layout
       .AddElement(std::make_unique<ui::Button>(
           "Play", font,
           [this]() {
-            scene_manager.PopScene();
-            scene_manager.PushScene(std::make_unique<GameScene>(scene_manager));
+            scene_manager_.PopScene();
+            scene_manager_.PushScene(
+                std::make_unique<GameScene>(scene_manager_));
             if (game::save_data.completion_markers.empty()) {
-              scene_manager.PushScene(
-                  std::make_unique<IntroScene>(scene_manager));
+              scene_manager_.PushScene(
+                  std::make_unique<IntroScene>(scene_manager_));
             }
           }))
       ->size.y = kLabelSizeY;
@@ -69,23 +70,24 @@ void MenuScene::Init() {
 
 void MenuScene::Update(double /* dt */) {
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
-    scene_manager.PopScene();
+    scene_manager_.PopScene();
   }
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ENTER)) {
     switch (static_cast<AppState>(focus_index)) {
-      case AppState::PLAYING:
-        scene_manager.PopScene();
-        scene_manager.PushScene(std::make_unique<GameScene>(scene_manager));
+      case AppState::kPlaying:
+        scene_manager_.PopScene();
+        scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_));
         if (game::save_data.completion_markers.empty()) {
-          scene_manager.PushScene(std::make_unique<IntroScene>(scene_manager));
+          scene_manager_.PushScene(
+              std::make_unique<IntroScene>(scene_manager_));
         }
         break;
-      case AppState::EXIT:
+      case AppState::kExit:
         glfwSetWindowShouldClose(GetGameWindow().window, 1);
         break;
-      case AppState::LEVEL_EDITOR:
-        scene_manager.PopScene();
-        scene_manager.PushScene(std::make_unique<LevelEditor>(scene_manager));
+      case AppState::kLevelEditor:
+        scene_manager_.PopScene();
+        scene_manager_.PushScene(std::make_unique<LevelEditor>(scene_manager_));
         break;
       default:
         break;
@@ -111,7 +113,7 @@ void MenuScene::Update(double /* dt */) {
 }
 
 void MenuScene::Render(GameWindow& window) {
-  window.SetProjection(ProjectionType::SCREEN_SPACE);
+  window.SetProjection(ProjectionType::kScreenSpace);
   GetCamera().SetType(CameraType::kUi);
   menu_layout.Render(text_shader, rect_shader);
 }
