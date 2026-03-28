@@ -3,20 +3,26 @@
 
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
+#include "core/scene.h"
 
-struct PlayerDamager {
-  float damage = 5.0F;
-  float hitbox_radius = 0.5F;
-  float knockback = 1.0F;
-  glm::vec2 knockback_direction = glm::vec2(1.0F, 0.0F);
-  float time_until_next_hit = 2.0F;
+struct Enemy {
+  std::string name;
+  float health;
+  float max_health;
+  float stamina;
+  float max_stamina;
+  float damage;
+};
 
-  // Internal use
-  float accumulator = 0.0F;
+
+struct BattleTrigger {
+  std::vector<Enemy> enemies;
+  float hitbox_radius = 5.0f;
 };
 
 namespace game {
-void UpdatePlayerDamagers(entt::registry& registry, float delta_time);
+Enemy CreateEnemyFromName(std::string_view name);
+void UpdateBattleTriggers(entt::registry& registry, SceneManager& scene_manager);
 }
 
 #endif  // GAME_ENEMY_H

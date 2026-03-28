@@ -157,7 +157,7 @@ void LevelEditor::Init() {
   REGISTER_COMPONENT(Light);
   REGISTER_COMPONENT(PhysicsBody);
   REGISTER_COMPONENT(PlayerSpawn);
-  REGISTER_COMPONENT(PlayerDamager);
+  REGISTER_COMPONENT(BattleTrigger);
 }
 
 void LevelEditor::Quit() {
@@ -523,19 +523,45 @@ void LevelEditor::Render(GameWindow& window) {
         }
       }
 
-      if (registry.any_of<PlayerDamager>(selected_entity)) {
-        if (ImGui::CollapsingHeader("Player Damager")) {
-          auto& damager = registry.get<PlayerDamager>(selected_entity);
-          ImGui::DragFloat("Damage", &damager.damage, 1.0F, 0);
-          ImGui::DragFloat("Hitbox Radius", &damager.hitbox_radius, 0.1F, 0.0F);
-          ImGui::DragFloat("Knockback", &damager.knockback, 0.1F, 0.0F);
-          ImGui::DragFloat2("Knockback Direction",
-                            glm::value_ptr(damager.knockback_direction), 0.1F);
-          ImGui::DragFloat("Time Until Next Hit", &damager.time_until_next_hit,
-                           0.1F, 0.0F);
-        }
-        if (ImGui::Button("Remove Player Damager")) {
-          registry.remove<PlayerDamager>(selected_entity);
+      if (registry.any_of<BattleTrigger>(selected_entity)) {
+        if (ImGui::CollapsingHeader("Battle Trigger")) {
+          auto& trigger = registry.get<BattleTrigger>(selected_entity);
+          std::vector<Enemy> enemies_to_erase;
+          ImGui::DragFloat("Hitbox Radius", &trigger.hitbox_radius, 0.1F, 0.0F);
+          for (auto& enemy : trigger.enemies) {
+            ImGui::Text("Enemy: %s", enemy.name.c_str());
+            ImGui::SameLine();
+            if (ImGui::Button(std::format("Remove##{}", enemy.name).c_str())) {
+              enemies_to_erase.push_back(enemy);
+            }
+          }
+          for (auto enemy : enemies_to_erase) {
+            if (auto it = std::find_if(trigger.enemies.begin(), trigger.enemies.end(),
+                                       [&](const Enemy& e) {
+                                         return e.name == enemy.name;
+                                       });
+                it != trigger.enemies.end()) {
+              trigger.enemies.erase(it);
+            }
+          }
+          if (ImGui::Button("Add Enemy")) {
+            ImGui::OpenPopup("add_enemy_popup");
+          }
+          if (ImGui::BeginPopup("add_enemy_popup")) {
+            static std::string enemy_name;
+            ImGui::InputText("Enemy Name", &enemy_name);
+            if (ImGui::Button("Add##add_enemy")) {
+              if (!enemy_name.empty()) {
+                trigger.enemies.push_back(game::CreateEnemyFromName(enemy_name));
+                enemy_name.clear();
+                ImGui::CloseCurrentPopup();
+              }
+            }
+            ImGui::EndPopup();
+          }
+          if (ImGui::Button("Remove Battle Trigger")) {
+            registry.remove<BattleTrigger>(selected_entity);
+          }
         }
       }
 

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Enemies>
+	<Enemy name="TestEnemy" max_health="100" max_stamina ="100"/>
+</Enemies>

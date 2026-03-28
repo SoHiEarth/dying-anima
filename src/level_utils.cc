@@ -67,18 +67,15 @@ entt::registry LoadLevel(std::string_view filename) {
       }
     }
     {
-      auto enemy_node = object_node.child("PlayerDamager");
+      auto enemy_node = object_node.child("BattleTrigger");
       if (enemy_node) {
-        auto& enemy = registry.emplace<PlayerDamager>(entity);
-        enemy.damage = enemy_node.attribute("damage").as_float();
+        auto& enemy = registry.emplace<BattleTrigger>(entity);
         enemy.hitbox_radius = enemy_node.attribute("hitbox_radius").as_float();
-        enemy.knockback = enemy_node.attribute("knockback").as_float();
-        enemy.knockback_direction.x =
-            enemy_node.attribute("knockback_direction.x").as_float();
-        enemy.knockback_direction.y =
-            enemy_node.attribute("knockback_direction.y").as_float();
-        enemy.time_until_next_hit =
-            enemy_node.attribute("time_until_next_hit").as_float();
+        for (auto& e : enemy_node.children("Enemy")) {
+          std::print("Added enemy {} to battle trigger\n", e.attribute("name").as_string());
+          enemy.enemies.push_back(
+              game::CreateEnemyFromName(e.attribute("name").as_string()));
+        }
       }
     }
     {
@@ -154,18 +151,14 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
     }
 
     // Custom Game components
-    if (registry.try_get<PlayerDamager>(entity)) {
-      const auto& enemy = registry.get<PlayerDamager>(entity);
-      auto enemy_node = object_node.append_child("PlayerDamager");
-      enemy_node.append_attribute("damage") = enemy.damage;
+    if (registry.try_get<BattleTrigger>(entity)) {
+      const auto& enemy = registry.get<BattleTrigger>(entity);
+      auto enemy_node = object_node.append_child("BattleTrigger");
       enemy_node.append_attribute("hitbox_radius") = enemy.hitbox_radius;
-      enemy_node.append_attribute("knockback") = enemy.knockback;
-      enemy_node.append_attribute("knockback_direction.x") =
-          enemy.knockback_direction.x;
-      enemy_node.append_attribute("knockback_direction.y") =
-          enemy.knockback_direction.y;
-      enemy_node.append_attribute("time_until_next_hit") =
-          enemy.time_until_next_hit;
+      for (auto& e : enemy.enemies) {
+        auto enemy_info_node = enemy_node.append_child("Enemy");
+        enemy_info_node.append_attribute("name") = e.name;
+      }
     }
 
     if (registry.all_of<PlayerSpawn>(entity)) {

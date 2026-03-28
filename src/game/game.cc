@@ -171,7 +171,7 @@ void GameScene::Update(double dt) {
       [](auto /* entity */, Transform& transform, PhysicsBody& physicsBody) {
         physics::SyncPosition(physicsBody.body, transform.position);
       });
-  game::UpdatePlayerDamagers(registry, static_cast<float>(dt));
+  game::UpdateBattleTriggers(registry, scene_manager_);
   UpdateAnimations(registry, static_cast<float>(dt));
 
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_TAB)) {
