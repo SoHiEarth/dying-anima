@@ -536,10 +536,9 @@ void LevelEditor::Render(GameWindow& window) {
             }
           }
           for (auto enemy : enemies_to_erase) {
-            if (auto it = std::find_if(trigger.enemies.begin(), trigger.enemies.end(),
-                                       [&](const Enemy& e) {
-                                         return e.name == enemy.name;
-                                       });
+            if (auto it = std::find_if(
+                    trigger.enemies.begin(), trigger.enemies.end(),
+                    [&](const Enemy& e) { return e.name == enemy.name; });
                 it != trigger.enemies.end()) {
               trigger.enemies.erase(it);
             }
@@ -552,7 +551,8 @@ void LevelEditor::Render(GameWindow& window) {
             ImGui::InputText("Enemy Name", &enemy_name);
             if (ImGui::Button("Add##add_enemy")) {
               if (!enemy_name.empty()) {
-                trigger.enemies.push_back(game::CreateEnemyFromName(enemy_name));
+                trigger.enemies.push_back(
+                    game::CreateEnemyFromName(enemy_name));
                 enemy_name.clear();
                 ImGui::CloseCurrentPopup();
               }

@@ -1,17 +1,17 @@
 #include "game/enemy.h"
 
-#include "core/transform.h"
-#include "game/player.h"
-#include "core/scene.h"
-#include "game/battle.h"
-
-#include <pugixml.hpp>
 #include <iostream>
+#include <pugixml.hpp>
+
+#include "core/scene.h"
+#include "core/transform.h"
+#include "game/battle.h"
+#include "game/player.h"
 
 namespace {
 std::vector<Enemy> default_enemies;
 std::once_flag default_enemies_initialized;
-}
+}  // namespace
 
 void LoadEnemies() {
   pugi::xml_document doc;
@@ -48,7 +48,8 @@ Enemy game::CreateEnemyFromName(std::string_view name) {
   throw std::runtime_error("Enemy type not found: " + std::string(name));
 }
 
-void game::UpdateBattleTriggers(entt::registry& registry, SceneManager& scene_manager) {
+void game::UpdateBattleTriggers(entt::registry& registry,
+                                SceneManager& scene_manager) {
   auto view = registry.view<BattleTrigger>();
   for (auto entity : view) {
     auto& damager = view.get<BattleTrigger>(entity);
@@ -56,7 +57,8 @@ void game::UpdateBattleTriggers(entt::registry& registry, SceneManager& scene_ma
     auto health_view = registry.view<Health>();
     for (auto health_entity : health_view) {
       auto& player_transform = registry.get<Transform>(health_entity);
-      float distance = glm::distance(transform.position, player_transform.position);
+      float distance =
+          glm::distance(transform.position, player_transform.position);
       if (distance < damager.hitbox_radius) {
         scene_manager.PopScene();
         scene_manager.PushScene(

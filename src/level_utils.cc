@@ -72,7 +72,8 @@ entt::registry LoadLevel(std::string_view filename) {
         auto& enemy = registry.emplace<BattleTrigger>(entity);
         enemy.hitbox_radius = enemy_node.attribute("hitbox_radius").as_float();
         for (auto& e : enemy_node.children("Enemy")) {
-          std::print("Added enemy {} to battle trigger\n", e.attribute("name").as_string());
+          std::print("Added enemy {} to battle trigger\n",
+                     e.attribute("name").as_string());
           enemy.enemies.push_back(
               game::CreateEnemyFromName(e.attribute("name").as_string()));
         }

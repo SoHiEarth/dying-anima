@@ -108,7 +108,8 @@ void game::Log::RenderLog(DegradationLevel degrade_level) {
     ImGui::EndChild();
   }
   ImGui::SameLine();
-  if (selected_log_index >= 0 && selected_log_index < static_cast<int>(log_.size())) {
+  if (selected_log_index >= 0 &&
+      selected_log_index < static_cast<int>(log_.size())) {
     if (ImGui::BeginChild("EntryDetails", ImVec2(0, 0))) {
       auto entry = log_.at(selected_log_index);
       ImGui::Text("Details");
