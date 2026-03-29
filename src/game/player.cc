@@ -3,8 +3,6 @@
 #include <core/window.h>
 #include <imgui.h>
 
-#include <vector>
-
 constexpr float kPlayerInfoMargin = 50.0F;
 /*
 bool IsOnGround(b2BodyId body) {
@@ -20,6 +18,7 @@ bool IsOnGround(b2BodyId body) {
 
   for (int i = 0; i < count; ++i) {
     b2ContactData &cd = contacts[i];
+  ImGui::Text("SKILLS");
     if (cd.manifold.normal.y <= -0.707f) {
       return true;
     }

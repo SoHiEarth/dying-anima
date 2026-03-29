@@ -6,6 +6,13 @@
 
 #include "core/scene.h"
 
+struct Skill {
+  std::string name;
+  float damage;        // The amount of damage applied to the enemy
+  float health_used;   // The amount of health drained from the user
+  float stamina_used;  // The amount of stamina drained from the user
+};
+
 struct Enemy {
   std::string name;
   float health;
@@ -17,7 +24,7 @@ struct Enemy {
 
 struct BattleTrigger {
   std::vector<Enemy> enemies;
-  float hitbox_radius = 5.0f;
+  float hitbox_radius = 5.0F;
 };
 
 namespace game {
