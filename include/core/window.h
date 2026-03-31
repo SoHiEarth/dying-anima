@@ -1,4 +1,6 @@
-#pragma once
+#ifndef WINDOW_H
+#define WINDOW_H
+
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
@@ -52,3 +54,5 @@ struct GameWindow {
 };
 
 GameWindow& GetGameWindow();
+
+#endif  // WINDOW_H

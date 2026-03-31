@@ -21,9 +21,9 @@
 #include "core/window.h"
 #include "game/game.h"
 #include "game/intro.h"
-#include "game/progression.h"
 #include "level_editor.h"
 #include "ui/elements.h"
+
 constexpr int kLabelSizeY = 36;
 namespace {
 int focus_index = 0;

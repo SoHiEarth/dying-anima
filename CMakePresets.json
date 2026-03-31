@@ -61,6 +61,11 @@
       "configurePreset": "windows",
       "configuration": "Release"
     },
+    {
+      "name": "relwithdebinfo-windows",
+      "configurePreset": "windows",
+      "configuration": "RelWithDebInfo"
+    },
 
     {
       "name": "debug-linux",
@@ -72,6 +77,11 @@
       "configurePreset": "linux",
       "configuration": "Release"
     },
+    {
+      "name": "relwithdebinfo-linux",
+      "configurePreset": "linux",
+      "configuration": "RelWithDebInfo"
+    },
 
     {
       "name": "debug-macos",
@@ -82,6 +92,11 @@
       "name": "release-macos",
       "configurePreset": "macos",
       "configuration": "Release"
+    },
+    {
+      "name": "relwithdebinfo-macos",
+      "configurePreset": "macos",
+      "configuration": "RelWithDebInfo"
     }
   ]
 }

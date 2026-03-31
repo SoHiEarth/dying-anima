@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CORE_RECT_H
+#define CORE_RECT_H
+
 #include <glm/glm.hpp>
 #include <memory>
 
@@ -11,3 +13,5 @@ struct Rect {
   glm::vec4 color;
   void Render(const std::shared_ptr<Shader>& shader) const;
 };
+
+#endif  // CORE_RECT_H

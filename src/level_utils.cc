@@ -14,7 +14,7 @@
 
 entt::registry LoadLevel(std::string_view filename) {
   pugi::xml_document doc;
-  if (!doc.load_file(filename.data())) {
+  if (!doc.load_file(std::string(filename).c_str())) {
     std::print("Failed to load level file: {}\n", filename);
     return {};
   }
@@ -156,7 +156,7 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
       const auto& enemy = registry.get<BattleTrigger>(entity);
       auto enemy_node = object_node.append_child("BattleTrigger");
       enemy_node.append_attribute("hitbox_radius") = enemy.hitbox_radius;
-      for (auto& e : enemy.enemies) {
+      for (const auto& e : enemy.enemies) {
         auto enemy_info_node = enemy_node.append_child("Enemy");
         enemy_info_node.append_attribute("name") = e.name;
       }
@@ -173,7 +173,7 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
           animation.file_path.c_str();
     }
   }
-  if (!doc.save_file(filename.data())) {
+  if (!doc.save_file(std::string(filename).c_str())) {
     std::print("Failed to save level file: {}\n", filename);
   }
 }

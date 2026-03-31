@@ -1,4 +1,6 @@
-#pragma once
+#ifndef LEVEL_EDITOR_H
+#define LEVEL_EDITOR_H
+
 #include <entt/entt.hpp>
 
 #include "core/scene.h"
@@ -17,3 +19,5 @@ struct LevelEditor : public Scene {
   std::shared_ptr<Shader> sprite_shader;
   entt::registry registry;
 };
+
+#endif  // LEVEL_EDITOR_H

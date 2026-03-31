@@ -11,7 +11,6 @@
 namespace {
 std::vector<Enemy> default_enemies;
 std::once_flag default_enemies_initialized;
-}  // namespace
 
 void LoadEnemies() {
   pugi::xml_document doc;
@@ -32,6 +31,8 @@ void LoadEnemies() {
   }
   std::cout << "Loaded " << default_enemies.size() << " enemy presets\n";
 }
+
+}  // namespace
 
 Enemy game::CreateEnemyFromName(std::string_view name) {
   // load default enemies if not already loaded

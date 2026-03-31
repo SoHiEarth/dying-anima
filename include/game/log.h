@@ -4,9 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "core/font.h"
-#include "core/resource_manager.h"
-#include "core/texture.h"
+#include "core/atlas.h"
 #include "game/degradation.h"
 
 namespace game {
@@ -19,8 +17,8 @@ struct LogEntry {
 // Consider moving Load/Save to SaveData and let savedata handle operations
 struct Log {
   void NewLog(const LogEntry& entry);
-  void LoadLog();
-  void SaveLog();
+  void LoadLog(pugi::xml_node& node);
+  void SaveLog(pugi::xml_node& node) const;
   std::vector<LogEntry> GetLogs() { return log_; }
   // Check if a log w/ a title at the level exists.
   bool LogExists(const std::string& title, DegradationLevel level);

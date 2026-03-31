@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "core/font.h"
-#include "core/shader.h"
 #include "core/texture.h"
 
 struct DialogueMeta {

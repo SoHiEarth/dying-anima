@@ -21,7 +21,6 @@
 #include "core/window.h"
 #include "game/game.h"
 #include "menu.h"
-#include "util/colors.h"
 
 namespace {
 void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {

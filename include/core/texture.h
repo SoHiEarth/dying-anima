@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CORE_TEXTURE_H
+#define CORE_TEXTURE_H
+
 #include <glm/glm.hpp>
 #include <string>
 struct Shader;
@@ -14,3 +16,5 @@ struct Texture {
   void Render(const std::shared_ptr<Shader>& shader,
               const glm::mat4& model) const;
 };
+
+#endif  // CORE_TEXTURE_H

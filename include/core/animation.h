@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "core/resource_manager.h"
+#include "core/atlas.h"
 
 struct AnimationFrame {
   TextureHandle texture;

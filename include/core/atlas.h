@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CORE_ATLAS_H
+#define CORE_ATLAS_H
+
 #include <map>
 #include <memory>
 #include <string>
@@ -35,3 +37,5 @@ struct TextureHandle {
 FONT_ATLAS LoadFontAtlas(std::string_view filename);
 SHADER_ATLAS LoadShaderAtlas(std::string_view filename);
 TEXTURE_ATLAS LoadTextureAtlas(std::string_view filename);
+
+#endif  // CORE_ATLAS_H

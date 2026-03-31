@@ -2,7 +2,6 @@
 #define CORE_SCENE_H_
 
 #include <memory>
-#include <stack>
 
 #include "core/window.h"
 

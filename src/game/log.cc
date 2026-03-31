@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <pugixml.hpp>
 #include <sstream>
+#include <utility>
 
 #include "core/resource_manager.h"
 #define LOG_FILE "player_log.xml"
@@ -35,11 +36,9 @@ void game::Log::NewLog(const LogEntry& entry) {
   log_.push_back(new_entry);
 }
 
-void game::Log::LoadLog() {
+void game::Log::LoadLog(pugi::xml_node& node) {
   log_.clear();
-  auto doc = pugi::xml_document();
-  doc.load_file(LOG_FILE);
-  auto entries = doc.child("logs").children("entry");
+  auto entries = node.child("logs").children("entry");
   for (auto& entry : entries) {
     LogEntry log_entry;
     log_entry.timestamp = entry.child("timestamp").text().as_string();
@@ -60,9 +59,8 @@ void game::Log::LoadLog() {
   }
 }
 
-void game::Log::SaveLog() {
-  auto doc = pugi::xml_document();
-  auto logs_node = doc.append_child("logs");
+void game::Log::SaveLog(pugi::xml_node& node) const {
+  auto logs_node = node.append_child("logs");
   for (const auto& entry : log_) {
     auto entry_node = logs_node.append_child("entry");
     entry_node.append_child("timestamp").text().set(entry.timestamp.c_str());
@@ -81,7 +79,6 @@ void game::Log::SaveLog() {
     auto texture_node = entry_node.append_child("texture");
     texture_node.append_attribute("tag") = entry.texture.tag.c_str();
   }
-  doc.save_file(LOG_FILE);
 }
 
 void game::Log::RenderLog(DegradationLevel degrade_level) {
@@ -109,7 +106,7 @@ void game::Log::RenderLog(DegradationLevel degrade_level) {
   }
   ImGui::SameLine();
   if (selected_log_index >= 0 &&
-      selected_log_index < static_cast<int>(log_.size())) {
+      std::cmp_less(selected_log_index, log_.size())) {
     if (ImGui::BeginChild("EntryDetails", ImVec2(0, 0))) {
       auto entry = log_.at(selected_log_index);
       ImGui::Text("Details");

@@ -14,6 +14,10 @@
 #include "core/shader.h"
 #include "core/window.h"
 
+namespace {
+glm::mat4 last_proj, last_view, last_vp;
+}
+
 Texture::Texture(std::string_view path) {
   this->path = std::string(path);
   stbi_set_flip_vertically_on_load(1);
@@ -41,7 +45,6 @@ Texture::Texture(std::string_view path) {
 
 Texture::~Texture() { glDeleteTextures(1, &id); }
 
-static glm::mat4 last_proj, last_view, last_vp;
 void Texture::Render(const std::shared_ptr<Shader>& shader,
                      const glm::mat4& model) const {
   shader->Use();

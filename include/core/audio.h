@@ -1,7 +1,9 @@
 #ifndef AUDIO_H
 #define AUDIO_H
+
 #include <AL/al.h>
 #include <AL/alc.h>
+
 namespace core {
 namespace audio {
 void Init();

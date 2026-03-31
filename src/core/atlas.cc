@@ -40,7 +40,8 @@ void PrintTextureResults(TEXTURE_ATLAS& atlas) {
 FONT_ATLAS LoadFontAtlas(std::string_view filename) {
   FONT_ATLAS font_atlas{};
   pugi::xml_document font_doc;
-  pugi::xml_parse_result result = font_doc.load_file(filename.data());
+  pugi::xml_parse_result result =
+      font_doc.load_file(std::string(filename).c_str());
   if (!result) {
     throw std::runtime_error(std::format("Failed to load font atlas XML: {}\n",
                                          result.description()));
@@ -65,7 +66,8 @@ FONT_ATLAS LoadFontAtlas(std::string_view filename) {
 SHADER_ATLAS LoadShaderAtlas(std::string_view filename) {
   SHADER_ATLAS shader_atlas{};
   pugi::xml_document shader_doc;
-  pugi::xml_parse_result shader_result = shader_doc.load_file(filename.data());
+  pugi::xml_parse_result shader_result =
+      shader_doc.load_file(std::string(filename).c_str());
   if (!shader_result) {
     throw std::runtime_error(std::format(
         "Failed to load shader atlas XML: {}\n", shader_result.description()));
@@ -95,7 +97,7 @@ TEXTURE_ATLAS LoadTextureAtlas(std::string_view filename) {
   TEXTURE_ATLAS texture_atlas{};
   pugi::xml_document texture_doc;
   pugi::xml_parse_result texture_result =
-      texture_doc.load_file(filename.data());
+      texture_doc.load_file(std::string(filename).c_str());
   if (!texture_result) {
     throw std::runtime_error(
         std::format("Failed to load texture atlas XML: {}\n",

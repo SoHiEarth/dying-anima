@@ -1,5 +1,5 @@
-#pragma once
-#include <string>
+#ifndef SHADER_H
+#define SHADER_H
 
 struct Shader {
   unsigned int id;
@@ -9,3 +9,5 @@ struct Shader {
   template <typename T>
   void SetUniform(std::string_view name, const T& value) const;
 };
+
+#endif  // SHADER_H

@@ -36,7 +36,7 @@ Animation LoadAnimationFromFile(std::string_view filename) {
   Animation animation;
   animation.file_path = std::string(filename);
   pugi::xml_document doc;
-  if (!doc.load_file(filename.data())) {
+  if (!doc.load_file(animation.file_path.c_str())) {
     std::print("Failed to load animation file: {}\n", filename);
     return animation;
   }
@@ -60,5 +60,5 @@ void SaveAnimationToFile(const Animation& animation,
     frame_node.append_attribute("texture") = frame.texture.tag.c_str();
     frame_node.append_attribute("duration") = frame.duration;
   }
-  doc.save_file(filename.data());
+  doc.save_file(std::string(filename).c_str());
 }

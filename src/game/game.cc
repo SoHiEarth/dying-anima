@@ -8,7 +8,6 @@
 
 #include <entt/entt.hpp>
 #include <filesystem>
-#include <format>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <pugixml.hpp>
@@ -36,8 +35,7 @@ namespace {
 bool show_log = false;
 bool show_player_info = false;
 }  // namespace
-
-SaveData game::save_data{};
+SaveData game::save_data;
 
 void GameScene::Init() {
   physics::Init({0, -39.81F});
@@ -54,12 +52,12 @@ void GameScene::Init() {
                            resource_manager::GetTexture("game.player").texture);
   if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
     std::filesystem::create_directory("saves");
-  } else if (!game::save_data.valid) {
+  } else {
     game::save_data = save_manager::LoadLatestSave();
     player_transform = game::save_data.player_transform;
     player_health = game::save_data.player_health;
+    player_log = game::save_data.log;
   }
-  player_log.LoadLog();
 
   sprite_shader = resource_manager::GetShader("Sprite").shader;
   rect_shader = resource_manager::GetShader("Rect").shader;
@@ -78,7 +76,6 @@ void GameScene::Quit() {
   if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
     std::filesystem::create_directory("saves");
   }
-  player_log.SaveLog();
   SaveData save_data{};
   if (!std::filesystem::is_empty("saves")) {
     save_data = save_manager::LoadLatestSave();
@@ -86,7 +83,7 @@ void GameScene::Quit() {
   save_data.player_transform = registry.get<Transform>(player);
   save_data.player_health = registry.get<Health>(player);
   save_data.completion_markers = game::save_data.completion_markers;
-  save_manager::SaveGame(save_data);
+  save_manager::SaveGame(save_data, player_log);
   physics::Quit();
   registry.clear();
 }
@@ -184,8 +181,6 @@ void GameScene::Update(double dt) {
 }
 
 void GameScene::Render(GameWindow& window) {
-  auto& camera_position = GetCamera().position;
-
   window.SetProjection(ProjectionType::kCentered);
   GetCamera().SetType(CameraType::kWorld);
   render::Render(registry);

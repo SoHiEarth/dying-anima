@@ -9,7 +9,7 @@
 #include "util/calculate.h"
 
 namespace {
-static glm::mat4 last_projection, last_view, last_vp;
+glm::mat4 last_projection, last_view, last_vp;
 }
 
 void Rect::Render(const std::shared_ptr<Shader>& shader) const {

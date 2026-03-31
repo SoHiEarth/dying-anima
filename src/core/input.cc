@@ -1,7 +1,6 @@
 #include "core/input.h"
 
 #include <map>
-#include <print>
 
 std::map<int, bool> core::input::states{}, core::input::last_frame_states{};
 

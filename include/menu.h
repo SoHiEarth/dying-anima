@@ -1,4 +1,6 @@
-#pragma once
+#ifndef MENU_H
+#define MENU_H
+
 #include "core/font.h"
 #include "core/scene.h"
 #include "core/shader.h"
@@ -18,3 +20,5 @@ struct MenuScene : public Scene {
   void Render(GameWindow& window) override;
   bool IsTransparent() override { return false; };
 };
+
+#endif  // MENU_H

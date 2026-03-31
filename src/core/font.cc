@@ -11,7 +11,10 @@
 #include "core/camera.h"
 #include "core/font.h"
 #include "core/window.h"
-#include "util/calculate.h"
+
+namespace {
+glm::mat4 last_projection, last_view, last_vp;
+}
 
 Font::Font(std::string_view font_path) {
   auto dpi = 96.0F;
@@ -25,7 +28,7 @@ Font::Font(std::string_view font_path) {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                        (void*)(3 * sizeof(float)));
+                        reinterpret_cast<void*>(3 * sizeof(float)));
 
   FT_Library ft;
   if (FT_Init_FreeType(&ft)) {
@@ -33,7 +36,8 @@ Font::Font(std::string_view font_path) {
   }
 
   FT_Face face;
-  if (FT_New_Face(ft, font_path.data(), 0, &face)) {
+  if (static_cast<bool>(
+          FT_New_Face(ft, std::string(font_path).c_str(), 0, &face))) {
     FT_Done_FreeType(ft);
     throw std::runtime_error("Failed to load font: " + std::string(font_path));
   }
@@ -95,8 +99,6 @@ int Font::GetHeight(std::string_view text) const {
   }
   return height;
 }
-
-static glm::mat4 last_projection, last_view, last_vp;
 
 void Font::Render(std::string_view text, const glm::vec2& position,
                   const glm::vec3& color,

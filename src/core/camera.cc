@@ -1,5 +1,6 @@
 #include "core/camera.h"
 
-static Camera camera;
-
-Camera& GetCamera() { return camera; }
+Camera& GetCamera() {
+  static Camera camera;
+  return camera;
+}

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CORE_FONT_H
+#define CORE_FONT_H
+
 #include <glm/glm.hpp>
 #include <map>
 #include <memory>
@@ -36,3 +38,5 @@ struct Font {
                         float height_pixels, const glm::vec3& color,
                         const std::shared_ptr<Shader>& shader) const;
 };
+
+#endif  // CORE_FONT_H

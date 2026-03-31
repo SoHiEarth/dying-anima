@@ -1,4 +1,6 @@
-#pragma once
+#ifndef GAME_PLAYER_H
+#define GAME_PLAYER_H
+
 #include <box2d/box2d.h>
 
 struct Health {
@@ -20,3 +22,5 @@ bool IsOnGround(b2BodyId body);
 namespace game {
 void RenderPlayerInfo();
 }
+
+#endif  // GAME_PLAYER_H

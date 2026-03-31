@@ -11,7 +11,7 @@
 
 Shader::Shader(std::string_view vertex_path, std::string_view fragment_path) {
   unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-  std::ifstream file(vertex_path.data());
+  std::ifstream file(std::string(vertex_path).c_str());
   std::string vertex_shader_source((std::istreambuf_iterator<char>(file)),
                                    std::istreambuf_iterator<char>());
   const char* vertex_shader_source_cstr = vertex_shader_source.c_str();
@@ -25,7 +25,7 @@ Shader::Shader(std::string_view vertex_path, std::string_view fragment_path) {
     std::print("Vertex Shader Compilation Error: {}", info_log);
   }
   unsigned int fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-  file = std::ifstream(fragment_path.data());
+  file = std::ifstream(std::string(fragment_path).c_str());
   std::string fragment_shader_source((std::istreambuf_iterator<char>(file)),
                                      std::istreambuf_iterator<char>());
   const char* fragment_shader_source_cstr = fragment_shader_source.c_str();
@@ -55,31 +55,34 @@ void Shader::Use() const { glUseProgram(id); }
 
 template <>
 void Shader::SetUniform(std::string_view name, const int& value) const {
-  glUniform1i(glGetUniformLocation(id, name.data()), value);
+  glUniform1i(glGetUniformLocation(id, std::string(name).c_str()), value);
 }
 
 template <>
 void Shader::SetUniform(std::string_view name, const float& value) const {
-  glUniform1f(glGetUniformLocation(id, name.data()), value);
+  glUniform1f(glGetUniformLocation(id, std::string(name).c_str()), value);
 }
 
 template <>
 void Shader::SetUniform(std::string_view name, const glm::vec2& value) const {
-  glUniform2fv(glGetUniformLocation(id, name.data()), 1, glm::value_ptr(value));
+  glUniform2fv(glGetUniformLocation(id, std::string(name).c_str()), 1,
+               glm::value_ptr(value));
 }
 
 template <>
 void Shader::SetUniform(std::string_view name, const glm::vec3& value) const {
-  glUniform3fv(glGetUniformLocation(id, name.data()), 1, glm::value_ptr(value));
+  glUniform3fv(glGetUniformLocation(id, std::string(name).c_str()), 1,
+               glm::value_ptr(value));
 }
 
 template <>
 void Shader::SetUniform(std::string_view name, const glm::vec4& value) const {
-  glUniform4fv(glGetUniformLocation(id, name.data()), 1, glm::value_ptr(value));
+  glUniform4fv(glGetUniformLocation(id, std::string(name).c_str()), 1,
+               glm::value_ptr(value));
 }
 
 template <>
 void Shader::SetUniform(std::string_view name, const glm::mat4& value) const {
-  glUniformMatrix4fv(glGetUniformLocation(id, name.data()), 1, GL_FALSE,
-                     glm::value_ptr(value));
+  glUniformMatrix4fv(glGetUniformLocation(id, std::string(name).c_str()), 1,
+                     GL_FALSE, glm::value_ptr(value));
 }

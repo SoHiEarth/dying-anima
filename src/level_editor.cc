@@ -116,13 +116,13 @@ void DrawGrid(GameWindow& window, Camera& camera,
   float start_x = floor(left);
   float start_y = floor(bottom);
 
-  for (float x = start_x; x <= right; x++) {
+  for (int x = start_x; x <= right; x++) {
     Rect line(glm::vec2(x, camera.position.y),
               glm::vec2(line_thickness, window.height),
               glm::vec4(0.3F, 0.3F, 0.3F, 1.0F));
     line.Render(shader);
   }
-  for (float y = start_y; y <= top; y++) {
+  for (int y = start_y; y <= top; y++) {
     Rect line(glm::vec2(camera.position.x, y),
               glm::vec2(window.width, line_thickness),
               glm::vec4(0.3F, 0.3F, 0.3F, 1.0F));
@@ -536,7 +536,7 @@ void LevelEditor::Render(GameWindow& window) {
             }
           }
           for (auto enemy : enemies_to_erase) {
-            if (auto it = std::find_if(
+            if (auto it = std::ranges::find_if(
                     trigger.enemies.begin(), trigger.enemies.end(),
                     [&](const Enemy& e) { return e.name == enemy.name; });
                 it != trigger.enemies.end()) {

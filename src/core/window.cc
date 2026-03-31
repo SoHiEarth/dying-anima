@@ -1,4 +1,7 @@
 #include "core/window.h"
-static GameWindow window;
+
+namespace {
+GameWindow window;
+}
 
 GameWindow& GetGameWindow() { return window; }

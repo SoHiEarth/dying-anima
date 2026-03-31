@@ -3,7 +3,6 @@
 #include <tinyfiledialogs.h>
 
 #include <entt/entt.hpp>
-#include <utility>
 
 #include "core/resource_manager.h"
 #include "editor/animation.h"

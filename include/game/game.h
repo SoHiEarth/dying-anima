@@ -1,4 +1,6 @@
-#pragma once
+#ifndef GAME_GAME_H
+#define GAME_GAME_H
+
 #include <entt/entt.hpp>
 
 #include "core/font.h"
@@ -30,3 +32,5 @@ struct GameScene : public Scene {
   b2BodyId player_body;
   game::Log player_log;
 };
+
+#endif

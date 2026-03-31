@@ -3,17 +3,15 @@
 #include <pugixml.hpp>
 #include <utility>
 
-#include "core/camera.h"
 #include "core/resource_manager.h"
 #include "core/window.h"
-#include "util/calculate.h"
 
 constexpr float kDialogueMargin = 50.0F;
 
 DialogueData game::LoadDialogue(std::string_view file) {
   DialogueData dialogue;
   pugi::xml_document doc;
-  if (!doc.load_file(file.data())) {
+  if (!doc.load_file(std::string(file).c_str())) {
     throw std::runtime_error("Failed to load dialogue file: " +
                              std::string(file));
   }
@@ -43,7 +41,7 @@ void game::SaveDialogue(const DialogueData& dialogue, std::string_view file) {
       line_node.text() = line.c_str();
     }
   }
-  if (!doc.save_file(file.data())) {
+  if (!doc.save_file(std::string(file).c_str())) {
     throw std::runtime_error("Failed to save dialogue file: " +
                              std::string(file));
   }
