@@ -3,8 +3,13 @@
 
 #include <box2d/box2d.h>
 
+#include "game/skill.h"
+
 struct Health {
-  float health{100.0F};
+  float max_health{100.0F};
+  float max_stamina{100.0F};
+  float health{max_health};
+  float stamina{max_stamina};
 };
 
 struct PlayerSpeed {
@@ -17,10 +22,14 @@ struct PlayerSpeed {
   float jump_impulse = 8.75F;
 };
 
+struct PlayerSkills {
+  std::vector<Skill> skills;
+};
+
 bool IsOnGround(b2BodyId body);
 
 namespace game {
 void RenderPlayerInfo();
-}
+}  // namespace game
 
 #endif  // GAME_PLAYER_H

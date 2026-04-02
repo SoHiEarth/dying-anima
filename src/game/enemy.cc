@@ -28,6 +28,14 @@ void LoadEnemies() {
     enemy.max_stamina = object_node.attribute("max_stamina").as_float();
     enemy.stamina = enemy.max_stamina;
     enemy.damage = object_node.attribute("damage").as_float();
+    for (auto skill_node : object_node.children("Skill")) {
+      Skill skill;
+      skill.name = skill_node.attribute("name").as_string();
+      skill.damage = skill_node.attribute("damage").as_float();
+      skill.health_used = skill_node.attribute("health_used").as_float();
+      skill.stamina_used = skill_node.attribute("stamina_used").as_float();
+      enemy.skills.emplace_back(skill);
+    }
     default_enemies.push_back(enemy);
   }
   std::cout << "Loaded " << default_enemies.size() << " enemy presets\n";
@@ -53,6 +61,9 @@ Enemy game::CreateEnemyFromName(std::string_view name) {
 void game::UpdateBattleTriggers(entt::registry& registry,
                                 SceneManager& scene_manager) {
   auto view = registry.view<BattleTrigger>();
+  auto player_entity = registry.view<PlayerSkills>().front();
+  auto player_skills = registry.get<PlayerSkills>(player_entity);
+  auto player_health = registry.get<Health>(player_entity);
   for (auto entity : view) {
     auto& damager = view.get<BattleTrigger>(entity);
     auto& transform = registry.get<Transform>(entity);
@@ -63,8 +74,8 @@ void game::UpdateBattleTriggers(entt::registry& registry,
           glm::distance(transform.position, player_transform.position);
       if (distance < damager.hitbox_radius) {
         scene_manager.PopScene();
-        scene_manager.PushScene(
-            std::make_unique<BattleScene>(scene_manager, damager.enemies));
+        scene_manager.PushScene(std::make_unique<BattleScene>(
+            scene_manager, damager.enemies, player_skills, player_health));
       }
     }
   }

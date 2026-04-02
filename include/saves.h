@@ -4,7 +4,6 @@
 #include <string>
 
 #include "core/transform.h"
-#include "game/battle.h"
 #include "game/log.h"
 #include "game/player.h"
 
@@ -14,7 +13,7 @@ struct SaveData {
   Health player_health;
   std::vector<std::string> completion_markers;
   game::Log log;
-  std::vector<Skill> aquired_skills;
+  std::vector<Skill> acquired_skills;
 };
 
 namespace save_manager {

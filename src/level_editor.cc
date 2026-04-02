@@ -554,8 +554,8 @@ void LevelEditor::Render(GameWindow& window) {
                 trigger.enemies.push_back(
                     game::CreateEnemyFromName(enemy_name));
                 enemy_name.clear();
-                ImGui::CloseCurrentPopup();
               }
+              ImGui::CloseCurrentPopup();
             }
             ImGui::EndPopup();
           }

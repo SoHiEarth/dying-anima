@@ -5,13 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "core/scene.h"
-
-struct Skill {
-  std::string name;
-  float damage;        // The amount of damage applied to the enemy
-  float health_used;   // The amount of health drained from the user
-  float stamina_used;  // The amount of stamina drained from the user
-};
+#include "game/skill.h"
 
 struct Enemy {
   std::string name;
@@ -20,6 +14,7 @@ struct Enemy {
   float stamina;
   float max_stamina;
   float damage;
+  std::vector<Skill> skills;
 };
 
 struct BattleTrigger {

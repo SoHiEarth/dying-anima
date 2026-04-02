@@ -41,8 +41,10 @@ void GameScene::Init() {
   physics::Init({0, -39.81F});
   registry = LoadLevel("level.txt");
   player = registry.create();
+  game::save_data = save_manager::LoadLatestSave();
   auto& player_transform = registry.emplace<Transform>(player);
   registry.emplace<PlayerSpeed>(player);
+  auto& player_skills = registry.emplace<PlayerSkills>(player);
   auto& player_health = registry.emplace<Health>(player, 100.0F);
   player_body = registry
                     .emplace<PhysicsBody>(
@@ -50,15 +52,21 @@ void GameScene::Init() {
                     .body;
   registry.emplace<Sprite>(player, "game.player",
                            resource_manager::GetTexture("game.player").texture);
-  if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
-    std::filesystem::create_directory("saves");
-  } else {
-    game::save_data = save_manager::LoadLatestSave();
+  if (game::save_data.valid) {
     player_transform = game::save_data.player_transform;
     player_health = game::save_data.player_health;
     player_log = game::save_data.log;
+    player_skills.skills = game::save_data.acquired_skills;
   }
-
+  if (player_skills.skills.empty()) {
+    player_skills.skills.push_back({
+        .name = "Punch",
+        .damage = 10.0F,
+        .health_used = 5.0F,
+        .stamina_used = 0.0F,
+    });
+    std::print("[GAME] Added punch\n");
+  }
   sprite_shader = resource_manager::GetShader("Sprite").shader;
   rect_shader = resource_manager::GetShader("Rect").shader;
   text_shader = resource_manager::GetShader("Text").shader;
