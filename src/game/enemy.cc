@@ -1,6 +1,7 @@
 #include "game/enemy.h"
 
 #include <iostream>
+#include <mutex>
 #include <pugixml.hpp>
 
 #include "core/scene.h"
