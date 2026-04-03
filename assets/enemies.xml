@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Enemies>
   <Enemy name="TestEnemy" max_health="100" max_stamina ="100">
-    <Skill name="TestSkill" damage="100" health_used="50" stamina_used="50"/>
+    <Skill name="TestSkill" damage="10" health_used="5" stamina_used="5"/>
   </Enemy>
 </Enemies>

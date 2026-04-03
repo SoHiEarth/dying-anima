@@ -62,6 +62,7 @@ void GameScene::Init() {
     player_skills.skills.push_back({
         .name = "Punch",
         .damage = 50.0F,
+        .stamina_drain = 5.0F,
         .health_used = 5.0F,
         .stamina_used = 0.0F,
     });
