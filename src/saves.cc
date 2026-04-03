@@ -14,6 +14,7 @@ void save_manager::SaveGame(const SaveData& data, const game::Log& log) {
   pugi::xml_document doc;
   auto root = doc.append_child(kSavedataRootName);
   auto player_node = root.append_child("Player");
+  player_node.append_attribute("death_count") = data.death_count;
   player_node.append_attribute("pos.x") = data.player_transform.position.x;
   player_node.append_attribute("pos.y") = data.player_transform.position.y;
   auto health_node = player_node.append_child("Health");
@@ -59,6 +60,7 @@ SaveData save_manager::LoadGame(std::string_view filename) {
   }
   auto root_node = doc.child(kSavedataRootName);
   auto player_node = root_node.child("Player");
+  data.death_count = player_node.attribute("death_count").as_int();
   if (player_node) {
     data.player_transform.position.x =
         player_node.attribute("pos.x").as_float();

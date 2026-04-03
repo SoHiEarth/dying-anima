@@ -2,6 +2,7 @@
 
 #include <core/window.h>
 #include <imgui.h>
+#include "game/game.h"
 
 constexpr float kPlayerInfoMargin = 50.0F;
 /*
@@ -43,7 +44,7 @@ void game::RenderPlayerInfo() {
                ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
                    ImGuiWindowFlags_NoResize);
   ImGui::Text("Player Info");
-  ImGui::Text("Death Count: %d", 0);  // temp
+  ImGui::Text("Death Count: %d", game::save_data.death_count);
 
   ImGui::End();
 }

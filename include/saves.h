@@ -12,6 +12,7 @@ struct SaveData {
   Transform player_transform;
   Health player_health;
   std::vector<std::string> completion_markers;
+  int death_count = 0;
   game::Log log;
   std::vector<Skill> acquired_skills;
 };

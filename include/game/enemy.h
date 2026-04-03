@@ -4,11 +4,13 @@
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
+#include "core/atlas.h"
 #include "core/scene.h"
 #include "game/skill.h"
 
 struct Enemy {
   std::string name;
+  TextureHandle texture;
   float health;
   float max_health;
   float stamina;

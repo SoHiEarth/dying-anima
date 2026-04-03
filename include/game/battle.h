@@ -14,10 +14,10 @@ struct BattleScene : public Scene {
 
  public:
   BattleScene(SceneManager& manager, std::vector<Enemy> enemies,
-              PlayerSkills player_skills_, Health player_health_)
+              PlayerSkills& player_skills_, Health& player_health_)
       : Scene(manager),
         enemies_(std::move(enemies)),
-        player_skills_(std::move(player_skills_)),
+        player_skills_(player_skills_),
         player_health_(player_health_) {}
   std::string Name() override { return "BattleScene"; };
   void Init() override;

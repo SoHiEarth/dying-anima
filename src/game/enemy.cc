@@ -4,6 +4,7 @@
 #include <mutex>
 #include <pugixml.hpp>
 
+#include "core/resource_manager.h"
 #include "core/scene.h"
 #include "core/transform.h"
 #include "game/battle.h"
@@ -23,6 +24,7 @@ void LoadEnemies() {
   for (auto object_node : root.children("Enemy")) {
     Enemy enemy;
     enemy.name = object_node.attribute("name").as_string();
+    enemy.texture = resource_manager::GetTexture(object_node.attribute("texture").as_string());
     enemy.max_health = object_node.attribute("max_health").as_float();
     enemy.health = enemy.max_health;
     enemy.max_stamina = object_node.attribute("max_stamina").as_float();
