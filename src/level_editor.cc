@@ -24,6 +24,7 @@
 #include "core/transform.h"
 #include "core/window.h"
 #include "editor/animation.h"
+#include "editor/onboarding.h"
 #include "game/enemy.h"
 #include "game/game.h"
 #include "game/spawn.h"
@@ -642,4 +643,7 @@ void LevelEditor::Render(GameWindow& window) {
   if (editor::internal::show_animation_window) {
     editor::AnimationWindow(registry.get<Animation>(selected_entity));
   }
+  
+  if (editor::internal::show_onboarding_window)
+    editor::RenderOnboarding();
 }

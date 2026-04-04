@@ -27,7 +27,9 @@ TurnData temp_turn_data;
 std::optional<TurnData> turn_data;
 std::vector<std::string> action_log;
 
-void UseSkill(const Skill& skill, float& user_health, float& user_stamina, float& target_health, float& target_stamina, const std::string& user_name = "") {
+void UseSkill(const Skill& skill, float& user_health, float& user_stamina,
+              float& target_health, float& target_stamina,
+              const std::string& user_name = "") {
   action_log.emplace_back(user_name + " used " + skill.name + "!");
   user_health -= skill.health_used;
   user_stamina -= skill.stamina_used;
@@ -42,22 +44,26 @@ void UpdateEnemyAI(std::vector<Enemy>& enemies, Health& player_health_) {
     for (auto& skill : enemy.skills) {
       // 20 hp/20 stamina minimum
       if (enemy.health - 20.0F < skill.health_used) {
-        continue; // don't even think about it.
+        continue;  // don't even think about it.
       }
       if (enemy.stamina - 20.0F < skill.stamina_used) {
         continue;
       }
 
-      // Skill ranking algorithm: damage/used resources - simple, but effective (i think)
-      skill_rank.insert({skill.damage/std::max(1.0F, (skill.health_used + skill.stamina_used)), skill});
+      // Skill ranking algorithm: damage/used resources - simple, but effective
+      // (i think)
+      skill_rank.insert({skill.damage / std::max(1.0F, (skill.health_used +
+                                                        skill.stamina_used)),
+                         skill});
     }
-    
+
     // Run the action
     if (skill_rank.empty()) {
       action_log.emplace_back("Enemy " + enemy.name + " ran away!");
     } else {
       auto skill_used = skill_rank.rbegin()->second;
-      UseSkill(skill_used, enemy.health, enemy.stamina, player_health_.health, player_health_.stamina, enemy.name);
+      UseSkill(skill_used, enemy.health, enemy.stamina, player_health_.health,
+               player_health_.stamina, enemy.name);
     }
   }
   current_turn = BattleTurn::kPlayer;
@@ -94,7 +100,9 @@ void BattleScene::Update(double) {
   if (turn_data.has_value() && current_turn == BattleTurn::kPlayer) {
     if (turn_data->target != nullptr) {
       for (const auto& skill : turn_data->used_skills) {
-        UseSkill(skill, player_health_.health, player_health_.stamina, turn_data->target->health, turn_data->target->stamina, "Player");
+        UseSkill(skill, player_health_.health, player_health_.stamina,
+                 turn_data->target->health, turn_data->target->stamina,
+                 "Player");
       }
       if (turn_data->target->health <= 0) {
         scene_manager_.PopScene();
@@ -116,8 +124,7 @@ void BattleScene::Update(double) {
 void BattleScene::Render(GameWindow& window) {
   auto ui_margin = std::min(window.width, window.height) / 15.0F;
   ImGui::SetNextWindowPos(
-      ImVec2(ui_margin,
-             (static_cast<float>(window.height) / 2) - ui_margin),
+      ImVec2(ui_margin, (static_cast<float>(window.height) / 2) - ui_margin),
       ImGuiCond_Always);
   ImGui::SetNextWindowSize(
       ImVec2(window.width - (ui_margin * 2),
@@ -153,7 +160,8 @@ void BattleScene::Render(GameWindow& window) {
           if (ImGui::Button(std::string("Execute!##" + skill.name).c_str())) {
             temp_turn_data.used_skills = {skill};
             if (enemies_.size() > 1)
-              ImGui::OpenPopup(std::string("SelectEnemyPopup##" + skill.name).c_str());
+              ImGui::OpenPopup(
+                  std::string("SelectEnemyPopup##" + skill.name).c_str());
             else {
               temp_turn_data.target = enemies_.data();
               turn_data.emplace(temp_turn_data);
@@ -161,7 +169,8 @@ void BattleScene::Render(GameWindow& window) {
               temp_turn_data.used_skills.clear();
             }
           }
-          if (ImGui::BeginPopup(std::string("SelectEnemyPopup##" + skill.name).c_str())) {
+          if (ImGui::BeginPopup(
+                  std::string("SelectEnemyPopup##" + skill.name).c_str())) {
             ImGui::Text("Which enemy do you want to attack?");
             for (auto& enemy : enemies_) {
               if (ImGui::Selectable(enemy.name.c_str(),
@@ -202,13 +211,18 @@ void BattleScene::Render(GameWindow& window) {
 
 void BattleScene::Quit() {
   auto save_data = save_manager::LoadLatestSave();
-  save_data.completion_markers.push_back("Battle." + std::to_string(std::chrono::system_clock::now().time_since_epoch().count()) + "." + ListEnemyNames(enemies_));
-  save_data.log.NewLog({
-      .title = {{game::DegradationLevel::kLevel0, "Battle against " + ListEnemyNames(enemies_)}},
-      .description = {{game::DegradationLevel::kLevel0, "No description."}},
-      .timestamp = std::to_string(std::chrono::system_clock::now().time_since_epoch().count()),
-      .texture = {}
-  });
+  save_data.completion_markers.push_back(
+      "Battle." +
+      std::to_string(
+          std::chrono::system_clock::now().time_since_epoch().count()) +
+      "." + ListEnemyNames(enemies_));
+  save_data.log.NewLog(
+      {.title = {{game::DegradationLevel::kLevel0,
+                  "Battle against " + ListEnemyNames(enemies_)}},
+       .description = {{game::DegradationLevel::kLevel0, "No description."}},
+       .timestamp = std::to_string(
+           std::chrono::system_clock::now().time_since_epoch().count()),
+       .texture = {}});
   if (player_health_.health <= 0) {
     save_data.death_count++;
     player_health_.health = 100;

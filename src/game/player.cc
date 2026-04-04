@@ -2,6 +2,7 @@
 
 #include <core/window.h>
 #include <imgui.h>
+
 #include "game/game.h"
 
 constexpr float kPlayerInfoMargin = 50.0F;

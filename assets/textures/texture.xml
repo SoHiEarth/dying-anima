@@ -16,4 +16,8 @@
 	<texture name="ui.movement" path="movement.png"/>
 	<texture name="ui.journal" path="journal.png"/>
 	<texture name="ui.character" path="character.png"/>
+  <texture name="doc.viewport" path="doc.viewport.png"/>
+  <texture name="doc.scene" path="doc.scene.png"/>
+  <texture name="doc.inspector" path="doc.inspector.png"/>
+  <texture name="doc.resource" path="doc.resource.png"/>
 </textures>
