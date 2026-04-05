@@ -141,6 +141,8 @@ void DrawGrid(GameWindow& window, Camera& camera,
               glm::vec4(0.0F, 1.0F, 0.0F, 1.0F));
   y_axis.Render(shader);
 }
+
+std::once_flag register_components_flag;
 }  // namespace
 
 void LevelEditor::Init() {
@@ -153,13 +155,16 @@ void LevelEditor::Init() {
   rect_shader = resource_manager::GetShader("Rect").shader;
   sprite_shader = resource_manager::GetShader("Sprite").shader;
   glfwSetScrollCallback(GetGameWindow().window, MouseScrollCallback);
-  REGISTER_COMPONENT(Animation);
-  REGISTER_COMPONENT(Transform);
-  REGISTER_COMPONENT(Sprite);
-  REGISTER_COMPONENT(Light);
-  REGISTER_COMPONENT(PhysicsBody);
-  REGISTER_COMPONENT(PlayerSpawn);
-  REGISTER_COMPONENT(BattleTrigger);
+  std::call_once(register_components_flag, []() {
+    REGISTER_COMPONENT(Animation);
+    REGISTER_COMPONENT(Transform);
+    REGISTER_COMPONENT(Sprite);
+    REGISTER_COMPONENT(Light);
+    REGISTER_COMPONENT(PhysicsBody);
+    REGISTER_COMPONENT(PlayerSpawn);
+    REGISTER_COMPONENT(BattleTrigger);
+  });
+  GetGameWindow().SetPixelsPerUnit(100.0F);
 }
 
 void LevelEditor::Quit() {

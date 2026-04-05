@@ -7,8 +7,8 @@
 
 #include "game/log.h"
 
-constexpr std::string kSavedataRootName = "SaveData";
-constexpr std::string kSavedataDirectory = "saves";
+std::string kSavedataRootName = "SaveData";
+std::string kSavedataDirectory = "saves";
 
 void save_manager::SaveGame(const SaveData& data, const game::Log& log) {
   pugi::xml_document doc;
