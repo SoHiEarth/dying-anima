@@ -27,8 +27,19 @@
     width: 50%;
     z-index: 1;
 }
-.explain {
+
+#title_text {
+    margin-left: 2.5rem;
+}
+
+#explain_title,
+#features_title {
     margin-left: 5rem;
+}
+
+#explain_content,
+#features_content {
+    margin-left: 7.5rem;
 }
 
 #navbar {
