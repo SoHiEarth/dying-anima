@@ -24,6 +24,7 @@
 #include "core/transform.h"
 #include "core/window.h"
 #include "editor/animation.h"
+#include "editor/tooltip.h"
 #include "editor/onboarding.h"
 #include "game/enemy.h"
 #include "game/game.h"
@@ -290,7 +291,7 @@ void LevelEditor::Render(GameWindow& window) {
                       ImGuiWindowFlags_NoBackground;
   ImGui::Begin("DockSpace", nullptr, window_flags);
   ImGui::PopStyleVar(2);
-  ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+  ImGuiID dockspace_id = ImGui::GetID("DockSpace");
   ImGui::DockSpace(dockspace_id, ImVec2(0.0F, 0.0F),
                    ImGuiDockNodeFlags_PassthruCentralNode);
   ImGui::End();
@@ -309,7 +310,7 @@ void LevelEditor::Render(GameWindow& window) {
         dock_main_id, ImGuiDir_Right, 0.25F, nullptr, &dock_main_id);
     ImGui::DockBuilderDockWindow("Scene", dock_id_left);
     ImGui::DockBuilderDockWindow("Resource Manager", dock_id_bottom);
-    ImGui::DockBuilderDockWindow("Renderer", dock_id_left);
+    ImGui::DockBuilderDockWindow("Utilities & Info", dock_id_left);
     ImGui::DockBuilderDockWindow("Entity Inspector", dock_id_right);
     ImGui::DockBuilderFinish(dockspace_id);
   }
@@ -321,6 +322,7 @@ void LevelEditor::Render(GameWindow& window) {
           registry.clear();
           current_scene_path.clear();
         }
+        editor::SetTooltip("menu_bar.file.new");
         if (ImGui::MenuItem("Open", "Ctrl+O")) {
           auto* level_path =
               tinyfd_openFileDialog("Open Scene", "", 0, nullptr, nullptr, 0);
@@ -329,6 +331,7 @@ void LevelEditor::Render(GameWindow& window) {
             registry = LoadLevel(current_scene_path);
           }
         }
+        editor::SetTooltip("menu_bar.file.open");
         if (ImGui::MenuItem("Save", "Ctrl+S")) {
           if (current_scene_path.empty()) {
             auto* level = tinyfd_saveFileDialog("Save Scene", "scene", 0,
@@ -341,11 +344,13 @@ void LevelEditor::Render(GameWindow& window) {
             SaveLevel(current_scene_path, registry);
           }
         }
-        if (ImGui::MenuItem("Play This Level")) {
+        editor::SetTooltip("menu_bar.file.save");
+        if (ImGui::MenuItem("Play This Scene")) {
           SaveLevel("level.txt", registry);
           scene_manager_.PopScene();
           scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_));
         }
+        editor::SetTooltip("menu_bar.file.play");
         ImGui::EndMenu();
       }
 
@@ -356,9 +361,11 @@ void LevelEditor::Render(GameWindow& window) {
         if (ImGui::MenuItem("Toggle Spotlight")) {
           enable_spotlight = !enable_spotlight;
         }
+        editor::SetTooltip("menu_bar.view.spotlight");
         if (ImGui::MenuItem("Animation Editor")) {
           editor::ShowAnimationWindow(!editor::internal::show_animation_window);
         }
+        editor::SetTooltip("menu_bar.view.anim_editor");
         ImGui::EndMenu();
       }
       ImGui::EndMainMenuBar();
@@ -374,8 +381,10 @@ void LevelEditor::Render(GameWindow& window) {
     ImGui::SeparatorText("Toolkit");
     ImGui::RadioButton("Select", reinterpret_cast<int*>(&current_tool),
                        static_cast<int>(Toolkit::kSelect));
+    editor::SetTooltip("scene.toolkit.select");
     ImGui::RadioButton("Move", reinterpret_cast<int*>(&current_tool),
                        static_cast<int>(Toolkit::kMove));
+    editor::SetTooltip("scene.toolkit.move");
     ImGui::SeparatorText("Entities");
     auto transform_view = registry.view<const Transform>();
     int entity_count = 0;
@@ -394,6 +403,7 @@ void LevelEditor::Render(GameWindow& window) {
     if (ImGui::Button("Reload Textures")) {
       resource_manager::ReloadTextures();
     }
+    editor::SetTooltip("resource.reload_texture");
     float thumbnail_size = 64.0F;
     float padding = 16.0F;
     float cell_size = thumbnail_size + (padding * 2);
@@ -418,6 +428,9 @@ void LevelEditor::Render(GameWindow& window) {
 
       ImGui::TextWrapped("%s", key.c_str());
       ImGui::EndGroup();
+      if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("Width: %dpx\nHeight: %dpx\nChannels: %d (%s)", value.texture->width, value.texture->height, value.texture->channels, (value.texture->channels == 3) ? "RGB" : "RGBA");
+      }
       ImGui::PopID();
       i++;
       if (i % column_count != 0) {
@@ -425,22 +438,26 @@ void LevelEditor::Render(GameWindow& window) {
       }
     }
     ImGui::End();
-    ImGui::Begin("Renderer");
+    ImGui::Begin("Utilities & Info");
     auto camera = GetCamera();
     ImGui::Text("Position: (%.2f, %.2f)", camera.position.x, camera.position.y);
+    editor::SetTooltip("info.camera");
     ImGui::Text("Window PPU: %.2f", window.GetPixelsPerUnit());
-    ImGui::Text("Camera Type: %s", camera.GetType() == CameraType::kWorld
-                                       ? "WORLD"
-                                       : "SCREEN_SPACE");
+    editor::SetTooltip("info.ppu");
     if (ImGui::CollapsingHeader("Lights")) {
       int i = 0;
       for (auto entity : registry.view<Light>()) {
+        if (entity == spotlight) continue;
         i++;
         if (ImGui::Button(std::format("Select Light #{}", i).c_str())) {
           selected_entity = entity;
         }
       }
+      if (i == 0) {
+        ImGui::Text("No lights in scene.");
+      }
     }
+    editor::SetTooltip("info.lights");
     ImGui::SeparatorText("Options");
     ImGui::Checkbox("Enable Grid", &enable_grid);
     ImGui::Checkbox("Enable Spotlight", &enable_spotlight);
@@ -448,10 +465,10 @@ void LevelEditor::Render(GameWindow& window) {
       for (auto entity : registry.view<Transform>()) {
         if (!registry.any_of<PhysicsBody>(entity)) {
           registry.emplace<PhysicsBody>(entity);
-          // Do not add b2BodyId because b2World is not initialized
         }
       }
     }
+    editor::SetTooltip("info.physics_body_shortcut");
     ImGui::End();
     ImGui::Begin("Entity Inspector");
     if (registry.try_get<Transform>(selected_entity) == nullptr) {
@@ -461,12 +478,16 @@ void LevelEditor::Render(GameWindow& window) {
       if (ImGui::CollapsingHeader("Transform")) {
         auto& transform = registry.get<Transform>(selected_entity);
         ImGui::DragFloat2("Position", glm::value_ptr(transform.position), 0.1F);
+        editor::SetTooltip("inspector.transform.position");
         ImGui::DragFloat("Z Index", &transform.z_index, 0.1F);
+        editor::SetTooltip("inspector.transform.z_index");
         ImGui::DragFloat2("Scale", glm::value_ptr(transform.scale), 0.1F);
+        editor::SetTooltip("inspector.transform.scale");
         ImGui::DragFloat("Rotation", &transform.rotation, 1.0F);
+        editor::SetTooltip("inspector.transform.rotation");
       }
-      if (ImGui::CollapsingHeader("Sprite")) {
-        if (registry.any_of<Sprite>(selected_entity)) {
+      if (registry.any_of<Sprite>(selected_entity)) {
+        if (ImGui::CollapsingHeader("Sprite")) {
           auto& sprite = registry.get<Sprite>(selected_entity);
           ImGui::BeginGroup();
           if (sprite.texture) {
@@ -488,9 +509,9 @@ void LevelEditor::Render(GameWindow& window) {
             }
             ImGui::EndDragDropTarget();
           }
-        }
-        if (ImGui::Button("Remove Sprite")) {
-          registry.remove<Sprite>(selected_entity);
+          if (ImGui::Button("Remove Sprite")) {
+            registry.remove<Sprite>(selected_entity);
+          }
         }
       }
       // Check if it has a physics body component
@@ -498,7 +519,9 @@ void LevelEditor::Render(GameWindow& window) {
         if (ImGui::CollapsingHeader("Physics Body")) {
           auto& physics_body = registry.get<PhysicsBody>(selected_entity);
           ImGui::Checkbox("Is Dynamic", &physics_body.is_dynamic);
+          editor::SetTooltip("inspector.physics_body.dynamic");
           ImGui::Checkbox("Is Chained", &physics_body.is_chained);
+          editor::SetTooltip("inspector.physics_body.chained");
           if (ImGui::Button("Remove Physics Body")) {
             registry.remove<PhysicsBody>(selected_entity);
           }
@@ -510,13 +533,18 @@ void LevelEditor::Render(GameWindow& window) {
           auto& light = registry.get<Light>(selected_entity);
           ImGui::Combo("Light Type", reinterpret_cast<int*>(&light.type),
                        "DIRECTIONAL\0POINT\0");
+          editor::SetTooltip("inspector.light.type");
           ImGui::ColorEdit3("Light Color", glm::value_ptr(light.color));
+          editor::SetTooltip("inspector.light.color");
           ImGui::DragFloat("Light Intensity", &light.intensity, 0.1F, 0.0F);
+          editor::SetTooltip("inspector.light.intensity");
           if (light.type == LightType::kPoint) {
             ImGui::DragFloat("Light Radial Falloff", &light.radial_falloff,
                              0.1F, 0.0F);
+            editor::SetTooltip("inspector.light.radial_falloff");
             ImGui::DragFloat("Light Volumetric Intensity",
                              &light.volumetric_intensity, 0.1F, 0.0F);
+            editor::SetTooltip("inspector.light.volumetric_intensity");
           }
           if (ImGui::Button("Remove Light")) {
             registry.remove<Light>(selected_entity);
@@ -567,8 +595,10 @@ void LevelEditor::Render(GameWindow& window) {
       }
 
       if (registry.any_of<PlayerSpawn>(selected_entity)) {
-        if (ImGui::Button("Remove PlayerSpawn Component")) {
-          registry.remove<PlayerSpawn>(selected_entity);
+        if (ImGui::CollapsingHeader("Player Spawn")) {
+          if (ImGui::Button("Remove PlayerSpawn Component")) {
+            registry.remove<PlayerSpawn>(selected_entity);
+          }
         }
       }
 
@@ -578,9 +608,9 @@ void LevelEditor::Render(GameWindow& window) {
           if (ImGui::Button("Edit Animation")) {
             editor::ShowAnimationWindow(true);
           }
-        }
-        if (ImGui::Button("Remove Animation")) {
-          registry.remove<Animation>(selected_entity);
+          if (ImGui::Button("Remove Animation")) {
+            registry.remove<Animation>(selected_entity);
+          }
         }
       }
 

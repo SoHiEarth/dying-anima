@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tooltips>
+  <tooltip tag="menu_bar.file.new" text="Create a new scene."/>
+  <tooltip tag="menu_bar.file.open" text="Open a scene from a file."/>
+  <tooltip tag="menu_bar.file.save" text="Save the current scene."/>
+  <tooltip tag="menu_bar.file.play" text="Play this scene in the game."/>
+  <tooltip tag="menu_bar.view.spotlight" text="Toggle the mouse light."/>
+  <tooltip tag="menu_bar.view.anim_editor" text="Show/Hide the animation editor."/>
+  <tooltip tag="scene.toolkit.select" text="Select an entity from the viewport."/>
+  <tooltip tag="scene.toolkit.move" text="Drag to move selected entity."/>
+  <tooltip tag="resource.reload_texture" text="Reload textures from atlas."/>
+  <tooltip tag="info.camera" text="Position of the viewport camera in world space."/>
+  <tooltip tag="info.ppu" text="Indicates how large 1 world unit should be in pixels."/>
+  <tooltip tag="info.lights" text="A shorthand for viewing lights in the scene."/>
+  <tooltip tag="info.physics_body_shortcut" text="Add physics bodies to all transforms in the scene."/>
+  <tooltip tag="inspector.transform.position" text="The position of the object. (vec2)"/>
+  <tooltip tag="inspector.transform.z_index" text="The rendering order of the object."/>
+  <tooltip tag="inspector.transform.scale" text="The scale of the object. (vec2)"/>
+  <tooltip tag="inspector.transform.rotation" text="The rotation of the object, in the z-axis."/>
+  <tooltip tag="inspector.physics_body.dynamic" text="Whether the object is locked in position or moving."/>
+  <tooltip tag="inspector.physics_body.chained" text="EXPERIMENTAL FEATURE: Chains flat surfaces for smoother movement."/>
+  <tooltip tag="inspector.light.type" text="Control's the light's type."/>
+  <tooltip tag="inspector.light.color" text="The color of the light."/>
+  <tooltip tag="inspector.light.intensity" text="The intensity of the light."/>
+  <tooltip tag="inspector.light.radial_falloff" text="The falloff of the light."/>
+  <tooltip tag="inspector.light.volumetric_intensity" text="The intensity at which the light affects the volume around it."/>
+</tooltips>

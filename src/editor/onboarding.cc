@@ -26,6 +26,7 @@ void editor::RenderOnboarding() {
       ImGui::SeparatorText(
           "Learn more about the layout of the editor and its features.");
       auto avail_width = ImGui::GetContentRegionAvail().x;
+      avail_width = std::min(avail_width, 350.0F);
 
       ImGui::SeparatorText("VIEWPORT");
       auto viewport_texture =
