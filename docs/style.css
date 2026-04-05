@@ -10,7 +10,8 @@
     --color-content: rgb(210, 210, 210);
     --border-radius: 10px;
     font-family: "Work Sans", BlinkMacSystemFont, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    color: black;
+    color: white;
+    background: rgba(30, 30, 30, 0.8);  
 }
 
 #title_text {
@@ -20,10 +21,14 @@
 }
 
 .content {
-    margin-top: 5rem;
+    margin-top: 8rem;
+    margin-left: 4rem;
     position: relative;
     width: 50%;
     z-index: 1;
+}
+.explain {
+    margin-left: 5rem;
 }
 
 #navbar {
@@ -63,12 +68,23 @@
     height: 100px;
 }
 
-#preview {
-    border-radius: var(--border-radius);
-    background-color: rgba(50, 50, 50, 0.2);
+.preview {
+    width: 60%;
+    margin: 4rem auto;
+    padding: 2rem;
+    border-radius: 25px;
+    background-color: rgba(30, 30, 30, 0.8);
+    overflow: hidden;
+    text-align: center;
 }
 
-#preview_text {
-    display: flex;
-    margin: auto;
+.preview_text {
+    margin-bottom: 1.5rem;
+}
+
+.video video {
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+    display: block;
 }
