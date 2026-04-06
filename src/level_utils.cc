@@ -107,6 +107,7 @@ entt::registry LoadLevel(std::string_view filename) {
   if (!chain_points.empty()) {
     physics::CreateChainBody(chain_points);
   }
+  std::print("Loaded level {}", filename);
   return registry;
 }
 
