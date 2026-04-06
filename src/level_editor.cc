@@ -35,9 +35,10 @@
 #include "sprite.h"
 #include "tinyfiledialogs/tinyfiledialogs.h"
 #include "util/calculate.h"
+#include <mutex>
 
 namespace {
-enum class Toolkit { kSelect, kMove };
+enum class Toolkit { kSelect, kMove, kCopy };
 Toolkit current_tool = Toolkit::kSelect;
 entt::entity selected_entity = entt::null;
 glm::dvec2 mouse_position, last_mouse_position;
@@ -146,12 +147,19 @@ std::once_flag register_components_flag;
 }  // namespace
 
 void LevelEditor::Init() {
+  if (std::filesystem::exists("level.txt")) {
+    current_scene_path = "level.txt";
+    registry = LoadLevel(current_scene_path);
+  } else {
   auto* level_path =
       tinyfd_openFileDialog("Open Scene", "", 0, nullptr, nullptr, 0);
   if (level_path) {
     current_scene_path = level_path;
     registry = LoadLevel(current_scene_path);
   }
+  }
+
+  resource_manager::ReloadTextures();
   rect_shader = resource_manager::GetShader("Rect").shader;
   sprite_shader = resource_manager::GetShader("Sprite").shader;
   glfwSetScrollCallback(GetGameWindow().window, MouseScrollCallback);
@@ -236,7 +244,7 @@ void LevelEditor::Update(double /* dt */) {
         GetGameWindow().GetPixelsPerUnit();
   }
   if (core::input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
-    if (core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+    if (core::input::IsKeyPressedThisFrame(GLFW_MOUSE_BUTTON_LEFT)) {
       if (selected_entity != entt::null && current_tool == Toolkit::kMove) {
         registry.get<Transform>(selected_entity).position +=
             ScreenToWorld(mouse_position, GetCamera(), GetGameWindow()) -
@@ -258,6 +266,31 @@ void LevelEditor::Update(double /* dt */) {
           sprite.normal =
               resource_manager::GetTexture(sprite.texture_tag).texture;
           selected_entity = entity;
+        }
+      }
+      if (current_tool == Toolkit::kCopy) {
+        if (selected_entity == entt::null) {
+          if (ObjectExistsAtPosition(world_pos, registry)) {
+            selected_entity = GetEntityAtPosition(world_pos, registry);
+          }
+        } else {
+          auto entity = registry.create();
+          
+          auto& transform = registry.emplace<Transform>(entity);
+          transform = registry.get<Transform>(selected_entity);
+          transform.position = world_pos;
+
+          if (registry.try_get<Sprite>(selected_entity)) {
+            registry.emplace<Sprite>(entity) = registry.get<Sprite>(selected_entity);
+          }
+
+          if (registry.try_get<Light>(selected_entity)) {
+            registry.emplace<Light>(entity) = registry.get<Light>(selected_entity);
+          }
+
+          if (registry.try_get<BattleTrigger>(selected_entity)) {
+            registry.emplace<BattleTrigger>(entity) = registry.get<BattleTrigger>(selected_entity);
+          }
         }
       }
     } else if (core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
@@ -390,6 +423,9 @@ void LevelEditor::Render(GameWindow& window) {
     ImGui::RadioButton("Move", reinterpret_cast<int*>(&current_tool),
                        static_cast<int>(Toolkit::kMove));
     editor::SetTooltip("scene.toolkit.move");
+    ImGui::RadioButton("Copy", reinterpret_cast<int*>(&current_tool),
+                      static_cast<int>(Toolkit::kCopy));
+    editor::SetTooltip("scene.toolkit.copy");
     ImGui::SeparatorText("Entities");
     auto transform_view = registry.view<const Transform>();
     int entity_count = 0;
@@ -601,6 +637,11 @@ void LevelEditor::Render(GameWindow& window) {
 
       if (registry.any_of<PlayerSpawn>(selected_entity)) {
         if (ImGui::CollapsingHeader("Player Spawn")) {
+          if (registry.view<PlayerSpawn>().front() == selected_entity) {
+            ImGui::Text("This entity is used as player spawn.");
+          } else {
+            ImGui::Text("Multiple instances of spawn found: This entity is not used.");
+          }
           if (ImGui::Button("Remove PlayerSpawn Component")) {
             registry.remove<PlayerSpawn>(selected_entity);
           }
