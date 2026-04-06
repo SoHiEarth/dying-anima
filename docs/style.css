@@ -1,0 +1,101 @@
+:root {
+    --navbar-height: 3rem;
+    --navbar-blur: 5px;
+    --navbar-margin: 0.5rem;
+    --color-background: rgb(255, 255, 255);
+    --color-accent: rgba(50, 50, 200, 0.8);
+    --color-navbar: rgba(30, 30, 30, 0.8);
+    --color-title-1: rgb(230, 230, 230);
+    --color-title-2: rgb(180, 180, 180);
+    --color-content: rgb(210, 210, 210);
+    --border-radius: 10px;
+    font-family: "Work Sans", BlinkMacSystemFont, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: white;
+    background: rgba(30, 30, 30, 0.8);  
+}
+
+#title_text {
+    font-size: 80px;
+    line-height: 1.05;
+    letter-spacing: -0.05rem;
+}
+
+.content {
+    margin-top: 8rem;
+    margin-left: 4rem;
+    position: relative;
+    width: 50%;
+    z-index: 1;
+}
+
+#title_text {
+    margin-left: 2.5rem;
+}
+
+#explain_title,
+#features_title {
+    margin-left: 5rem;
+}
+
+#explain_content,
+#features_content {
+    margin-left: 7.5rem;
+}
+
+#navbar {
+    font-size: 25px;
+    position: fixed;
+    z-index: 1000;
+    top: var(--navbar-margin);
+    left: var(--navbar-margin);
+    right: var(--navbar-margin); /* Ensures it stretches but respects viewport */
+    margin: 0 auto; /* Centers if necessary */
+    border-radius: var(--border-radius);
+    padding-left: 4rem;
+    padding-right: 4rem;
+    height: var(--navbar-height);
+    box-sizing: border-box;
+    background-color: var(--color-navbar);
+    color: var(--color-title-1);
+    justify-content: space-between;
+    backdrop-filter: blur(var(--navbar-blur));
+    display: flex;
+    align-items: center;
+}
+
+#navbar a {
+    color: var(--color-title-1);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+#navbar a:hover {
+ color: var(--color-accent);
+}
+
+#logo {
+    margin-top: 3rem;
+    margin-left: -3rem;
+    height: 100px;
+}
+
+.preview {
+    width: 60%;
+    margin: 4rem auto;
+    padding: 2rem;
+    border-radius: 25px;
+    background-color: rgba(30, 30, 30, 0.8);
+    overflow: hidden;
+    text-align: center;
+}
+
+.preview_text {
+    margin-bottom: 1.5rem;
+}
+
+.video video {
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+    display: block;
+}

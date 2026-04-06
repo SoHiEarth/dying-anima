@@ -38,7 +38,7 @@ bool show_player_info = false;
 SaveData game::save_data;
 
 void GameScene::Init() {
-  physics::Init({0, -39.81F});
+  physics::Init({0, -35.0F});
   registry = LoadLevel("level.txt");
   player = registry.create();
   game::save_data = save_manager::LoadLatestSave();
@@ -78,6 +78,7 @@ void GameScene::Init() {
   sprite_shader->SetUniform("texture1", 0);
   text_shader->Use();
   text_shader->SetUniform("character", 0);
+  GetGameWindow().SetPixelsPerUnit(150.0F);
   glfwSwapInterval(0);
 }
 

@@ -176,5 +176,7 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
   }
   if (!doc.save_file(std::string(filename).c_str())) {
     std::print("Failed to save level file: {}\n", filename);
+  } else {
+    std::print("Saved level file: {}\n", filename);
   }
 }
