@@ -8,6 +8,7 @@
   <tooltip tag="menu_bar.view.anim_editor" text="Show/Hide the animation editor."/>
   <tooltip tag="scene.toolkit.select" text="Select an entity from the viewport."/>
   <tooltip tag="scene.toolkit.move" text="Drag to move selected entity."/>
+  <tooltip tag="scene.toolkit.copy" text="Copy the selected entity."/>
   <tooltip tag="resource.reload_texture" text="Reload textures from atlas."/>
   <tooltip tag="info.camera" text="Position of the viewport camera in world space."/>
   <tooltip tag="info.ppu" text="Indicates how large 1 world unit should be in pixels."/>

@@ -34,9 +34,11 @@ entt::registry LoadLevel(std::string_view filename) {
     }
     {
       auto sprite_node = object_node.child("Sprite");
-      auto& sprite = registry.emplace<Sprite>(entity);
-      sprite.texture_tag = sprite_node.attribute("texture_tag").as_string();
-      sprite.texture = resource_manager::GetTexture(sprite.texture_tag).texture;
+      if (sprite_node) {
+        auto& sprite = registry.emplace<Sprite>(entity);
+        sprite.texture_tag = sprite_node.attribute("texture_tag").as_string();
+        sprite.texture = resource_manager::GetTexture(sprite.texture_tag).texture;
+      }
     }
     {
       auto physics_node = object_node.child("Physics");
@@ -107,12 +109,13 @@ entt::registry LoadLevel(std::string_view filename) {
   if (!chain_points.empty()) {
     physics::CreateChainBody(chain_points);
   }
+  std::print("Loaded level {}", filename);
   return registry;
 }
 
 void SaveLevel(std::string_view filename, const entt::registry& registry) {
   pugi::xml_document doc;
-  auto view = registry.view<Transform, Sprite>();
+  auto view = registry.view<Transform>();
   auto root = doc.append_child("Level");
   for (auto entity : view) {
     auto object_node = root.append_child("Object");
@@ -126,17 +129,16 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
       transform_node.append_attribute("scale.y") = transform.scale.y;
       transform_node.append_attribute("rotation") = transform.rotation;
     }
-    {
-      const auto& sprite = view.get<Sprite>(entity);
+    if (registry.try_get<Sprite>(entity)) {
+      const auto& sprite = registry.get<Sprite>(entity);
       auto sprite_node = object_node.append_child("Sprite");
       sprite_node.append_attribute("texture_tag") = sprite.texture_tag.c_str();
     }
     if (registry.try_get<PhysicsBody>(entity)) {
+      const auto& physics_body = registry.get<PhysicsBody>(entity);
       auto physics_node = object_node.append_child("Physics");
-      physics_node.append_attribute("is_dynamic") =
-          registry.get<PhysicsBody>(entity).is_dynamic;
-      physics_node.append_attribute("is_chained") =
-          registry.get<PhysicsBody>(entity).is_chained;
+      physics_node.append_attribute("is_dynamic") = physics_body.is_dynamic;
+      physics_node.append_attribute("is_chained") = physics_body.is_chained;
     }
     if (registry.try_get<Light>(entity)) {
       const auto& light = registry.get<Light>(entity);

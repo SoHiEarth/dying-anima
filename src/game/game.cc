@@ -5,9 +5,11 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <tinyfiledialogs.h>
 
 #include <entt/entt.hpp>
 #include <filesystem>
+#include "game/spawn.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <pugixml.hpp>
@@ -38,11 +40,19 @@ bool show_player_info = false;
 SaveData game::save_data;
 
 void GameScene::Init() {
+  if (std::filesystem::exists("level.txt")) {
+    tinyfd_messageBox("Level file not found.", "The level file \"level.txt\" not found. The game may run, but the scene may be missing.", "ok", "warning", 1);
+  }
   physics::Init({0, -35.0F});
   registry = LoadLevel("level.txt");
   player = registry.create();
-  game::save_data = save_manager::LoadLatestSave();
   auto& player_transform = registry.emplace<Transform>(player);
+  auto spawn_view = registry.view<Transform, PlayerSpawn>();
+  auto spawn_entity = spawn_view.front();
+  if (spawn_entity != entt::null) {
+    player_transform = registry.get<Transform>(spawn_entity);
+  }
+  game::save_data = save_manager::LoadLatestSave();
   registry.emplace<PlayerSpeed>(player);
   auto& player_skills = registry.emplace<PlayerSkills>(player);
   auto& player_health = registry.emplace<Health>(player, 100.0F);
@@ -66,7 +76,6 @@ void GameScene::Init() {
         .health_used = 5.0F,
         .stamina_used = 0.0F,
     });
-    std::print("[GAME] Added punch\n");
   }
   sprite_shader = resource_manager::GetShader("Sprite").shader;
   rect_shader = resource_manager::GetShader("Rect").shader;

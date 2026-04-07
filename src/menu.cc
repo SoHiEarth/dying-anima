@@ -17,11 +17,9 @@
 #include "core/camera.h"
 #include "core/input.h"
 #include "core/resource_manager.h"
-#include "core/state.h"
 #include "core/window.h"
-#include "game/game.h"
-#include "game/intro.h"
 #include "level_editor.h"
+#include "save_select.h"
 #include "ui/elements.h"
 
 constexpr int kLabelSizeY = 36;
@@ -35,8 +33,6 @@ void MenuScene::Init() {
   rect_shader = resource_manager::GetShader("Rect").shader;
   text_shader->Use();
   text_shader->SetUniform("character", 0);
-  // Commented out for demonstration purposes
-  // #ifndef NDEBUG
   menu_layout
       .AddElement(std::make_unique<ui::Button>(
           "Editor", font,
@@ -45,7 +41,6 @@ void MenuScene::Init() {
                 std::make_unique<LevelEditor>(scene_manager_));
           }))
       ->size.y = kLabelSizeY;
-  // #endif
   menu_layout
       .AddElement(std::make_unique<ui::Button>(
           "Exit", font, [this]() { scene_manager_.PopScene(); }))
@@ -64,11 +59,7 @@ void MenuScene::Init() {
           if (result == 1) {
             scene_manager_.PopScene();
             scene_manager_.PushScene(
-                std::make_unique<GameScene>(scene_manager_));
-            if (game::save_data.completion_markers.empty()) {
-              scene_manager_.PushScene(
-                  std::make_unique<IntroScene>(scene_manager_));
-            }
+                std::make_unique<SaveSelect>(scene_manager_));
           }
           }))
       ->size.y = kLabelSizeY;
