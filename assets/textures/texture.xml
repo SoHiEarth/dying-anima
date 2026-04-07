@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <textures>
 	<texture name="util.notexture" path="notexture.png"/>
 	<texture name="game.player" path="player.png"/>
@@ -8,6 +8,8 @@
 	<texture name="game.city.building" path="building.png"/>
 	<texture name="game.city.lamp" path="lamp.png"/>
 	<texture name="game.city.brick" path="messy_brick.png"/>
+	<texture name="game.city.floor" path="floor.png"/>
+	<texture name="game.city.background" path="background.png"/>
 	<texture name="game.ui.heart_empty" path="heart_empty.png"/>
 	<texture name="game.ui.heart_half" path="heart_half.png"/>
 	<texture name="game.ui.heart_full" path="heart_full.png"/>
@@ -16,8 +18,8 @@
 	<texture name="ui.movement" path="movement.png"/>
 	<texture name="ui.journal" path="journal.png"/>
 	<texture name="ui.character" path="character.png"/>
-  <texture name="doc.viewport" path="doc.viewport.png"/>
-  <texture name="doc.scene" path="doc.scene.png"/>
-  <texture name="doc.inspector" path="doc.inspector.png"/>
-  <texture name="doc.resource" path="doc.resource.png"/>
+	<texture name="doc.viewport" path="doc.viewport.png"/>
+	<texture name="doc.scene" path="doc.scene.png"/>
+	<texture name="doc.inspector" path="doc.inspector.png"/>
+	<texture name="doc.resource" path="doc.resource.png"/>
 </textures>

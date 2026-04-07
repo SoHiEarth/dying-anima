@@ -104,20 +104,27 @@ void BattleScene::Update(double) {
                  turn_data->target->health, turn_data->target->stamina,
                  "Player");
       }
-      if (turn_data->target->health <= 0) {
+      if (turn_data->target->health <= 0 && enemies_.empty()) {
         scene_manager_.PopScene();
         scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_));
+      } else if (turn_data->target->health <= 0) {
+        action_log.emplace_back("Enemy " + turn_data->target->name + " was defeated!");
+        enemies_.erase(std::remove_if(enemies_.begin(), enemies_.end(),
+                                      [&](const Enemy& e) {
+                                        return &e == turn_data->target;
+                                      }),
+                       enemies_.end());
       }
-    }
-    if (player_health_.health <= 0) {
-      scene_manager_.PopScene();
-      scene_manager_.PushScene(std::make_unique<MenuScene>(scene_manager_));
-    }
-    if (player_health_.stamina <= 0) {
-      player_health_.stamina -= kStaminaDrainPenalty;
+      if (player_health_.stamina <= 0) {
+        player_health_.stamina -= kStaminaDrainPenalty;
+      }
     }
     turn_data.reset();
     current_turn = BattleTurn::kEnemy;
+  }
+  if (player_health_.health <= 0) {
+    scene_manager_.PopScene();
+    scene_manager_.PushScene(std::make_unique<MenuScene>(scene_manager_));
   }
 }
 
@@ -172,7 +179,9 @@ void BattleScene::Render(GameWindow& window) {
           if (ImGui::BeginPopup(
                   std::string("SelectEnemyPopup##" + skill.name).c_str())) {
             ImGui::Text("Which enemy do you want to attack?");
+            int i = 0;
             for (auto& enemy : enemies_) {
+              ImGui::PushID((enemy.name + std::to_string(i++)).c_str());
               if (ImGui::Selectable(enemy.name.c_str(),
                                     &enemy == temp_turn_data.target)) {
                 temp_turn_data.target = &enemy;
@@ -181,6 +190,7 @@ void BattleScene::Render(GameWindow& window) {
                 temp_turn_data.used_skills.clear();
                 ImGui::CloseCurrentPopup();
               }
+              ImGui::PopID();
             }
             ImGui::EndPopup();
           }
@@ -189,16 +199,22 @@ void BattleScene::Render(GameWindow& window) {
       if (player_skills_.skills.empty()) {
         ImGui::Text("No skills.");
       }
+      int i = 0;
       ImGui::SeparatorText("ENEMY");
       for (const auto& enemy : enemies_) {
+        ImGui::PushID((enemy.name + std::to_string(i++)).c_str());
         ImGui::SeparatorText(enemy.name.c_str());
+        int j = 0;
         for (const auto& skill : enemy.skills) {
+          ImGui::PushID((enemy.name + std::to_string(i) + skill.name + std::to_string(j++)).c_str());
           if (ImGui::CollapsingHeader(skill.name.c_str())) {
             ImGui::Text("Damage: %.2f", skill.damage);
             ImGui::Text("Health Drained: %.2f", skill.health_used);
             ImGui::Text("Stamina Drained: %.2f", skill.stamina_used);
           }
+          ImGui::PopID();
         }
+        ImGui::PopID();
         if (enemy.skills.empty()) {
           ImGui::Text("No skills.");
         }

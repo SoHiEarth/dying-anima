@@ -38,34 +38,38 @@ bool show_log = false;
 bool show_player_info = false;
 }  // namespace
 SaveData game::save_data;
+entt::registry game::registry;
+game::Log game::player_log;
+entt::entity game::player;
 
 void GameScene::Init() {
   if (std::filesystem::exists("level.txt")) {
     tinyfd_messageBox("Level file not found.", "The level file \"level.txt\" not found. The game may run, but the scene may be missing.", "ok", "warning", 1);
   }
   physics::Init({0, -35.0F});
-  registry = LoadLevel("level.txt");
-  player = registry.create();
-  auto& player_transform = registry.emplace<Transform>(player);
-  auto spawn_view = registry.view<Transform, PlayerSpawn>();
+  game::registry = LoadLevel("level.txt");
+  game::player = game::registry.create();
+  auto& player_transform = game::registry.emplace<Transform>(game::player);
+  auto spawn_view = game::registry.view<Transform, PlayerSpawn>();
   auto spawn_entity = spawn_view.front();
   if (spawn_entity != entt::null) {
-    player_transform = registry.get<Transform>(spawn_entity);
+    player_transform = game::registry.get<Transform>(spawn_entity);
   }
   game::save_data = save_manager::LoadLatestSave();
-  registry.emplace<PlayerSpeed>(player);
-  auto& player_skills = registry.emplace<PlayerSkills>(player);
-  auto& player_health = registry.emplace<Health>(player, 100.0F);
-  player_body = registry
-                    .emplace<PhysicsBody>(
-                        player, physics::CreateBody(player_transform, true))
+  game::registry.emplace<PlayerSpeed>(game::player);
+  auto& player_skills = game::registry.emplace<PlayerSkills>(game::player);
+  auto& player_health = game::registry.emplace<Health>(game::player, 100.0F);
+  player_body = game::registry
+                    .emplace<PhysicsBody>(game::player,
+                                physics::CreateBody(player_transform, true))
                     .body;
-  registry.emplace<Sprite>(player, "game.player",
+  game::registry.emplace<Sprite>(
+      game::player, "game.player",
                            resource_manager::GetTexture("game.player").texture);
   if (game::save_data.valid) {
     player_transform = game::save_data.player_transform;
     player_health = game::save_data.player_health;
-    player_log = game::save_data.log;
+    game::player_log = game::save_data.log;
     player_skills.skills = game::save_data.acquired_skills;
   }
   if (player_skills.skills.empty()) {
@@ -99,17 +103,17 @@ void GameScene::Quit() {
   if (!std::filesystem::is_empty("saves")) {
     save_data = save_manager::LoadLatestSave();
   }
-  save_data.player_transform = registry.get<Transform>(player);
-  save_data.player_health = registry.get<Health>(player);
+  save_data.player_transform = game::registry.get<Transform>(game::player);
+  save_data.player_health = game::registry.get<Health>(game::player);
   save_data.completion_markers = game::save_data.completion_markers;
-  save_manager::SaveGame(save_data, player_log);
+  save_manager::SaveGame(save_data, game::player_log);
   physics::Quit();
-  registry.clear();
+  game::registry.clear();
 }
 
 void GameScene::Update(double dt) {
-  auto& player_speed = registry.get<PlayerSpeed>(player);
-  player_body = registry.get<PhysicsBody>(player).body;
+  auto& player_speed = game::registry.get<PlayerSpeed>(game::player);
+  player_body = game::registry.get<PhysicsBody>(game::player).body;
 
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
     scene_manager_.PushScene(std::make_unique<PauseScene>(scene_manager_));
@@ -153,10 +157,10 @@ void GameScene::Update(double dt) {
   }
 
   if (velocity.x > 0) {
-    auto& transform = registry.get<Transform>(player);
+    auto& transform = game::registry.get<Transform>(game::player);
     transform.scale.x = 1.0F;
   } else if (velocity.x < 0) {
-    auto& transform = registry.get<Transform>(player);
+    auto& transform = game::registry.get<Transform>(game::player);
     transform.scale.x = -1.0F;  // Flip sprite when moving left
   }
   b2Body_SetLinearVelocity(player_body, velocity);
@@ -172,7 +176,7 @@ void GameScene::Update(double dt) {
   float speed = std::min(
       1.0F, 1.0F - std::exp(-kCameraSmoothing * static_cast<float>(dt)));
   auto& camera_position = GetCamera().position;
-  auto& player_transform = registry.get<Transform>(player);
+  auto& player_transform = game::registry.get<Transform>(game::player);
   player_transform.z_index = 2.0F;
   camera_position = glm::mix({camera_position.x, camera_position.y, 0.0F},
                              glm::vec3(player_transform.position, 0.0F), speed);
@@ -182,13 +186,13 @@ void GameScene::Update(double dt) {
     b2World_Step(physics::world, physics_time_step, 4);
     physics_accumulator -= physics_time_step;
   }
-  auto physics_view = registry.view<Transform, PhysicsBody>();
+  auto physics_view = game::registry.view<Transform, PhysicsBody>();
   physics_view.each(
       [](auto /* entity */, Transform& transform, PhysicsBody& physicsBody) {
         physics::SyncPosition(physicsBody.body, transform.position);
       });
-  game::UpdateBattleTriggers(registry, scene_manager_);
-  UpdateAnimations(registry, static_cast<float>(dt));
+  game::UpdateBattleTriggers(game::registry, scene_manager_);
+  UpdateAnimations(game::registry, static_cast<float>(dt));
 
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_TAB)) {
     show_log = !show_log;
@@ -202,11 +206,11 @@ void GameScene::Update(double dt) {
 void GameScene::Render(GameWindow& window) {
   window.SetProjection(ProjectionType::kCentered);
   GetCamera().SetType(CameraType::kWorld);
-  render::Render(registry);
+  render::Render(game::registry);
 
   window.SetProjection(ProjectionType::kScreenSpace);
   GetCamera().SetType(CameraType::kUi);
-  auto& player_health = registry.get<Health>(player);
+  auto& player_health = game::registry.get<Health>(game::player);
   auto health_full_count = static_cast<int>(player_health.health / 10.0F);
   auto health_partial_count =
       (player_health.health - (health_full_count * 10.0)) / 10.0F;
@@ -234,7 +238,7 @@ void GameScene::Render(GameWindow& window) {
   }
 
   if (show_log) {
-    player_log.RenderLog(game::kLevel0);
+    game::player_log.RenderLog(game::kLevel0);
   }
 
   if (show_player_info) {

@@ -41,18 +41,25 @@ void save_manager::SaveGame(const SaveData& data, const game::Log& log) {
   if (!std::filesystem::exists(kSavedataDirectory)) {
     std::filesystem::create_directory(kSavedataDirectory);
   }
+  auto now = std::chrono::system_clock::now();
+  auto t = std::chrono::system_clock::to_time_t(now);
+  auto tm = *std::localtime(&t);
+  std::stringstream ss;
+  ss << std::put_time(&tm, "%Y-%m-%d_%H-%M-%S");
+
   std::string file_name =
       (std::filesystem::path(kSavedataDirectory) /
-       std::filesystem::path(
-           std::to_string(
-               std::chrono::system_clock::now().time_since_epoch().count()) +
-           ".save"))
-          .string();
+       std::filesystem::path(ss.str() + ".save")).string();
   std::cout << "Saving game to " << file_name << std::endl;
   doc.save_file(file_name.c_str());
 }
 
 SaveData save_manager::LoadGame(std::string_view filename) {
+  if (!std::filesystem::exists(filename)) {
+    std::cout << "Save file " << filename << " doesn't exist. Returning empty "
+              << "save data.";
+    return {};
+  }
   SaveData data{};
   pugi::xml_document doc;
   if (!doc.load_file(std::string(filename).c_str())) {
@@ -98,14 +105,25 @@ SaveData save_manager::LoadLatestSave() {
     std::filesystem::create_directory("saves");
     return {}; // No need to search empty directory
   }
-  std::string largest_save_id;
+  
+  std::string latest_save;
+  std::time_t latest_time = 0;
+
   for (const auto& entry :
        std::filesystem::directory_iterator(kSavedataDirectory)) {
     if (entry.is_regular_file() && entry.path().extension() == ".save") {
       std::string filename = entry.path().filename().string();
-      std::string save_id = filename.substr(0, filename.find(".save"));
-      largest_save_id = std::max(largest_save_id, save_id);
+
+      // Get the last modification time of the file
+      std::time_t file_time = std::chrono::system_clock::to_time_t(
+          std::chrono::clock_cast<std::chrono::system_clock>(
+              entry.last_write_time()));
+      if (file_time > latest_time) {
+        latest_time = file_time;
+        latest_save = filename;
+      }
     }
   }
-  return LoadGame("saves/" + largest_save_id + ".save");
+
+  return LoadGame("saves/" + latest_save + ".save");
 }

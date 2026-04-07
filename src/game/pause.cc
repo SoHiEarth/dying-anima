@@ -7,6 +7,10 @@
 #include "level_editor.h"
 #include "menu.h"
 #include "ui/elements.h"
+#include "saves.h"
+#include "game/game.h"
+#include <tinyfiledialogs/tinyfiledialogs.h>
+
 namespace {
 std::unique_ptr<ui::VerticalLayout> layout;
 glm::ivec2 GetMousePos() {
@@ -36,6 +40,17 @@ void PauseScene::Init() {
 #endif
   layout->AddElement(std::make_unique<ui::Button>("Exit", ui_font_, []() {
     glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
+  }));
+  layout->AddElement(std::make_unique<ui::Button>("Save", ui_font_, []() {
+    SaveData save_data{};
+    if (!std::filesystem::is_empty("saves")) {
+      save_data = save_manager::LoadLatestSave();
+    }
+    save_data.player_transform = game::registry.get<Transform>(game::player);
+    save_data.player_health = game::registry.get<Health>(game::player);
+    save_data.completion_markers = game::save_data.completion_markers;
+    save_manager::SaveGame(save_data, game::player_log);
+    tinyfd_messageBox("Game Saved", "Your game has been saved successfully!", "ok", "info", 1);
   }));
   layout->AddElement(std::make_unique<ui::Button>("Menu", ui_font_, [this]() {
     scene_manager_.PopScene();
