@@ -1,87 +1,119 @@
+@import "navbar.css";
+
 :root {
     --navbar-height: 3rem;
     --navbar-blur: 5px;
     --navbar-margin: 0.5rem;
     --color-background: rgb(255, 255, 255);
-    --color-accent: rgba(50, 50, 200, 0.8);
+    --color-accent: rgb(25, 28, 29);
+    --color-accent-2: rgb(170, 159, 132);
     --color-navbar: rgba(30, 30, 30, 0.8);
-    --color-title-1: rgb(230, 230, 230);
-    --color-title-2: rgb(180, 180, 180);
-    --color-content: rgb(210, 210, 210);
     --border-radius: 10px;
     font-family: "Work Sans", BlinkMacSystemFont, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     color: white;
-    background: rgba(30, 30, 30, 0.8);  
+    background: rgb(0, 0, 0, 1.0);  
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+#bg-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(12px) brightness(0.7);
+    z-index: -1;
+}
+
+.intro {
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
 }
 
 #title_text {
+    background: linear-gradient(to bottom right, rgb(255, 255, 255) 40%, rgb(50, 50,50));
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    font-family: "Inter", BLinkMacSystemFont, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     font-size: 80px;
     line-height: 1.05;
     letter-spacing: -0.05rem;
 }
 
-.content {
-    margin-top: 8rem;
-    margin-left: 4rem;
+#download_button {
+    margin-top: 1.5rem;
+    padding: 0.8rem 1.6rem;
+    font-family: "Inter", sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    color: white;
+    background: linear-gradient(135deg, rgba(80, 80, 255, 0.5), rgba(120, 120, 255, 0.2));
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 0 25px rgba(80, 80, 80, 0.25);
     position: relative;
-    width: 50%;
+    overflow: hidden;
+}
+
+#download_button:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 0 20px rgba(100, 100, 255, 5.0);
+    background: linear-gradient(135deg, rgba(100, 100, 255, 1), rgba(150, 150, 255, 0.8));
+}
+
+#download_button:active {
+    transform: scale(0.97);
+    box-shadow: 0 0 15px rgba(80, 80, 80, 0.3);
+}
+
+.features {
+    position: relative;
     z-index: 1;
+    min-width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1) 10%);
 }
 
-#title_text {
-    margin-left: 2.5rem;
-}
-
-#explain_title,
 #features_title {
-    margin-left: 5rem;
+    font-size: 60px;
+    margin-left: 3rem;
 }
 
-#explain_content,
 #features_content {
-    margin-left: 7.5rem;
-}
-
-#navbar {
-    font-size: 25px;
-    position: fixed;
-    z-index: 1000;
-    top: var(--navbar-margin);
-    left: var(--navbar-margin);
-    right: var(--navbar-margin); /* Ensures it stretches but respects viewport */
-    margin: 0 auto; /* Centers if necessary */
-    border-radius: var(--border-radius);
-    padding-left: 4rem;
-    padding-right: 4rem;
-    height: var(--navbar-height);
-    box-sizing: border-box;
-    background-color: var(--color-navbar);
-    color: var(--color-title-1);
-    justify-content: space-between;
-    backdrop-filter: blur(var(--navbar-blur));
+    border-radius: 25px;
+    background-color: rgba(30, 30, 30, 0.8);
+    margin: 3rem;
+    padding: 3rem;
+    font-size: 30px;
+    line-height: 5rem;
     display: flex;
-    align-items: center;
 }
 
-#navbar a {
-    color: var(--color-title-1);
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-
-#navbar a:hover {
- color: var(--color-accent);
-}
-
-#logo {
-    margin-top: 3rem;
-    margin-left: -3rem;
-    height: 100px;
+.preview_container {
+    background: rgb(0, 0, 0);
+    margin-top: -5rem;
+    padding: 5rem;
 }
 
 .preview {
-    width: 60%;
-    margin: 4rem auto;
+    width: 100%;
     padding: 2rem;
     border-radius: 25px;
     background-color: rgba(30, 30, 30, 0.8);
@@ -97,5 +129,4 @@
     width: 100%;
     height: auto;
     border-radius: 15px;
-    display: block;
 }

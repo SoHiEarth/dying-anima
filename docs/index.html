@@ -1,44 +1,94 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-    <title>Dying Anima: A fantasy RPG in the works.</title>
+    <title>Dying Anima</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
     </style>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header id="navbar">
-    <a href="index.html">
-    <img id="logo" src="assets/logo.png"/>
-    </a>
-      <a href="story.html">Story</a>
-    <a href="https://www.github.com/sohiearth/dying-anima/releases/latest" target="_blank">Download</a>
-  </header>
-  <div class="content">
-    <h1 id="title_text">A Story of Memories...</h1>
-    <div class="explain">
-      <h2 id="explain_title">What is it?</h2>
-      <p id="explain_content">Dying Anima is a story set in the world of Mer.<br/>
-        It goes through the passage of time and losing memory.</p>
-    </div>
-    <div>
-        <h2 id="features_title">Features</h2>
-        <p id="features_content">A fun, sidescroll + turn based RPG experience.<br/>
-        A easy to use level editor. (Seen below)</p>
-    </div>
-  </div>
+    <video id="bg-video" autoplay muted loop playsinline>
+        <source src="video.mp4" type="video/mp4">
+    </video>
 
-  <div class="preview">
-      <h1 class="preview_text">See the editor in action.</h1>
-     <div class="video">
-         <video autoplay muted loop>
-             <source src="video.mp4" type="video/mp4">
-         </video>
-     </div>
-  </div>
+    <nav id="navbar">
+        <a href="index.html">
+            <img id="logo" src="assets/logo.png" alt="Dying Anima Logo" />
+        </a>
+        <a href="https://www.github.com/sohiearth/dying-anima/tree/main/docs/story.md" target="_blank">Story</a>
+        <a href="https://www.github.com/sohiearth/dying-anima/releases/latest" target="_blank">Download</a>
+    </nav>
+
+    <section class="intro">
+        <h1 id="title_text">A Story of Memories</h1>
+        <h2 id="explain_content">Dying Anima is a story set in the world of Mer</h2>
+        <button id="download_button" onclick="window.open('https://www.github.com/sohiearth/dying-anima/releases/latest', '_blank')">Download</button>
+    </section>
+
+    <section class="features">
+        <h2 id="features_title">Features</h2>
+        <p id="features_content">A fun, sidescroll + turn based RPG experience.<br />A easy to use level editor.</p>
+    </section>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Dying Anima</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+        </style>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <video id="bg-video" autoplay muted loop playsinline>
+            <source src="video.mp4" type="video/mp4">
+        </video>
+
+        <nav id="navbar">
+            <a href="index.html">
+                <img id="logo" src="assets/logo.png" alt="Dying Anima Logo" />
+            </a>
+            <a href="https://www.github.com/sohiearth/dying-anima/tree/main/docs/story.md" target="_blank">Story</a>
+            <a href="https://www.github.com/sohiearth/dying-anima/releases/latest" target="_blank">Download</a>
+        </nav>
+
+        <section class="intro">
+            <h1 id="title_text">A Story of Memories</h1>
+            <h2 id="explain_content">Dying Anima is a story set in the world of Mer</h2>
+            <button id="download_button" onclick="window.open('https://www.github.com/sohiearth/dying-anima/releases/latest', '_blank')">Download</button>
+        </section>
+
+        <section class="features">
+            <h2 id="features_title">Features</h2>
+            <p id="features_content">A fun, sidescroll + turn based RPG experience.<br />A easy to use level editor.</p>
+        </section>
+
+        <div class="preview_container">
+            <div class="preview">
+                <h1 class="preview_text">See the editor in action.</h1>
+                <div class="video">
+                    <video>
+                        <source src="video.mp4" type="video/mp4">
+                    </video>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+
+<div class="preview_container">
+    <div class="preview">
+        <h1 class="preview_text">See the editor in action.</h1>
+        <div class="video">
+            <video>
+                <source src="video.mp4" type="video/mp4">
+            </video>
+        </div>
+    </div>
+</div>
 </body>
 </html>
