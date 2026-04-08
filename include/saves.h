@@ -15,6 +15,7 @@ struct SaveData {
   int death_count = 0;
   game::Log log;
   std::vector<Skill> acquired_skills;
+  std::vector<int> defeated_enemy_uids;
 };
 
 namespace save_manager {

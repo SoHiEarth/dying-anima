@@ -61,7 +61,7 @@ void GameScene::Init() {
   auto& player_health = game::registry.emplace<Health>(game::player, 100.0F);
   player_body = game::registry
                     .emplace<PhysicsBody>(game::player,
-                                physics::CreateBody(player_transform, true))
+                                physics::CreateBody(player_transform, true, 0.0F))
                     .body;
   game::registry.emplace<Sprite>(
       game::player, "game.player",

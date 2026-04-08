@@ -2,7 +2,6 @@ build/
 .vscode/
 .vs/
 .cache/
-level.txt
 .DS_Store
 imgui.ini
 compile_commands.json

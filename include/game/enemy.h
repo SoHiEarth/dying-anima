@@ -9,6 +9,7 @@
 #include "game/skill.h"
 
 struct Enemy {
+  int uid = 0;
   std::string name;
   TextureHandle texture;
   float health;
@@ -25,7 +26,7 @@ struct BattleTrigger {
 };
 
 namespace game {
-Enemy CreateEnemyFromName(std::string_view name);
+Enemy CreateEnemyFromName(std::string_view name, int designated_enemy_id = 0);
 void UpdateBattleTriggers(entt::registry& registry,
                           SceneManager& scene_manager);
 }  // namespace game

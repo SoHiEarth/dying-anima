@@ -8,7 +8,9 @@
 	<texture name="game.city.building" path="building.png"/>
 	<texture name="game.city.lamp" path="lamp.png"/>
 	<texture name="game.city.brick" path="messy_brick.png"/>
+	<texture name="game.city.box" path="box.png"/>
 	<texture name="game.city.floor" path="floor.png"/>
+	<texture name="game.city.fence" path="fence.png"/>
 	<texture name="game.city.background" path="background.png"/>
 	<texture name="game.ui.heart_empty" path="heart_empty.png"/>
 	<texture name="game.ui.heart_half" path="heart_half.png"/>

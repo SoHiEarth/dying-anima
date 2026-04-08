@@ -30,15 +30,15 @@ b2BodyId physics::CreateChainBody(const std::vector<glm::vec2>& vertices) {
   return body;
 }
 
-PhysicsBody physics::CreateBody(Transform transform, bool is_dynamic) {
+PhysicsBody physics::CreateBody(Transform transform, bool is_dynamic, float friction) {
   PhysicsBody physics_body = CreateBody(transform.position, transform.scale,
-                                        transform.rotation, is_dynamic);
+                                        transform.rotation, is_dynamic, friction);
   return physics_body;
 }
 
 PhysicsBody physics::CreateBody(const glm::vec2& position,
                                 const glm::vec2& scale, float angle,
-                                bool is_dynamic) {
+                                bool is_dynamic, float friction) {
   PhysicsBody physics_body;
   auto body_def = b2DefaultBodyDef();
   if (is_dynamic) {
@@ -53,7 +53,7 @@ PhysicsBody physics::CreateBody(const glm::vec2& position,
   auto shape = b2MakeBox((scale.x / 2.0F), (scale.y / 2.0F));
   auto shape_def = b2DefaultShapeDef();
   shape_def.density = 1.0F;
-  shape_def.material.friction = 0.0F;
+  shape_def.material.friction = friction;
   physics_body.shape = b2CreatePolygonShape(body, &shape_def, &shape);
   physics_body.body = body;
   physics_body.is_dynamic = is_dynamic;

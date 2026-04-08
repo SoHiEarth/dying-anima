@@ -71,13 +71,14 @@ entt::registry LoadLevel(std::string_view filename) {
     {
       auto enemy_node = object_node.child("BattleTrigger");
       if (enemy_node) {
-        auto& enemy = registry.emplace<BattleTrigger>(entity);
-        enemy.hitbox_radius = enemy_node.attribute("hitbox_radius").as_float();
+        auto& battle_trigger = registry.emplace<BattleTrigger>(entity);
+        battle_trigger.hitbox_radius = enemy_node.attribute("hitbox_radius").as_float();
         for (auto& e : enemy_node.children("Enemy")) {
           std::print("Added enemy {} to battle trigger\n",
                      e.attribute("name").as_string());
-          enemy.enemies.push_back(
+          battle_trigger.enemies.push_back(
               game::CreateEnemyFromName(e.attribute("name").as_string()));
+          battle_trigger.enemies.back().uid = e.attribute("uid").as_int(battle_trigger.enemies.size());
         }
       }
     }
@@ -161,6 +162,7 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
       for (const auto& e : enemy.enemies) {
         auto enemy_info_node = enemy_node.append_child("Enemy");
         enemy_info_node.append_attribute("name") = e.name;
+        enemy_info_node.append_attribute("uid") = e.uid;
       }
     }
 

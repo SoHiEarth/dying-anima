@@ -78,10 +78,26 @@ std::string ListEnemyNames(const std::vector<Enemy>& enemies) {
   }
   return result;
 }
+std::vector<int> defeated_enemy_uids;
 }  // namespace
 
 void BattleScene::Init() {
-  // find the player
+  defeated_enemy_uids.clear();
+  // load defeated enemies from save data
+  auto save_data = save_manager::LoadLatestSave();
+  // check if any enemies in this battle have been defeated before, and if so,
+  // remove them from the battle
+  for (const auto& uid : save_data.defeated_enemy_uids) {
+    defeated_enemy_uids.push_back(uid);
+  }
+  enemies_.erase(std::remove_if(enemies_.begin(), enemies_.end(),
+                                [&](const Enemy& e) {
+                                  return std::find(defeated_enemy_uids.begin(),
+                                                   defeated_enemy_uids.end(),
+                                                   e.uid) !=
+                                         defeated_enemy_uids.end();
+                                }),
+                 enemies_.end());
   assert(!enemies_.empty());
 }
 
@@ -108,7 +124,9 @@ void BattleScene::Update(double) {
         scene_manager_.PopScene();
         scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_));
       } else if (turn_data->target->health <= 0) {
-        action_log.emplace_back("Enemy " + turn_data->target->name + " was defeated!");
+        action_log.emplace_back("Enemy " + turn_data->target->name +
+                                " was defeated!");
+        defeated_enemy_uids.push_back(turn_data->target->uid);
         enemies_.erase(std::remove_if(enemies_.begin(), enemies_.end(),
                                       [&](const Enemy& e) {
                                         return &e == turn_data->target;
@@ -245,6 +263,9 @@ void BattleScene::Quit() {
   }
   save_data.player_health.health = player_health_.health;
   save_data.player_health.stamina = player_health_.stamina;
+  save_data.defeated_enemy_uids.insert(save_data.defeated_enemy_uids.end(),
+                                  defeated_enemy_uids.begin(),
+                                       defeated_enemy_uids.end());
   if (save_data.acquired_skills.size() != player_skills_.skills.size()) {
     save_data.acquired_skills = player_skills_.skills;
   }

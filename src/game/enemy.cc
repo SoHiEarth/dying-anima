@@ -46,7 +46,8 @@ void LoadEnemies() {
 
 }  // namespace
 
-Enemy game::CreateEnemyFromName(std::string_view name) {
+Enemy game::CreateEnemyFromName(std::string_view name, int designated_enemy_id) {
+  static int last_uid = 0;
   // load default enemies if not already loaded
   if (default_enemies.empty()) {
     std::call_once(default_enemies_initialized, LoadEnemies);
@@ -55,7 +56,16 @@ Enemy game::CreateEnemyFromName(std::string_view name) {
   for (const auto& enemy : default_enemies) {
     std::cout << "Found enemy preset: " << enemy.name << "\n";
     if (enemy.name == name) {
-      return enemy;
+      Enemy return_enemy = enemy;
+      if (last_uid < designated_enemy_id) {
+        last_uid = designated_enemy_id;
+      }
+      if (designated_enemy_id != 0) {
+        return_enemy.uid = designated_enemy_id;
+      } else {
+        return_enemy.uid = ++last_uid;
+      }
+      return return_enemy;
     }
   }
   throw std::runtime_error("Enemy type not found: " + std::string(name));

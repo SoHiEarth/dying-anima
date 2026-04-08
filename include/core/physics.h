@@ -20,9 +20,9 @@ bool WorldValid();
 void Init(const glm::vec2& gravity);
 void SetGravity(const glm::vec2& gravity);
 b2BodyId CreateChainBody(const std::vector<glm::vec2>& vertices);
-PhysicsBody CreateBody(Transform transform, bool is_dynamic);
+PhysicsBody CreateBody(Transform transform, bool is_dynamic, float friction = 0.5F);
 PhysicsBody CreateBody(const glm::vec2& position, const glm::vec2& scale,
-                       float angle, bool is_dynamic);
+                       float angle, bool is_dynamic, float friction = 0.5f);
 void SyncPosition(b2BodyId body, glm::vec2& position);
 void SyncTransform(b2BodyId body, Transform& transform);
 bool IsColliding(PhysicsBody body1, PhysicsBody body2);

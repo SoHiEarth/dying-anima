@@ -38,6 +38,13 @@ void save_manager::SaveGame(const SaveData& data, const game::Log& log) {
     skill_node.append_attribute("health_used") = skill.health_used;
     skill_node.append_attribute("stamina_used") = skill.stamina_used;
   }
+
+  auto defeated_enemies_node = root.append_child("DefeatedEnemies");
+  for (const auto& uid : data.defeated_enemy_uids) {
+    auto enemy_node = defeated_enemies_node.append_child("Enemy");
+    enemy_node.append_attribute("uid") = uid;
+  }
+
   if (!std::filesystem::exists(kSavedataDirectory)) {
     std::filesystem::create_directory(kSavedataDirectory);
   }
@@ -93,6 +100,11 @@ SaveData save_manager::LoadGame(std::string_view filename) {
     skill.health_used = skill_node.attribute("health_used").as_float();
     skill.stamina_used = skill_node.attribute("stamina_used").as_float();
     data.acquired_skills.emplace_back(skill);
+  }
+
+  auto defeated_enemies_node = root_node.child("DefeatedEnemies");
+  for (auto enemy_node : defeated_enemies_node.children("Enemy")) {
+    data.defeated_enemy_uids.emplace_back(enemy_node.attribute("uid").as_int());
   }
   std::cout << "Loaded game from " << filename << std::endl;
   data.valid = true;
