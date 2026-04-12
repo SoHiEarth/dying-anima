@@ -1,6 +1,7 @@
 #ifndef SAVES_H
 #define SAVES_H
 
+#include <expected>
 #include <string>
 
 #include "core/transform.h"
@@ -18,10 +19,12 @@ struct SaveData {
   std::vector<int> defeated_enemy_uids;
 };
 
+enum class LoadError { kFileNotFound };
+
 namespace save_manager {
 void SaveGame(const SaveData& data, const game::Log& log);
-SaveData LoadGame(std::string_view filename);
-SaveData LoadLatestSave();
+std::expected<SaveData, LoadError> LoadGame(std::string_view filename);
+std::expected<SaveData, LoadError> LoadLatestSave();
 }  // namespace save_manager
 
 #endif  // SAVES_H

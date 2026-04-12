@@ -63,11 +63,10 @@ void save_manager::SaveGame(const SaveData& data, const game::Log& log) {
   doc.save_file(filename.c_str());
 }
 
-SaveData save_manager::LoadGame(std::string_view filename) {
-  if (!std::filesystem::exists(filename)) {
-    core::Log(std::format("Save file {} doesn't exist. Returning empty data.", filename), "SaveManager");
-    return {};
-  }
+std::expected<SaveData, LoadError> save_manager::LoadGame(std::string_view filename) {
+  if (!std::filesystem::exists(filename))
+    return std::unexpected(LoadError::kFileNotFound);
+  
   SaveData data{};
   pugi::xml_document doc;
   if (!doc.load_file(std::string(filename).c_str())) {
@@ -112,7 +111,7 @@ SaveData save_manager::LoadGame(std::string_view filename) {
   return data;
 }
 
-SaveData save_manager::LoadLatestSave() {
+std::expected<SaveData, LoadError> save_manager::LoadLatestSave() {
   if (!std::filesystem::exists("saves")) {
     core::Log("Saves directory doesn't exist. Recreating directory.", "SaveManager");
     std::filesystem::create_directory("saves");
@@ -138,5 +137,5 @@ SaveData save_manager::LoadLatestSave() {
     }
   }
 
-  return LoadGame("saves/" + latest_save + ".save");
+  return LoadGame("saves/" + latest_save);
 }
