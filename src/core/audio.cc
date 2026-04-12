@@ -1,4 +1,5 @@
 #include "core/audio.h"
+#include "core/log.h"
 
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -128,8 +129,7 @@ unsigned int core::audio::Load(const char* file) {
 
 void core::audio::Play(unsigned int handle) {
   if (!loaded_map.contains(handle)) {
-    std::cerr << "Ignoring request to play nonexistent handle: " << handle
-              << std::endl;
+    core::Log(std::format("Ignoring request to play nonexistent handle {}", handle), "Audio");
     return;
   }
 
@@ -143,8 +143,7 @@ void core::audio::Play(unsigned int handle) {
 
 void core::audio::Stop(unsigned int handle) {
   if (!loaded_map.contains(handle)) {
-    std::cerr << "Ignoring request to stop nonexistent handle: " << handle
-              << std::endl;
+    core::Log(std::format("Ignoring request to play nonexistent handle {}", handle), "Audio");
     return;
   }
 

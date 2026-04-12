@@ -6,13 +6,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <print>
 #include <string>
 
 #include "core/camera.h"
 #include "core/quad.h"
 #include "core/shader.h"
 #include "core/window.h"
+#include "core/log.h"
 
 namespace {
 glm::mat4 last_proj, last_view, last_vp;
@@ -37,7 +37,7 @@ Texture::Texture(std::string_view path) {
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(data);
   } else {
-    std::print("Failed to load texture: {}\n", path);
+    core::Log(std::format("Failed to load texture: {}", path), "Texture");
     id = 0;
     width = height = channels = 0;
   }

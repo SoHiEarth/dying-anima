@@ -1,6 +1,5 @@
 #include "level_utils.h"
 
-#include <print>
 #include <pugixml.hpp>
 
 #include "core/animation.h"
@@ -8,6 +7,7 @@
 #include "core/physics.h"
 #include "core/resource_manager.h"
 #include "core/transform.h"
+#include "core/log.h"
 #include "game/enemy.h"
 #include "game/spawn.h"
 #include "sprite.h"
@@ -15,8 +15,7 @@
 entt::registry LoadLevel(std::string_view filename) {
   pugi::xml_document doc;
   if (!doc.load_file(std::string(filename).c_str())) {
-    std::print("Failed to load level file: {}\n", filename);
-    return {};
+    throw std::runtime_error(std::format("Failed to load level file: {}\n", filename));
   }
   auto registry = entt::registry{};
   auto root = doc.child("Level");
@@ -110,7 +109,7 @@ entt::registry LoadLevel(std::string_view filename) {
   if (!chain_points.empty()) {
     physics::CreateChainBody(chain_points);
   }
-  std::print("Loaded level {}", filename);
+  core::Log(std::format("Loaded level {}", filename), "Level");
   return registry;
 }
 
@@ -178,8 +177,8 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
     }
   }
   if (!doc.save_file(std::string(filename).c_str())) {
-    std::print("Failed to save level file: {}\n", filename);
+    core::Log(std::format("Failed to save level {}", filename), "Level");
   } else {
-    std::print("Saved level file: {}\n", filename);
+    core::Log(std::format("Saved level {}", filename), "Level");
   }
 }

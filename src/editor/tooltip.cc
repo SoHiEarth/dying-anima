@@ -1,7 +1,9 @@
 #include "editor/tooltip.h"
 #include <mutex>
 #include <pugixml.hpp>
+
 #include "core/path_resolve.h"
+#include "core/log.h"
 
 namespace editor {
 std::map<std::string, std::string> tooltip_map;
@@ -14,7 +16,7 @@ std::once_flag tooltips_initialized;
 void editor::LoadTooltips() {
   pugi::xml_document doc;
   if (!doc.load_file((core::path::GetAssetPath() / "tooltip.xml").string().c_str())) {
-    std::print("Failed to load tooltips: assets/tooltip.xml\n");
+    core::Log(std::format("Failed to load tooltips: {}", (core::path::GetAssetPath() / "tooltip.xml").string()), "Editor");
     return;
   }
   auto root = doc.child("tooltips");

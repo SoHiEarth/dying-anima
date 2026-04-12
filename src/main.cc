@@ -11,7 +11,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <print>
 
 #include "core/input.h"
 #include "core/quad.h"
@@ -19,6 +18,7 @@
 #include "core/resource_manager.h"
 #include "core/scene.h"
 #include "core/window.h"
+#include "core/log.h"
 #include "game/game.h"
 #include "menu.h"
 
@@ -37,7 +37,7 @@ void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {
 
 int main() {
   if (!glfwInit()) {
-    std::print("Failed to initialize GLFW\n");
+    core::Log("Failed to initialize GLFW", "main");
     return -1;
   }
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);

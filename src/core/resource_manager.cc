@@ -1,4 +1,5 @@
 #include "core/resource_manager.h"
+#include "core/log.h"
 #include "core/path_resolve.h"
 #include <format>
 #include <print>
@@ -21,29 +22,28 @@ TextureHandle resource_manager::GetTexture(std::string_view tag) {
       it != texture_atlas.end()) {
     return it->second;
   }
-  std::print("Texture with tag '{}' not found in atlas\n", tag);
+  core::Log(std::format("Texture with tag '{}' not found in atlas", tag), "Resource Manager");
   // Return util.notexture
   if (auto it = texture_atlas.find("util.notexture");
       it != texture_atlas.end()) {
     return it->second;
   }
-  throw std::runtime_error(
-      "Fallback texture 'util.notexture' not found in atlas");
+  throw std::runtime_error("Fallback texture 'util.notexture' not found");
 }
 
 ShaderHandle resource_manager::GetShader(std::string_view tag) {
   if (auto it = shader_atlas.find(std::string(tag)); it != shader_atlas.end()) {
     return it->second;
   }
-  throw std::runtime_error(
-      std::format("Shader with tag '{}' not found in atlas", tag));
+  throw std::runtime_error(std::format("Shader with tag '{}' not found in atlas", tag));
 }
 
 FontHandle resource_manager::GetFont(std::string_view tag) {
   if (auto it = font_atlas.find(std::string(tag)); it != font_atlas.end()) {
     return it->second;
   }
-  std::print("Font with tag '{}' not found in atlas\n", tag);
+
+  core::Log(std::format("Font with tag '{}' not found in atlas", tag), "Resource Manager");
   // Return util.nofont
   if (auto it = font_atlas.find("util.nofont"); it != font_atlas.end()) {
     return it->second;

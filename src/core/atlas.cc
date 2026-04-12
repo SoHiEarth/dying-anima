@@ -6,32 +6,31 @@
 #include <print>
 #include <pugixml.hpp>
 #include <stdexcept>
+#include "core/log.h"
 namespace {
 std::once_flag font_flag, shader_flag, texture_flag;
 
 void PrintFontResults(FONT_ATLAS& atlas) {
-  std::print("- Font Atlas Result -\nLoaded {} fonts from atlas.\n",
-             atlas.size());
+  core::Log("- Font Atlas Result -", "Atlas");
+  core::Log(std::format("Loaded {} fonts from atlas", atlas.size()), "Atlas");
   for (const auto& [tag, entry] : atlas) {
-    std::print("Name: {} (Tag: {}) File: {})\n", entry.name, tag, entry.file);
+    core::Log(std::format("Name: {} (Tag: {}) File: {})", entry.name, tag, entry.file), "Atlas");
   }
 }
 
 void PrintShaderResults(SHADER_ATLAS& atlas) {
-  std::print("- Shader Atlas Result -\nLoaded {} shaders from atlas.\n",
-             atlas.size());
+  core::Log("- Shader Atlas Result -", "Atlas");
+  core::Log(std::format("Loaded {} shaders from atlas.", atlas.size()), "Atlas");
   for (const auto& [tag, entry] : atlas) {
-    std::print("Name: {} (Tag: {}) Vertex File: {}, Fragment File: {})\n",
-               entry.name, tag, entry.vertex_file, entry.fragment_file);
+    core::Log(std::format("Name: {} (Tag: {}) Vertex File: {}, Fragment File: {})", entry.name, tag, entry.vertex_file, entry.fragment_file), "Atlas");
   }
 }
 
 void PrintTextureResults(TEXTURE_ATLAS& atlas) {
-  std::print("- Texture Atlas Result -\nLoaded {} textures from atlas.\n",
-             atlas.size());
+  core::Log("- Texture Atlas Result -", "Atlas");
+  core::Log(std::format("Loaded {} textures from atlas.", atlas.size()), "Atlas");
   for (const auto& [name, entry] : atlas) {
-    std::print("Name: {} (File: {}, Dimensions: {}x{})\n", name, entry.path,
-               entry.texture->width, entry.texture->height);
+    core::Log(std::format("Name: {} (File: {}, Dimensions: {}x{})", name, entry.path, entry.texture->width, entry.texture->height), "Atlas");
   }
 }
 

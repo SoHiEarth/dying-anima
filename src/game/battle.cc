@@ -3,8 +3,6 @@
 
 #include <GLFW/glfw3.h>
 #include <imgui.h>
-
-
 #include <vector>
 
 #include "game/battle.h"

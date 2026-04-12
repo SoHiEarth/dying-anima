@@ -8,6 +8,7 @@
 #include <iterator>
 #include <print>
 #include <string>
+#include "core/log.h"
 
 Shader::Shader(std::string_view vertex_path, std::string_view fragment_path) {
   unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -22,7 +23,7 @@ Shader::Shader(std::string_view vertex_path, std::string_view fragment_path) {
   glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(vertex_shader, 512, nullptr, info_log);
-    std::print("Vertex Shader Compilation Error: {}", info_log);
+    core::Log(std::format("Vertex Shader Compilation Error: {}", info_log), "Shader");
   }
   unsigned int fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
   file = std::ifstream(std::string(fragment_path).c_str());
@@ -34,7 +35,7 @@ Shader::Shader(std::string_view vertex_path, std::string_view fragment_path) {
   glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(fragment_shader, 512, nullptr, info_log);
-    std::print("Fragment Shader Compilation Error: {}", info_log);
+    core::Log(std::format("Fragment Shader Compilation Error: {}", info_log), "Shader");
   }
   id = glCreateProgram();
   glAttachShader(id, vertex_shader);
@@ -43,7 +44,7 @@ Shader::Shader(std::string_view vertex_path, std::string_view fragment_path) {
   glGetProgramiv(id, GL_LINK_STATUS, &success);
   if (!success) {
     glGetProgramInfoLog(id, 512, nullptr, info_log);
-    std::print("Shader Program Linking Error: {}", info_log);
+    core::Log(std::format("Shader Program Link Error: {}", info_log), "Shader");
   }
   glDeleteShader(vertex_shader);
   glDeleteShader(fragment_shader);

@@ -1,10 +1,10 @@
 #include "game/enemy.h"
 
 #include <algorithm>
-#include <iostream>
 #include <mutex>
 #include <pugixml.hpp>
 
+#include "core/log.h"
 #include "core/path_resolve.h"
 #include "core/resource_manager.h"
 #include "core/scene.h"
@@ -19,7 +19,7 @@ std::once_flag default_enemies_initialized;
 void LoadEnemies() {
   pugi::xml_document doc;
   if (!doc.load_file((core::path::GetAssetPath() / "enemies.xml").c_str())) {
-    std::print("Failed to load enemies file: assets/enemies.xml\n");
+    core::Log(std::format("Failed to load enemies file"), "Enemy");
     return;
   }
   auto root = doc.child("Enemies");
@@ -43,7 +43,7 @@ void LoadEnemies() {
     }
     default_enemies.push_back(enemy);
   }
-  std::cout << "Loaded " << default_enemies.size() << " enemy presets\n";
+  core::Log(std::format("Loaded {} enemy presets", default_enemies.size()), "Enemy");
 }
 
 }  // namespace
@@ -56,7 +56,7 @@ Enemy game::CreateEnemyFromName(std::string_view name, int designated_enemy_id) 
   }
 
   for (const auto& enemy : default_enemies) {
-    std::cout << "Found enemy preset: " << enemy.name << "\n";
+    core::Log(std::format("Found enemy preset: {}", enemy.name), "Enemy");
     if (enemy.name == name) {
       Enemy return_enemy = enemy;
       last_uid = std::max(last_uid, designated_enemy_id);

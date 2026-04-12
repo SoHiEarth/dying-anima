@@ -2,17 +2,19 @@
 
 #include <chrono>
 #include <filesystem>
-#include <iostream>
 #include <pugixml.hpp>
 
+#include "core/log.h"
 #include "game/log.h"
 
-std::string kSavedataRootName = "SaveData";
-std::string kSavedataDirectory = "saves";
+namespace {
+std::string savedata_root_name = "SaveData";
+std::string savedata_directory = "saves";
+}
 
 void save_manager::SaveGame(const SaveData& data, const game::Log& log) {
   pugi::xml_document doc;
-  auto root = doc.append_child(kSavedataRootName);
+  auto root = doc.append_child(savedata_root_name);
   auto player_node = root.append_child("Player");
   player_node.append_attribute("death_count") = data.death_count;
   player_node.append_attribute("pos.x") = data.player_transform.position.x;
@@ -45,8 +47,8 @@ void save_manager::SaveGame(const SaveData& data, const game::Log& log) {
     enemy_node.append_attribute("uid") = uid;
   }
 
-  if (!std::filesystem::exists(kSavedataDirectory)) {
-    std::filesystem::create_directory(kSavedataDirectory);
+  if (!std::filesystem::exists(savedata_directory)) {
+    std::filesystem::create_directory(savedata_directory);
   }
   auto now = std::chrono::system_clock::now();
   auto t = std::chrono::system_clock::to_time_t(now);
@@ -54,17 +56,16 @@ void save_manager::SaveGame(const SaveData& data, const game::Log& log) {
   std::stringstream ss;
   ss << std::put_time(&tm, "%Y-%m-%d_%H-%M-%S");
 
-  std::string file_name =
-      (std::filesystem::path(kSavedataDirectory) /
+  std::string filename =
+      (std::filesystem::path(savedata_directory) /
        std::filesystem::path(ss.str() + ".save")).string();
-  std::cout << "Saving game to " << file_name << std::endl;
-  doc.save_file(file_name.c_str());
+  core::Log(std::format("Saving game to {}", filename), "Saves");
+  doc.save_file(filename.c_str());
 }
 
 SaveData save_manager::LoadGame(std::string_view filename) {
   if (!std::filesystem::exists(filename)) {
-    std::cout << "Save file " << filename << " doesn't exist. Returning empty "
-              << "save data.";
+    core::Log(std::format("Save file {} doesn't exist. Returning empty data.", filename), "SaveManager");
     return {};
   }
   SaveData data{};
@@ -72,7 +73,7 @@ SaveData save_manager::LoadGame(std::string_view filename) {
   if (!doc.load_file(std::string(filename).c_str())) {
     throw std::runtime_error("Failed to load save file");
   }
-  auto root_node = doc.child(kSavedataRootName);
+  auto root_node = doc.child(savedata_root_name);
   auto player_node = root_node.child("Player");
   data.death_count = player_node.attribute("death_count").as_int();
   if (player_node) {
@@ -106,14 +107,14 @@ SaveData save_manager::LoadGame(std::string_view filename) {
   for (auto enemy_node : defeated_enemies_node.children("Enemy")) {
     data.defeated_enemy_uids.emplace_back(enemy_node.attribute("uid").as_int());
   }
-  std::cout << "Loaded game from " << filename << std::endl;
+  core::Log(std::format("Loaded game from {}", filename), "SaveManager");
   data.valid = true;
   return data;
 }
 
 SaveData save_manager::LoadLatestSave() {
   if (!std::filesystem::exists("saves")) {
-    std::cout << "Saves directory doesn't exist. Recreating...";
+    core::Log("Saves directory doesn't exist. Recreating directory.", "SaveManager");
     std::filesystem::create_directory("saves");
     return {}; // No need to search empty directory
   }
@@ -122,7 +123,7 @@ SaveData save_manager::LoadLatestSave() {
   std::time_t latest_time = 0;
 
   for (const auto& entry :
-       std::filesystem::directory_iterator(kSavedataDirectory)) {
+       std::filesystem::directory_iterator(savedata_directory)) {
     if (entry.is_regular_file() && entry.path().extension() == ".save") {
       std::string filename = entry.path().filename().string();
 
