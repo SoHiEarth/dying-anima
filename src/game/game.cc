@@ -56,7 +56,7 @@ void GameScene::Init() {
   if (spawn_entity != entt::null) {
     player_transform = game::registry.get<Transform>(spawn_entity);
   }
-  game::save_data = save_manager::LoadLatestSave();
+  game::save_data = save_manager::LoadLatestSave().value();
   game::registry.emplace<PlayerSpeed>(game::player);
   auto& player_skills = game::registry.emplace<PlayerSkills>(game::player);
   auto& player_health = game::registry.emplace<Health>(game::player, 100.0F);
@@ -101,7 +101,7 @@ void GameScene::Quit() {
   if (!std::filesystem::exists("saves")) {
     std::filesystem::create_directory("saves");
   } else if (!std::filesystem::is_empty("saves")){
-    save_data = save_manager::LoadLatestSave();
+    save_data = save_manager::LoadLatestSave().value();
   }
   save_data.player_transform = game::registry.get<Transform>(game::player);
   save_data.player_health = game::registry.get<Health>(game::player);

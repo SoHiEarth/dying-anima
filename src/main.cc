@@ -92,7 +92,7 @@ int main() {
   if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
     std::filesystem::create_directory("saves");
   } else {
-    game::save_data = save_manager::LoadLatestSave();
+    game::save_data = save_manager::LoadLatestSave().value();
   }
   double last_time = glfwGetTime();
   constexpr double kMaxDeltaTime = 0.1;

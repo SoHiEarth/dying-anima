@@ -22,7 +22,7 @@ void core::Log(std::string_view content, std::string_view caller) {
   }
 
   const auto now = std::chrono::system_clock::now();
-  auto formatted = std::format("[{:%Y-%m-%d %H:%M:%S}] [ {} ] {}\n", now, caller, content);
+  auto formatted = std::format("[ {:%H:%M:%S} ] [ {} ] {}\n", now, caller, content);
   std::cout << formatted;
   if (output_file.is_open()) {
     output_file << formatted;

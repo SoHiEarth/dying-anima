@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "game/battle.h"
+#include "core/log.h"
 #include "game/degradation.h"
 #include "game/game.h"
 #include "menu.h"
@@ -85,7 +86,7 @@ void BattleScene::Init() {
   auto save_data = save_manager::LoadLatestSave();
   // check if any enemies in this battle have been defeated before, and if so,
   // remove them from the battle
-  for (const auto& uid : save_data.defeated_enemy_uids) {
+  for (const auto& uid : save_data->defeated_enemy_uids) {
     defeated_enemy_uids.push_back(uid);
   }
   enemies_.erase(std::remove_if(enemies_.begin(), enemies_.end(),
@@ -96,7 +97,10 @@ void BattleScene::Init() {
                                          defeated_enemy_uids.end();
                                 }),
                  enemies_.end());
-  assert(!enemies_.empty());
+  if (enemies_.empty()) {
+    core::Log("Logic Error: Enemy count empty.", "BattleScene");
+    scene_manager_.PopScene();
+  }
 }
 
 void BattleScene::Update(double) {
@@ -243,12 +247,12 @@ void BattleScene::Render(GameWindow& window) {
 
 void BattleScene::Quit() {
   auto save_data = save_manager::LoadLatestSave();
-  save_data.completion_markers.push_back(
+  save_data->completion_markers.push_back(
       "Battle." +
       std::to_string(
           std::chrono::system_clock::now().time_since_epoch().count()) +
       "." + ListEnemyNames(enemies_));
-  save_data.log.NewLog(
+  save_data->log.NewLog(
       {.title = {{game::DegradationLevel::kLevel0,
                   "Battle against " + ListEnemyNames(enemies_)}},
        .description = {{game::DegradationLevel::kLevel0, "No description."}},
@@ -256,16 +260,16 @@ void BattleScene::Quit() {
            std::chrono::system_clock::now().time_since_epoch().count()),
        .texture = {}});
   if (player_health_.health <= 0) {
-    save_data.death_count++;
+    save_data->death_count++;
     player_health_.health = 100;
   }
-  save_data.player_health.health = player_health_.health;
-  save_data.player_health.stamina = player_health_.stamina;
-  save_data.defeated_enemy_uids.insert(save_data.defeated_enemy_uids.end(),
+  save_data->player_health.health = player_health_.health;
+  save_data->player_health.stamina = player_health_.stamina;
+  save_data->defeated_enemy_uids.insert(save_data->defeated_enemy_uids.end(),
                                   defeated_enemy_uids.begin(),
                                        defeated_enemy_uids.end());
-  if (save_data.acquired_skills.size() != player_skills_.skills.size()) {
-    save_data.acquired_skills = player_skills_.skills;
+  if (save_data->acquired_skills.size() != player_skills_.skills.size()) {
+    save_data->acquired_skills = player_skills_.skills;
   }
-  save_manager::SaveGame(save_data, save_data.log);
+  save_manager::SaveGame(save_data.value(), save_data->log);
 }

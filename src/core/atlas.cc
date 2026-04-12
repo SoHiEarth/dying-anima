@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <format>
 #include <mutex>
-#include <print>
 #include <pugixml.hpp>
 #include <stdexcept>
 #include "core/log.h"
@@ -14,7 +13,7 @@ void PrintFontResults(FONT_ATLAS& atlas) {
   core::Log("- Font Atlas Result -", "Atlas");
   core::Log(std::format("Loaded {} fonts from atlas", atlas.size()), "Atlas");
   for (const auto& [tag, entry] : atlas) {
-    core::Log(std::format("Name: {} (Tag: {}) File: {})", entry.name, tag, entry.file), "Atlas");
+    core::Log(std::format("Name: {} (Tag: {}) File: {})", entry.name, tag, std::filesystem::relative(entry.file).string()), "Atlas");
   }
 }
 
@@ -22,7 +21,8 @@ void PrintShaderResults(SHADER_ATLAS& atlas) {
   core::Log("- Shader Atlas Result -", "Atlas");
   core::Log(std::format("Loaded {} shaders from atlas.", atlas.size()), "Atlas");
   for (const auto& [tag, entry] : atlas) {
-    core::Log(std::format("Name: {} (Tag: {}) Vertex File: {}, Fragment File: {})", entry.name, tag, entry.vertex_file, entry.fragment_file), "Atlas");
+    core::Log(std::format("Name: {} (Tag: {}) Vertex File: {}, Fragment File: {})",
+          entry.name, tag, std::filesystem::relative(entry.vertex_file).string(), std::filesystem::relative(entry.fragment_file).string()), "Atlas");
   }
 }
 
@@ -30,7 +30,7 @@ void PrintTextureResults(TEXTURE_ATLAS& atlas) {
   core::Log("- Texture Atlas Result -", "Atlas");
   core::Log(std::format("Loaded {} textures from atlas.", atlas.size()), "Atlas");
   for (const auto& [name, entry] : atlas) {
-    core::Log(std::format("Name: {} (File: {}, Dimensions: {}x{})", name, entry.path, entry.texture->width, entry.texture->height), "Atlas");
+    core::Log(std::format("Name: {} (File: {}, Dimensions: {}x{})", name, std::filesystem::relative(entry.path).string(), entry.texture->width, entry.texture->height), "Atlas");
   }
 }
 

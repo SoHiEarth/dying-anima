@@ -45,7 +45,7 @@ void PauseScene::Init() {
     SaveData save_data{};
     if (std::filesystem::exists("saves")) {
       if (!std::filesystem::is_empty("saves")) {
-        save_data = save_manager::LoadLatestSave();
+        save_data = save_manager::LoadLatestSave().value();
       }
     }
     save_data.player_transform = game::registry.get<Transform>(game::player);
