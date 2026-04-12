@@ -1,9 +1,11 @@
 #include "game/enemy.h"
 
+#include <algorithm>
 #include <iostream>
 #include <mutex>
 #include <pugixml.hpp>
 
+#include "core/path_resolve.h"
 #include "core/resource_manager.h"
 #include "core/scene.h"
 #include "core/transform.h"
@@ -16,7 +18,7 @@ std::once_flag default_enemies_initialized;
 
 void LoadEnemies() {
   pugi::xml_document doc;
-  if (!doc.load_file("assets/enemies.xml")) {
+  if (!doc.load_file((core::path::GetAssetPath() / "enemies.xml").c_str())) {
     std::print("Failed to load enemies file: assets/enemies.xml\n");
     return;
   }
@@ -57,9 +59,7 @@ Enemy game::CreateEnemyFromName(std::string_view name, int designated_enemy_id) 
     std::cout << "Found enemy preset: " << enemy.name << "\n";
     if (enemy.name == name) {
       Enemy return_enemy = enemy;
-      if (last_uid < designated_enemy_id) {
-        last_uid = designated_enemy_id;
-      }
+      last_uid = std::max(last_uid, designated_enemy_id);
       if (designated_enemy_id != 0) {
         return_enemy.uid = designated_enemy_id;
       } else {

@@ -6,12 +6,8 @@
 #include "game/intro.h"
 #include "menu.h"
 #include <algorithm>
-#include <chrono>
 
 constexpr int kLabelHeight = 24;
-namespace {
-  int focus_index = 0;
-}
 
 void SaveSelect::Init() {
   font = resource_manager::GetFont("menu.ui").font;
@@ -46,7 +42,7 @@ void SaveSelect::Init() {
             (i == 0 ? std::string("* ") : std::string("")) + save.stem().string(), font,
               [this]() {
                 scene_manager_.PopScene();
-                // TODO: Load the save data and pass it to the game scene
+                // TODO: sohiearth - Load the save data and pass it to the game scene
                 scene_manager_.PushScene(
                     std::make_unique<GameScene>(scene_manager_));
               }))
@@ -61,7 +57,7 @@ void SaveSelect::Init() {
         font,
         [this](){
           scene_manager_.PopScene();
-          // TODO: Don't load a save
+          // TODO: sohiearth - Don't load a save
           scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_));
           scene_manager_.PushScene(std::make_unique<IntroScene>(scene_manager_));}
   ))->size.y = kLabelHeight;
@@ -73,7 +69,7 @@ void SaveSelect::Init() {
   layout.SetSpacing(kLabelHeight);
 }
 
-void SaveSelect::Update(double dt) {
+void SaveSelect::Update(double) {
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_ESCAPE)) {
     scene_manager_.PopScene();
     scene_manager_.PushScene(std::make_unique<MenuScene>(scene_manager_));

@@ -45,9 +45,10 @@ entt::entity game::player;
 void GameScene::Init() {
   if (std::filesystem::exists("level.txt")) {
     tinyfd_messageBox("Level file not found.", "The level file \"level.txt\" not found. The game may run, but the scene may be missing.", "ok", "warning", 1);
+  } else {
+    game::registry = LoadLevel("level.txt");
   }
   physics::Init({0, -35.0F});
-  game::registry = LoadLevel("level.txt");
   game::player = game::registry.create();
   auto& player_transform = game::registry.emplace<Transform>(game::player);
   auto spawn_view = game::registry.view<Transform, PlayerSpawn>();
@@ -96,11 +97,10 @@ void GameScene::Init() {
 }
 
 void GameScene::Quit() {
-  if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
-    std::filesystem::create_directory("saves");
-  }
   SaveData save_data{};
-  if (!std::filesystem::is_empty("saves")) {
+  if (!std::filesystem::exists("saves")) {
+    std::filesystem::create_directory("saves");
+  } else if (!std::filesystem::is_empty("saves")){
     save_data = save_manager::LoadLatestSave();
   }
   save_data.player_transform = game::registry.get<Transform>(game::player);

@@ -1,5 +1,5 @@
 #include "core/resource_manager.h"
-
+#include "core/path_resolve.h"
 #include <format>
 #include <print>
 #include <stdexcept>
@@ -11,9 +11,9 @@ FONT_ATLAS font_atlas;
 }  // namespace resource_manager
 
 void resource_manager::Init() {
-  texture_atlas = LoadTextureAtlas("assets/textures/texture.xml");
-  shader_atlas = LoadShaderAtlas("assets/shaders/shader.xml");
-  font_atlas = LoadFontAtlas("assets/fonts/font.xml");
+  texture_atlas = LoadTextureAtlas((core::path::GetAssetPath() / "textures/texture.xml").string());
+  shader_atlas = LoadShaderAtlas((core::path::GetAssetPath() / "shaders/shader.xml").string());
+  font_atlas = LoadFontAtlas((core::path::GetAssetPath() / "fonts/font.xml").string());
 }
 
 TextureHandle resource_manager::GetTexture(std::string_view tag) {

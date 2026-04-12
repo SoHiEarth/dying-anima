@@ -91,7 +91,7 @@ int main() {
   scene_manager.ProcessSceneChanges();
   if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
     std::filesystem::create_directory("saves");
-  } else if (!game::save_data.valid) {
+  } else {
     game::save_data = save_manager::LoadLatestSave();
   }
   double last_time = glfwGetTime();

@@ -43,8 +43,10 @@ void PauseScene::Init() {
   }));
   layout->AddElement(std::make_unique<ui::Button>("Save", ui_font_, []() {
     SaveData save_data{};
-    if (!std::filesystem::is_empty("saves")) {
-      save_data = save_manager::LoadLatestSave();
+    if (std::filesystem::exists("saves")) {
+      if (!std::filesystem::is_empty("saves")) {
+        save_data = save_manager::LoadLatestSave();
+      }
     }
     save_data.player_transform = game::registry.get<Transform>(game::player);
     save_data.player_health = game::registry.get<Health>(game::player);
