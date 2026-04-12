@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <string>
 
+#include "core/log.h"
 #include "core/shader.h"
 #include FT_FREETYPE_H
 #include "core/camera.h"
@@ -32,14 +33,14 @@ Font::Font(std::string_view font_path) {
 
   FT_Library ft;
   if (FT_Init_FreeType(&ft)) {
-    throw std::runtime_error("Could not init FreeType Library");
+    throw core::Error("Could not init FreeType Library", "Font");
   }
 
   FT_Face face;
   if (static_cast<bool>(
           FT_New_Face(ft, std::string(font_path).c_str(), 0, &face))) {
     FT_Done_FreeType(ft);
-    throw std::runtime_error("Failed to load font: " + std::string(font_path));
+    throw core::Error("Failed to load font: " + std::string(font_path), "Font");
   }
 
   FT_Set_Pixel_Sizes(face, 0, static_cast<unsigned int>(dpi));
@@ -47,7 +48,7 @@ Font::Font(std::string_view font_path) {
 
   for (unsigned char c = 0; c < 128; c++) {
     if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-      throw std::runtime_error("Failed to load Glyph");
+      throw core::Error("Failed to load Glyph", "Font");
     }
     unsigned int texture;
     glGenTextures(1, &texture);

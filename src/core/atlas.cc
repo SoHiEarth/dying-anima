@@ -4,7 +4,6 @@
 #include <format>
 #include <mutex>
 #include <pugixml.hpp>
-#include <stdexcept>
 #include "core/log.h"
 namespace {
 std::once_flag font_flag, shader_flag, texture_flag;
@@ -42,8 +41,8 @@ FONT_ATLAS LoadFontAtlas(std::string_view filename) {
   pugi::xml_parse_result result =
       font_doc.load_file(std::string(filename).c_str());
   if (!result) {
-    throw std::runtime_error(std::format("Failed to load font atlas XML: {}\n",
-                                         result.description()));
+    throw core::Error(std::format("Failed to load font atlas XML: {}",
+                                         result.description()), "Atlas");
   }
   pugi::xml_node fonts_node = font_doc.child("fonts");
   std::filesystem::path base_path =
@@ -68,8 +67,8 @@ SHADER_ATLAS LoadShaderAtlas(std::string_view filename) {
   pugi::xml_parse_result shader_result =
       shader_doc.load_file(std::string(filename).c_str());
   if (!shader_result) {
-    throw std::runtime_error(std::format(
-        "Failed to load shader atlas XML: {}\n", shader_result.description()));
+    throw core::Error(std::format(
+        "Failed to load shader atlas XML: {}", shader_result.description()), "Atlas");
   }
   pugi::xml_node shaders_node = shader_doc.child("shaders");
   auto base_path = std::filesystem::path(filename).parent_path();
@@ -98,9 +97,9 @@ TEXTURE_ATLAS LoadTextureAtlas(std::string_view filename) {
   pugi::xml_parse_result texture_result =
       texture_doc.load_file(std::string(filename).c_str());
   if (!texture_result) {
-    throw std::runtime_error(
-        std::format("Failed to load texture atlas XML: {}\n",
-                    texture_result.description()));
+    throw core::Error(
+        std::format("Failed to load texture atlas XML: {}",
+                    texture_result.description()), "Atlas");
   }
   pugi::xml_node textures_node = texture_doc.child("textures");
   auto base_path = std::filesystem::path(filename).parent_path();

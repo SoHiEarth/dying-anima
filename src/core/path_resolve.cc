@@ -1,5 +1,6 @@
 #include "core/path_resolve.h"
 #include <filesystem>
+#include "core/log.h"
 
 namespace {
 std::vector<std::filesystem::path> fallback_paths{};
@@ -15,7 +16,7 @@ std::filesystem::path core::path::GetAssetPath() {
     }
   }
 
-  throw std::runtime_error("Asset path not found in current directory or fallback paths");
+  throw core::Error("Asset path not found in current directory or fallback paths", "Path Resolve");
 }
 
 std::vector<std::filesystem::path>& core::path::GetFallbackPaths() {

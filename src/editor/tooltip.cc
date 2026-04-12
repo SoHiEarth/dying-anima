@@ -16,8 +16,7 @@ std::once_flag tooltips_initialized;
 void editor::LoadTooltips() {
   pugi::xml_document doc;
   if (!doc.load_file((core::path::GetAssetPath() / "tooltip.xml").string().c_str())) {
-    core::Log(std::format("Failed to load tooltips: {}", (core::path::GetAssetPath() / "tooltip.xml").string()), "Editor");
-    return;
+    throw core::Error(std::format("Failed to load tooltips: {}", (core::path::GetAssetPath() / "tooltip.xml").string()), "Editor");
   }
   auto root = doc.child("tooltips");
   for (auto tooltip_node : root.children("tooltip")) {

@@ -70,7 +70,7 @@ std::expected<SaveData, LoadError> save_manager::LoadGame(std::string_view filen
   SaveData data{};
   pugi::xml_document doc;
   if (!doc.load_file(std::string(filename).c_str())) {
-    throw std::runtime_error("Failed to load save file");
+    throw core::Error("Failed to load save file", "SaveManager");
   }
   auto root_node = doc.child(savedata_root_name);
   auto player_node = root_node.child("Player");

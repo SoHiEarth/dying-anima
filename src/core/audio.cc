@@ -12,7 +12,7 @@ void LoadWAV(const char* filename, std::vector<char>& data, ALenum& format,
              ALsizei& frequency) {
   std::ifstream file(filename, std::ios::binary);
   if (!file) {
-    throw std::runtime_error(
+    throw core::Error(
         std::format("Failed to open WAV file: {}", filename));
   }
   std::array<char, 4> chunk_id;
@@ -25,13 +25,13 @@ void LoadWAV(const char* filename, std::vector<char>& data, ALenum& format,
 
   file.read(format_id.data(), 4);
   if (std::strncmp(format_id.data(), "WAVE", 4) != 0) {
-    throw std::runtime_error(
+    throw core::Error(
         std::format("Invalid WAV file (missing WAVE): {}", filename));
   }
 
   file.read(subchunk_1_id.data(), 4);
   if (std::strncmp(subchunk_1_id.data(), "fmt ", 4) != 0) {
-    throw std::runtime_error(
+    throw core::Error(
         std::format("Invalid WAV file (missing fmt ): {}", filename));
   }
 
@@ -52,7 +52,7 @@ void LoadWAV(const char* filename, std::vector<char>& data, ALenum& format,
   file.read(reinterpret_cast<char*>(&bits_per_sample), 2);
 
   if (audio_format != 1) {
-    throw std::runtime_error(std::format(
+    throw core::Error(std::format(
         "Unsupported WAV audio_format (only PCM supported): {}", filename));
   }
   if (subchunk_1_size > 16) {
@@ -70,7 +70,7 @@ void LoadWAV(const char* filename, std::vector<char>& data, ALenum& format,
   }
 
   if (subchunk_2_size == 0) {
-    throw std::runtime_error(
+    throw core::Error(
         std::format("Invalid WAV file (missing data chunk): {}", filename));
   }
 
@@ -82,7 +82,7 @@ void LoadWAV(const char* filename, std::vector<char>& data, ALenum& format,
   } else if (bits_per_sample == 16) {
     format = (channels == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
   } else {
-    throw std::runtime_error(std::format(
+    throw core::Error(std::format(
         "Unsupported WAV bit depth: {} in file {}", bits_per_sample, filename));
   }
   frequency = sample_rate;

@@ -19,8 +19,7 @@ std::once_flag default_enemies_initialized;
 void LoadEnemies() {
   pugi::xml_document doc;
   if (!doc.load_file((core::path::GetAssetPath() / "enemies.xml").c_str())) {
-    core::Log(std::format("Failed to load enemies file"), "Enemy");
-    return;
+    throw core::Error(std::format("Failed to load enemies file"), "Enemy");
   }
   auto root = doc.child("Enemies");
   for (auto object_node : root.children("Enemy")) {
@@ -68,7 +67,7 @@ Enemy game::CreateEnemyFromName(std::string_view name, int designated_enemy_id) 
       return return_enemy;
     }
   }
-  throw std::runtime_error("Enemy type not found: " + std::string(name));
+  throw core::Error("Enemy type not found: " + std::string(name), "Enemy");
 }
 
 void game::UpdateBattleTriggers(entt::registry& registry,

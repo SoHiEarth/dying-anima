@@ -37,8 +37,7 @@ void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {
 
 int main() {
   if (!glfwInit()) {
-    core::Log("Failed to initialize GLFW", "main");
-    return -1;
+    throw core::Error("Failed to initialize GLFW", "main");
   }
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);

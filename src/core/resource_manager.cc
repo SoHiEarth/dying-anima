@@ -28,14 +28,14 @@ TextureHandle resource_manager::GetTexture(std::string_view tag) {
       it != texture_atlas.end()) {
     return it->second;
   }
-  throw std::runtime_error("Fallback texture 'util.notexture' not found");
+  throw core::Error("Fallback texture 'util.notexture' not found", "Resource Manager");
 }
 
 ShaderHandle resource_manager::GetShader(std::string_view tag) {
   if (auto it = shader_atlas.find(std::string(tag)); it != shader_atlas.end()) {
     return it->second;
   }
-  throw std::runtime_error(std::format("Shader with tag '{}' not found in atlas", tag));
+  throw core::Error(std::format("Shader with tag '{}' not found in atlas", tag), "Resource Manager");
 }
 
 FontHandle resource_manager::GetFont(std::string_view tag) {
@@ -48,7 +48,7 @@ FontHandle resource_manager::GetFont(std::string_view tag) {
   if (auto it = font_atlas.find("util.nofont"); it != font_atlas.end()) {
     return it->second;
   }
-  throw std::runtime_error("Fallback font 'util.nofont' not found in atlas");
+  throw core::Error("Fallback font 'util.nofont' not found in atlas", "Resource Manager");
 }
 
 // Will destroy all existing textures. Reaquire textures again.

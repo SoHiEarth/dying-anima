@@ -98,8 +98,7 @@ void BattleScene::Init() {
                                 }),
                  enemies_.end());
   if (enemies_.empty()) {
-    core::Log("Logic Error: Enemy count empty.", "BattleScene");
-    scene_manager_.PopScene();
+    throw core::Error("Logic Error: Enemy count empty.", "BattleScene");
   }
 }
 

@@ -7,6 +7,7 @@
 
 #include "core/camera.h"
 #include "core/light.h"
+#include "core/log.h"
 #include "core/quad.h"
 #include "core/render.h"
 #include "core/resource_manager.h"
@@ -45,7 +46,7 @@ Framebuffer::Framebuffer(int w, int h, unsigned int i)
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                          colorbuffer, 0);
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-    throw std::runtime_error("Error: Framebuffer is not complete!\n");
+    throw core::Error("Framebuffer not complete", "Framebuffer");
   }
 }
 
@@ -223,8 +224,4 @@ void render::Init() {
   render::UnbindFramebuffer();
 }
 
-void render::Quit() {
-  for (const auto& framebuffer : framebuffers) {
-    DeleteFramebuffer(framebuffer);
-  }
-}
+void render::Quit() {}

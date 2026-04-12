@@ -37,8 +37,7 @@ Animation LoadAnimationFromFile(std::string_view filename) {
   animation.file_path = std::string(filename);
   pugi::xml_document doc;
   if (!doc.load_file(animation.file_path.c_str())) {
-    core::Log(std::format("Failed to load animation file: {}", filename), "Animation");
-    return animation;
+    throw core::Error(std::format("Failed to load animation file: {}", filename), "Animation");
   }
   auto root = doc.child("Animation");
   for (auto frame : root.children("Frame")) {

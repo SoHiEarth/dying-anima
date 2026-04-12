@@ -3,6 +3,7 @@
 #include <pugixml.hpp>
 #include <utility>
 
+#include "core/log.h"
 #include "core/resource_manager.h"
 #include "core/window.h"
 
@@ -12,8 +13,8 @@ DialogueData game::LoadDialogue(std::string_view file) {
   DialogueData dialogue;
   pugi::xml_document doc;
   if (!doc.load_file(std::string(file).c_str())) {
-    throw std::runtime_error("Failed to load dialogue file: " +
-                             std::string(file));
+    throw core::Error("Failed to load dialogue file: " +
+                             std::string(file), "Dialogue");
   }
   for (const auto& character : doc.child("dialogue").children("character")) {
     DialogueMeta meta;
@@ -42,8 +43,8 @@ void game::SaveDialogue(const DialogueData& dialogue, std::string_view file) {
     }
   }
   if (!doc.save_file(std::string(file).c_str())) {
-    throw std::runtime_error("Failed to save dialogue file: " +
-                             std::string(file));
+    throw core::Error("Failed to save dialogue file: " +
+                             std::string(file), "Dialogue");
   }
 }
 
