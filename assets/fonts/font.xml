@@ -2,8 +2,9 @@
 <fonts>
   <font name="Funnel Display" tag="Title" file="Funnel_Display/FunnelDisplay-VariableFont_wght.ttf"/>
   <font name="Google Sans Code" tag="util.nofont" file="Google_Sans_Code/GoogleSansCode-VariableFont_wght.ttf"/>
-  <font name="Google Sans Code" tag="Debug" file="Google_Sans_Code/GoogleSansCode-VariableFont_wght.ttf"/>
-  <font name="Tinos" tag="UI" file="Tinos/Tinos-Regular.ttf"/>
+  <!-- <font name="Fragment Mono" tag="Debug" file="Fragment_Mono/FragmentMono-Regular.ttf"/> -->
+  <font name="Tinos" tag="UI" file="Tinos/Tinos-Regular.ttf"/>	
   <font name="Tinos" tag="Special" file="Tinos/Tinos-Regular.ttf"/>
-  <font name="Fragment Mono" tag="menu.ui" file="Fragment_Mono/FragmentMono-Regular.ttf"/>
+	<font name="Funnel Display" tag="Debug" file="Funnel_Display/FunnelDisplay-VariableFont_wght.ttf"/>
+  <font name="Playfair Display" tag="menu.ui" file="Playfair_Display/PlayfairDisplay-VariableFont_wght.ttf"/>
 </fonts>
