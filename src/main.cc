@@ -88,10 +88,8 @@ int main() {
   SceneManager scene_manager;
   scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
   scene_manager.ProcessSceneChanges();
-  if (!std::filesystem::exists("saves") || std::filesystem::is_empty("saves")) {
+  if (!std::filesystem::exists("saves")) {
     std::filesystem::create_directory("saves");
-  } else {
-    game::save_data = save_manager::LoadLatestSave().value();
   }
   double last_time = glfwGetTime();
   constexpr double kMaxDeltaTime = 0.1;

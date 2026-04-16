@@ -43,23 +43,33 @@ entt::registry game::registry;
 game::Log game::player_log;
 entt::entity game::player;
 
-void GameScene::Init() {
-  if (std::filesystem::exists("level.txt")) {
-    tinyfd_messageBox("Level file not found.", "The level file \"level.txt\" not found. The game may run, but the scene may be missing.", "ok", "warning", 1);
-  } else {
-    game::registry = LoadLevel("level.txt");
-  }
-  physics::Init({0, -35.0F});
-  game::player = game::registry.create();
-  auto& player_transform = game::registry.emplace<Transform>(game::player);
+enum class GetPlayerSpawnError { kNoSpawnPoint };
+std::expected<Transform, GetPlayerSpawnError> GetPlayerSpawn() {
   auto spawn_view = game::registry.view<Transform, PlayerSpawn>();
   auto spawn_entity = spawn_view.front();
   if (spawn_entity != entt::null) {
-    player_transform = game::registry.get<Transform>(spawn_entity);
+    auto transform = game::registry.get<Transform>(spawn_entity);
+    core::Log("Player spawn point found at (" + std::to_string(transform.position.x) + ", " +
+                  std::to_string(transform.position.y) + ")",
+              "Game");
+    return transform;
+  }
+  core::Log("No player spawn point found in the level.", "Game");
+  return std::unexpected(GetPlayerSpawnError::kNoSpawnPoint);
+}
+
+void GameScene::Init() {
+  physics::Init({0, -35.0F});
+  game::registry = LoadLevel("level.txt");
+  game::player = game::registry.create();
+  auto& player_transform = game::registry.emplace<Transform>(game::player);
+  auto player_spawn = GetPlayerSpawn();
+  if (player_spawn.has_value()) {
+    player_transform = player_spawn.value();
   }
   try {
     if (std::filesystem::exists(save_data_path)) {
-      auto returned = save_manager::LoadGame(save_data_path.c_str());
+      auto returned = save_manager::LoadGame(save_data_path.generic_string());
       if (returned.has_value()) {
         game::save_data = returned.value();
       }
@@ -84,12 +94,10 @@ void GameScene::Init() {
   game::registry.emplace<Sprite>(
       game::player, "game.player",
                            resource_manager::GetTexture("game.player").texture);
-  if (game::save_data.valid) {
-    player_transform = game::save_data.player_transform;
-    player_health = game::save_data.player_health;
-    game::player_log = game::save_data.log;
-    player_skills.skills = game::save_data.acquired_skills;
-  }
+  player_transform = game::save_data.player_transform;
+  player_health = game::save_data.player_health;
+  game::player_log = game::save_data.log;
+  player_skills.skills = game::save_data.acquired_skills;
   if (player_skills.skills.empty()) {
     player_skills.skills.push_back({
         .name = "Punch",
@@ -218,6 +226,9 @@ void GameScene::Update(double dt) {
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_P)) {
     show_player_info = !show_player_info;
   }
+  core::Log("Player position: (" + std::to_string(player_transform.position.x) + ", " +
+            std::to_string(player_transform.position.y) + ")",
+            "Game");
 }
 
 void GameScene::Render(GameWindow& window) {
