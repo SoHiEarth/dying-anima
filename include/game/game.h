@@ -2,6 +2,7 @@
 #define GAME_GAME_H
 
 #include <entt/entt.hpp>
+#include <utility>
 
 #include "core/font.h"
 #include "core/scene.h"
@@ -15,11 +16,13 @@ extern SaveData save_data;
 extern entt::registry registry;
 extern game::Log player_log;
 extern entt::entity player;
-}
+}  // namespace game
 
 struct GameScene : public Scene {
  public:
-  using Scene::Scene;
+  explicit GameScene(SceneManager& manager,
+                     std::filesystem::path save_data_path_)
+      : Scene(manager), save_data_path(std::move(save_data_path_)) {};
   std::string Name() override { return "GameScene"; };
   void Init() override;
   void Quit() override;
@@ -31,6 +34,7 @@ struct GameScene : public Scene {
   const float physics_time_step = 1.0F / 60.0F;
   float physics_accumulator = 0.0F;
   b2BodyId player_body;
+  std::filesystem::path save_data_path{};
 };
 
 #endif

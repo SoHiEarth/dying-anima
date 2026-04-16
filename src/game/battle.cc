@@ -112,7 +112,7 @@ void BattleScene::Update(double) {
   }
   if (enemies_.empty()) {
     scene_manager_.PopScene();
-    scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_));
+    scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_, ""));
   }
   if (turn_data.has_value() && current_turn == BattleTurn::kPlayer) {
     if (turn_data->target != nullptr) {
@@ -123,7 +123,7 @@ void BattleScene::Update(double) {
       }
       if (turn_data->target->health <= 0 && enemies_.empty()) {
         scene_manager_.PopScene();
-        scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_));
+        scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_, ""));
       } else if (turn_data->target->health <= 0) {
         action_log.emplace_back("Enemy " + turn_data->target->name +
                                 " was defeated!");

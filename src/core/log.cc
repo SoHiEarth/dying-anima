@@ -49,7 +49,7 @@ core::Exception core::Error(std::string_view content, std::string_view caller) {
     output_file.flush();
   }
 
-  tinyfd_messageBox("Dying Anima Error", std::format("[ {} ] {}", caller, content).c_str(), "ok", "warning", 1);
+  tinyfd_messageBox("Dying Anima Error", formatted.c_str(), "ok", "warning", 1);
   return Exception(std::format("{:%H:%M:%S}", std::chrono::system_clock::now()), content, caller);
 }
 

@@ -3,9 +3,10 @@
 
 #include <entt/entt.hpp>
 #include <functional>
-#include <iostream>
 #include <string>
 #include <vector>
+
+#include "core/log.h"
 
 struct ComponentEntry {
   std::string name;
@@ -27,7 +28,7 @@ void RegisterComponent(std::string_view name) {
            registry.emplace<T>(entity);
          }
        }});
-  std::cout << "Registered component: " << name << std::endl;
+  core::Log("Registered component: " + std::string(name), "Component");
 }
 
 #define REGISTER_COMPONENT(Component) RegisterComponent<Component>(#Component)

@@ -179,7 +179,7 @@ void LevelEditor::Quit() {
   glfwSetScrollCallback(GetGameWindow().window, nullptr);
   if (current_scene_path.empty()) {
     auto* level =
-        tinyfd_saveFileDialog("Save Scene", "scene", 0, nullptr, nullptr);
+        tinyfd_saveFileDialog("Save Scene", "level.txt", 0, nullptr, nullptr);
     if (level) {
       current_scene_path = level;
       SaveLevel(current_scene_path, registry);
@@ -384,9 +384,10 @@ void LevelEditor::Render(GameWindow& window) {
         }
         editor::SetTooltip("menu_bar.file.save");
         if (ImGui::MenuItem("Play This Scene")) {
+          current_scene_path = "level.txt";
           SaveLevel("level.txt", registry);
           scene_manager_.PopScene();
-          scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_));
+          scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_, ""));
         }
         editor::SetTooltip("menu_bar.file.play");
         ImGui::EndMenu();

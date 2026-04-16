@@ -9,6 +9,7 @@
 
 #include <entt/entt.hpp>
 #include <filesystem>
+#include "core/log.h"
 #include "game/spawn.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -56,7 +57,23 @@ void GameScene::Init() {
   if (spawn_entity != entt::null) {
     player_transform = game::registry.get<Transform>(spawn_entity);
   }
-  game::save_data = save_manager::LoadLatestSave().value();
+  try {
+    if (std::filesystem::exists(save_data_path)) {
+      auto returned = save_manager::LoadGame(save_data_path.c_str());
+      if (returned.has_value()) {
+        game::save_data = returned.value();
+      }
+    }
+    else {
+      auto returned = save_manager::LoadLatestSave();
+      if (returned.has_value()) {
+        game::save_data = returned.value();
+      }
+    }
+  }
+  catch (std::exception& e) {
+    core::Log("Caught exception: " + std::string(e.what()) + " while loading save.", "Game");
+  }
   game::registry.emplace<PlayerSpeed>(game::player);
   auto& player_skills = game::registry.emplace<PlayerSkills>(game::player);
   auto& player_health = game::registry.emplace<Health>(game::player, 100.0F);

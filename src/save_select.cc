@@ -40,11 +40,11 @@ void SaveSelect::Init() {
     layout
           .AddElement(std::make_unique<ui::Button>(
             (i == 0 ? std::string("* ") : std::string("")) + save.stem().string(), font,
-              [this]() {
+              [this, save]() {
                 scene_manager_.PopScene();
                 // TODO: sohiearth - Load the save data and pass it to the game scene
                 scene_manager_.PushScene(
-                    std::make_unique<GameScene>(scene_manager_));
+                    std::make_unique<GameScene>(scene_manager_, save));
               }))
           ->size.y = kLabelHeight;
         if (i++ > 4) break;  
@@ -58,7 +58,7 @@ void SaveSelect::Init() {
         [this](){
           scene_manager_.PopScene();
           // TODO: sohiearth - Don't load a save
-          scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_));
+          scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_, ""));
           scene_manager_.PushScene(std::make_unique<IntroScene>(scene_manager_));}
   ))->size.y = kLabelHeight;
 
