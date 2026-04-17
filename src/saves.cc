@@ -119,17 +119,14 @@ std::expected<SaveData, LoadError> save_manager::LoadLatestSave() {
   }
   
   std::string latest_save;
-  std::time_t latest_time = 0;
+  std::filesystem::file_time_type latest_time{};
 
   for (const auto& entry :
        std::filesystem::directory_iterator(savedata_directory)) {
     if (entry.is_regular_file() && entry.path().extension() == ".save") {
       std::string filename = entry.path().filename().string();
 
-      // Get the last modification time of the file
-      std::time_t file_time = std::chrono::system_clock::to_time_t(
-          std::chrono::clock_cast<std::chrono::system_clock>(
-              entry.last_write_time()));
+      auto file_time = entry.last_write_time();
       if (file_time > latest_time) {
         latest_time = file_time;
         latest_save = filename;

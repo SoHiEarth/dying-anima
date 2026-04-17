@@ -79,10 +79,17 @@ int main() {
   style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.38F, 0.62F, 0.83F, 1.00F);
 
   resource_manager::Init();
-  imgui_io.Fonts->AddFontFromFileTTF(
-      resource_manager::GetFont("Debug").file.c_str(), 15.5F);
   ImGui_ImplGlfw_InitForOpenGL(window.window, true);
   ImGui_ImplOpenGL3_Init("#version 150");
+  float scale_x = 1.0F;
+  float scale_y = 1.0F;
+  glfwGetWindowContentScale(GetGameWindow().window, &scale_x, &scale_y);
+  ImGuiIO& io = ImGui::GetIO();
+  io.FontGlobalScale = 1.0F / scale_x;
+  io.DisplayFramebufferScale = ImVec2(scale_x, scale_y);
+  imgui_io.Fonts->AddFontFromFileTTF(
+      resource_manager::GetFont("Debug").file.c_str(), 15.5F * scale_x);
+  
   render::Init();
   core::quad::Init();
   SceneManager scene_manager;

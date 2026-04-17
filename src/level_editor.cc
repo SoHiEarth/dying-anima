@@ -227,9 +227,15 @@ void LevelEditor::Update(double /* dt */) {
       registry.destroy(spotlight);
     }
   }
+
+  glfwGetCursorPos(GetGameWindow().window, &mouse_position.x, &mouse_position.y);
+  float scale_x = 1.0F;
+  float scale_y = 1.0F;
+  glfwGetWindowContentScale(GetGameWindow().window, &scale_x, &scale_y);
+  mouse_position.x *= scale_x;
+  mouse_position.y *= scale_y;
   last_mouse_position = mouse_position;
-  glfwGetCursorPos(GetGameWindow().window, &mouse_position.x,
-                   &mouse_position.y);
+
   glm::vec2 world_pos =
       ScreenToWorld(mouse_position, GetCamera(), GetGameWindow());
   if (enable_spotlight) registry.get<Transform>(spotlight).position = world_pos;

@@ -85,6 +85,12 @@ void MenuScene::Update(double /* dt */) {
   }
   glm::dvec2 mouse_pos{};
   glfwGetCursorPos(GetGameWindow().window, &mouse_pos.x, &mouse_pos.y);
+  float scale_x = 1.0F;
+  float scale_y = 1.0F;
+  glfwGetWindowContentScale(GetGameWindow().window, &scale_x, &scale_y);
+  mouse_pos.x *= scale_x;
+  mouse_pos.y *= scale_y;
+
   menu_layout.SetPosition(
       {30, (GetGameWindow().height - menu_layout.GetLayoutSize()) / 2});
   menu_layout.Update(mouse_pos,

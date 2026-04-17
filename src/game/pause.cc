@@ -14,10 +14,14 @@
 namespace {
 std::unique_ptr<ui::VerticalLayout> layout;
 glm::ivec2 GetMousePos() {
-  double x;
-  double y;
-  glfwGetCursorPos(glfwGetCurrentContext(), &x, &y);
-  return glm::ivec2(x, y);
+  glm::dvec2 mouse_position{};
+  glfwGetCursorPos(GetGameWindow().window, &mouse_position.x, &mouse_position.y);
+  float scale_x = 1.0F;
+  float scale_y = 1.0F;
+  glfwGetWindowContentScale(GetGameWindow().window, &scale_x, &scale_y);
+  mouse_position.x *= scale_x;
+  mouse_position.y *= scale_y;
+  return mouse_position;
 }
 }  // namespace
 

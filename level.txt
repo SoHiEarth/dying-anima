@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <Level>
 	<Object>
+		<Transform pos.x="-7.52093744" pos.y="4.00468731" z_index="0" scale.x="1" scale.y="1" rotation="0" />
+		<Light type="1" intensity="1" radial_falloff="50" volumetric_intensity="0.0500000007" color.r="1" color.g="1" color.b="1" />
+	</Object>
+	<Object>
 		<Transform pos.x="-8.98632622" pos.y="2.92240095" z_index="0" scale.x="1" scale.y="1" rotation="0" />
 		<Light type="1" intensity="1" radial_falloff="50" volumetric_intensity="0.0500000007" color.r="1" color.g="1" color.b="1" />
 	</Object>
@@ -118,5 +122,9 @@
 	<Object>
 		<Transform pos.x="-11.5" pos.y="-1" z_index="-1.10000002" scale.x="1" scale.y="1" rotation="0" />
 		<Light type="1" intensity="4.5999999" radial_falloff="500" volumetric_intensity="-0.0500000007" color.r="1" color.g="1" color.b="1" />
+	</Object>
+	<Object>
+		<Transform pos.x="-14.2024221" pos.y="7.35671854" z_index="0" scale.x="1" scale.y="1" rotation="0" />
+		<Light type="1" intensity="1" radial_falloff="50" volumetric_intensity="0.0500000007" color.r="1" color.g="1" color.b="1" />
 	</Object>
 </Level>
