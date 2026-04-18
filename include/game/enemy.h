@@ -20,6 +20,11 @@ struct Enemy {
   std::vector<Skill> skills;
 };
 
+struct PathFinder2D {
+  float speed = 1.0F;
+  int internal_value;
+};
+
 struct BattleTrigger {
   std::vector<Enemy> enemies;
   float hitbox_radius = 5.0F;
@@ -29,6 +34,7 @@ namespace game {
 Enemy CreateEnemyFromName(std::string_view name, int designated_enemy_id = 0);
 void UpdateBattleTriggers(entt::registry& registry,
                           SceneManager& scene_manager);
+void UpdatePathFinders(entt::registry& registry);
 }  // namespace game
 
 #endif  // GAME_ENEMY_H

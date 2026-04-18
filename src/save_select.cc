@@ -42,7 +42,6 @@ void SaveSelect::Init() {
             (i == 0 ? std::string("* ") : std::string("")) + save.stem().string(), font,
               [this, save]() {
                 scene_manager_.PopScene();
-                // TODO: sohiearth - Load the save data and pass it to the game scene
                 scene_manager_.PushScene(
                     std::make_unique<GameScene>(scene_manager_, save));
               }))
@@ -57,7 +56,6 @@ void SaveSelect::Init() {
         font,
         [this](){
           scene_manager_.PopScene();
-          // TODO: sohiearth - Don't load a save
           scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_, ""));
           scene_manager_.PushScene(std::make_unique<IntroScene>(scene_manager_));}
   ))->size.y = kLabelHeight;
@@ -75,10 +73,11 @@ void SaveSelect::Update(double) {
     scene_manager_.PushScene(std::make_unique<MenuScene>(scene_manager_));
   }
   
-  glm::dvec2 mouse_position{};
-  glfwGetCursorPos(GetGameWindow().window, &mouse_position.x, &mouse_position.y);
+  glm::dvec2 mouse_pos{};
+  glfwGetCursorPos(GetGameWindow().window, &mouse_pos.x, &mouse_pos.y);
+
   layout.SetPosition({30, (GetGameWindow().height - layout.GetLayoutSize()) / 2});
-  layout.Update(mouse_position, core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_LEFT));
+  layout.Update(mouse_pos, core::input::IsKeyPressed(GLFW_MOUSE_BUTTON_LEFT));
 }
 
 void SaveSelect::Render(GameWindow& window) {

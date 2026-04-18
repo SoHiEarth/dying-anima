@@ -160,6 +160,7 @@ void LevelEditor::Init() {
   }
   }
 
+  GetGameWindow().SetWindowSizeType(WindowSizeType::kFramebufferSize);
   resource_manager::ReloadTextures();
   rect_shader = resource_manager::GetShader("Rect").shader;
   sprite_shader = resource_manager::GetShader("Sprite").shader;
@@ -172,6 +173,7 @@ void LevelEditor::Init() {
     REGISTER_COMPONENT(PhysicsBody);
     REGISTER_COMPONENT(PlayerSpawn);
     REGISTER_COMPONENT(BattleTrigger);
+    REGISTER_COMPONENT(PathFinder2D);
   });
   GetGameWindow().SetPixelsPerUnit(100.0F);
 }
@@ -662,6 +664,15 @@ void LevelEditor::Render(GameWindow& window) {
           if (ImGui::Button("Remove Battle Trigger")) {
             registry.remove<BattleTrigger>(selected_entity);
           }
+        }
+      }
+
+      if (registry.any_of<PathFinder2D>(selected_entity)) {
+        if (ImGui::CollapsingHeader("PathFinder 2D")) {
+          ImGui::DragFloat("Speed", &registry.get<PathFinder2D>(selected_entity).speed);
+        }
+        if (ImGui::Button("Remove PathFinder2D Component")) {
+          registry.remove<PathFinder2D>(selected_entity);
         }
       }
 

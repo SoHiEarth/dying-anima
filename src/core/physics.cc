@@ -47,7 +47,7 @@ PhysicsBody physics::CreateBody(const glm::vec2& position,
     body_def.type = b2_staticBody;
   }
   body_def.position = {.x = position.x, .y = position.y};
-  body_def.rotation = b2MakeRot(angle);
+  body_def.rotation = b2MakeRot(glm::radians(angle));
   body_def.fixedRotation = true;
   auto body = b2CreateBody(world, &body_def);
   auto shape = b2MakeBox((scale.x / 2.0F), (scale.y / 2.0F));
@@ -69,7 +69,7 @@ void physics::SyncPosition(b2BodyId body, glm::vec2& position) {
 void physics::SyncTransform(b2BodyId body, Transform& transform) {
   b2Vec2 b2_position = b2Body_GetPosition(body);
   transform.position = {b2_position.x, b2_position.y};
-  transform.rotation = b2Rot_GetAngle(b2Body_GetRotation(body));
+  transform.rotation = glm::degrees(b2Rot_GetAngle(b2Body_GetRotation(body)));
 }
 
 bool physics::WorldValid() { return b2World_IsValid(world); }

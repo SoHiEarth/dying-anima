@@ -81,6 +81,12 @@ entt::registry LoadLevel(std::string_view filename) {
       }
     }
     {
+      auto pathfinder_node = object_node.child("PathFinder2D");
+      if (pathfinder_node) {
+        registry.emplace<PathFinder2D>(entity).speed = pathfinder_node.attribute("speed").as_float();
+      }
+    }
+    {
       auto spawn_node = object_node.child("PlayerSpawn");
       if (spawn_node) {
         registry.emplace<PlayerSpawn>(entity);
@@ -162,6 +168,10 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
         enemy_info_node.append_attribute("name") = e.name;
         enemy_info_node.append_attribute("uid") = e.uid;
       }
+    }
+
+    if (registry.try_get<PathFinder2D>(entity)) {
+      object_node.append_child("PathFinder2D").append_attribute("speed") = registry.get<PathFinder2D>(entity).speed;
     }
 
     if (registry.all_of<PlayerSpawn>(entity)) {

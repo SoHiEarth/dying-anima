@@ -28,6 +28,7 @@ int focus_index = 0;
 }
 void MenuScene::Init() {
   glfwSwapInterval(1);  // Save resources
+  GetGameWindow().SetWindowSizeType(WindowSizeType::kWindowSize);
   font = resource_manager::GetFont("menu.ui").font;
   text_shader = resource_manager::GetShader("Text").shader;
   rect_shader = resource_manager::GetShader("Rect").shader;
@@ -85,11 +86,6 @@ void MenuScene::Update(double /* dt */) {
   }
   glm::dvec2 mouse_pos{};
   glfwGetCursorPos(GetGameWindow().window, &mouse_pos.x, &mouse_pos.y);
-  float scale_x = 1.0F;
-  float scale_y = 1.0F;
-  glfwGetWindowContentScale(GetGameWindow().window, &scale_x, &scale_y);
-  mouse_pos.x *= scale_x;
-  mouse_pos.y *= scale_y;
 
   menu_layout.SetPosition(
       {30, (GetGameWindow().height - menu_layout.GetLayoutSize()) / 2});

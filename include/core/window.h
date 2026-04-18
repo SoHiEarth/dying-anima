@@ -7,10 +7,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 enum class ProjectionType { kCentered, kScreenSpace };
+enum class WindowSizeType { kWindowSize, kFramebufferSize };
 
 struct GameWindow {
  private:
   ProjectionType current_projection_ = ProjectionType::kCentered;
+  WindowSizeType size_type_ = WindowSizeType::kWindowSize;
   float pixels_per_unit_ = 100.0F;
   float half_width_ = 0.0F, half_height_ = 0.0F;
   // cache projection matrices
@@ -43,6 +45,10 @@ struct GameWindow {
     }
     return glm::mat4(1.0F);
   }
+
+  void SetWindowSizeType(WindowSizeType type);
+  WindowSizeType GetWindowSizeType() { return size_type_; }
+
   void RecalculateCenteredProjection() {
     centered_projection_ = glm::ortho(-half_width_, half_width_, -half_height_,
                                       half_height_, near, far);

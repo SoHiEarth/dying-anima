@@ -59,6 +59,7 @@ std::expected<Transform, GetPlayerSpawnError> GetPlayerSpawn() {
 }
 
 void GameScene::Init() {
+  GetGameWindow().SetWindowSizeType(WindowSizeType::kFramebufferSize);
   physics::Init({0, -35.0F});
   game::registry = LoadLevel("level.txt");
   game::player = game::registry.create();
@@ -214,8 +215,9 @@ void GameScene::Update(double dt) {
   auto physics_view = game::registry.view<Transform, PhysicsBody>();
   physics_view.each(
       [](auto /* entity */, Transform& transform, PhysicsBody& physicsBody) {
-        physics::SyncPosition(physicsBody.body, transform.position);
+        physics::SyncTransform(physicsBody.body, transform);
       });
+  game::UpdatePathFinders(game::registry);
   game::UpdateBattleTriggers(game::registry, scene_manager_);
   UpdateAnimations(game::registry, static_cast<float>(dt));
 
@@ -226,9 +228,6 @@ void GameScene::Update(double dt) {
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_P)) {
     show_player_info = !show_player_info;
   }
-  core::Log("Player position: (" + std::to_string(player_transform.position.x) + ", " +
-            std::to_string(player_transform.position.y) + ")",
-            "Game");
 }
 
 void GameScene::Render(GameWindow& window) {

@@ -1,11 +1,14 @@
 #include "game/enemy.h"
+#include <box2d/box2d.h>
 
 #include <algorithm>
 #include <mutex>
+#include <print>
 #include <pugixml.hpp>
 
 #include "core/log.h"
 #include "core/path_resolve.h"
+#include "core/physics.h"
 #include "core/resource_manager.h"
 #include "core/scene.h"
 #include "core/transform.h"
@@ -89,6 +92,28 @@ void game::UpdateBattleTriggers(entt::registry& registry,
         scene_manager.PushScene(std::make_unique<BattleScene>(
             scene_manager, damager.enemies, player_skills, player_health));
       }
+    }
+  }
+}
+
+void game::UpdatePathFinders(entt::registry &registry) {
+  auto view = registry.view<PhysicsBody, PathFinder2D>();
+  for (auto entity : view) {
+    auto& physics_body = view.get<PhysicsBody>(entity);
+    auto& pathfinder = view.get<PathFinder2D>(entity);
+    auto movement_vec = b2Body_GetLinearVelocity(physics_body.body);
+    if (movement_vec.x > 0) { // Continue going positive-x
+      b2Body_ApplyForceToCenter(physics_body.body, b2Vec2(pathfinder.speed, 0), true);
+      pathfinder.internal_value = 1;
+    }
+    if (movement_vec.x < 0) { // Continue going negative-x
+      b2Body_ApplyForceToCenter(physics_body.body, b2Vec2(-pathfinder.speed, 0), true);
+      pathfinder.internal_value = -1;
+    }
+    if (movement_vec.x == 0) {
+      if (pathfinder.internal_value == 0) pathfinder.internal_value = 1;
+      // Probably hit a wall or something. Go the opposite direction of last direction
+      b2Body_ApplyForceToCenter(physics_body.body, b2Vec2(pathfinder.internal_value * -pathfinder.speed, 0), true);
     }
   }
 }

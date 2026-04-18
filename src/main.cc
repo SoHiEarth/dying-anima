@@ -22,18 +22,7 @@
 #include "game/game.h"
 #include "menu.h"
 
-namespace {
-void FramebufferSizeCallback(GLFWwindow* /* window */, int width, int height) {
-  auto& window = GetGameWindow();
-  window.width = width;
-  window.height = height;
-  window.SetPixelsPerUnit(window.GetPixelsPerUnit());
-  window.RecalculateCenteredProjection();
-  window.RecalculateScreenSpaceProjection();
-  glViewport(0, 0, width, height);
-  render::RecreateFramebuffers(width, height);
-}
-}  // namespace
+
 
 int main() {
   if (!glfwInit()) {
@@ -55,7 +44,11 @@ int main() {
   window.RecalculateCenteredProjection();
   window.RecalculateScreenSpaceProjection();
   glViewport(0, 0, window.width, window.height);
-  glfwSetFramebufferSizeCallback(window.window, FramebufferSizeCallback);
+#ifdef __APPLE__
+  window.SetWindowSizeType(WindowSizeType::kWindowSize);
+#else
+  window.SetWindowSizeType(WindowSizeType::kFramebufferSize);
+#endif
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   IMGUI_CHECKVERSION();

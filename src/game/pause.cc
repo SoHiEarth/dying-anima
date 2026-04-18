@@ -4,6 +4,7 @@
 #include "core/input.h"
 #include "core/rect.h"
 #include "core/resource_manager.h"
+#include "core/window.h"
 #include "level_editor.h"
 #include "menu.h"
 #include "ui/elements.h"
@@ -16,16 +17,12 @@ std::unique_ptr<ui::VerticalLayout> layout;
 glm::ivec2 GetMousePos() {
   glm::dvec2 mouse_position{};
   glfwGetCursorPos(GetGameWindow().window, &mouse_position.x, &mouse_position.y);
-  float scale_x = 1.0F;
-  float scale_y = 1.0F;
-  glfwGetWindowContentScale(GetGameWindow().window, &scale_x, &scale_y);
-  mouse_position.x *= scale_x;
-  mouse_position.y *= scale_y;
   return mouse_position;
 }
 }  // namespace
 
 void PauseScene::Init() {
+  GetGameWindow().SetWindowSizeType(WindowSizeType::kWindowSize);
   rect_shader_ = resource_manager::GetShader("Rect").shader;
   text_shader_ = resource_manager::GetShader("Text").shader;
   title_font_ = resource_manager::GetFont("Title").font;
