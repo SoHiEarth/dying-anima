@@ -1,3 +1,4 @@
+#include <GLFW/glfw3.h>
 #include <glad/glad.h>
 // Code block
 #include <imgui.h>
@@ -307,6 +308,28 @@ void LevelEditor::Update(double /* dt */) {
           selected_entity = entt::null;
         }
       }
+    }
+  }
+  if (core::input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL) || core::input::IsKeyPressed(GLFW_KEY_RIGHT_CONTROL) ||
+      core::input::IsKeyPressed(GLFW_KEY_LEFT_SUPER) || core::input::IsKeyPressed(GLFW_KEY_RIGHT_SUPER)) {
+    if (core::input::IsKeyPressed(GLFW_KEY_EQUAL)) {
+      GetGameWindow().SetPixelsPerUnit(GetGameWindow().GetPixelsPerUnit() + 1);
+    } else if (core::input::IsKeyPressed(GLFW_KEY_MINUS)) {
+      GetGameWindow().SetPixelsPerUnit(GetGameWindow().GetPixelsPerUnit() - 1);
+    }
+
+    if (core::input::IsKeyPressed(GLFW_KEY_LEFT)) {
+      GetCamera().position.x-= (4/GetGameWindow().GetPixelsPerUnit());
+    }
+    if (core::input::IsKeyPressed(GLFW_KEY_RIGHT)) {
+      GetCamera().position.x+= (4/GetGameWindow().GetPixelsPerUnit());
+    }
+
+    if (core::input::IsKeyPressed(GLFW_KEY_DOWN)) {
+      GetCamera().position.y-= (4/GetGameWindow().GetPixelsPerUnit());
+    }
+    if (core::input::IsKeyPressed(GLFW_KEY_UP)) {
+      GetCamera().position.y+= (4/GetGameWindow().GetPixelsPerUnit());
     }
   }
 }

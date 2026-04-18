@@ -21,6 +21,7 @@ struct GameWindow {
   int width = 0, height = 0;
   float near = 0.1F, far = 100.0F;
   void SetPixelsPerUnit(float ppu) {
+    ppu = std::max(ppu, 1.0F);
     pixels_per_unit_ = ppu;
     // calculate half width and height for centered projection (avoid doing this
     // every frame)

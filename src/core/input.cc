@@ -1,6 +1,8 @@
 #include "core/input.h"
+#include <GLFW/glfw3.h>
 
 #include <map>
+#include "core/log.h"
 
 std::map<int, bool> core::input::states{}, core::input::last_frame_states{};
 
