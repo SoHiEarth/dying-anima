@@ -9,14 +9,14 @@ constexpr float kMargin = 100.0F;
 bool editor::internal::show_onboarding_window = true;
 
 void editor::RenderOnboarding() {
-  int logical_w = 0;
-  int logical_h = 0;
-  glfwGetWindowSize(GetGameWindow().window, &logical_w, &logical_h);
+  int window_width = 0;
+  int window_height = 0;
+  glfwGetWindowSize(GetGameWindow().window, &window_width, &window_height);
   ImGui::SetNextWindowPos(
-      ImVec2(logical_w / 2.0F, logical_h / 2.0F),
+      ImVec2(window_width / 2.0F, window_height / 2.0F),
       ImGuiCond_Always, ImVec2(0.5F, 0.5F));
   ImGui::SetNextWindowSize(
-      ImVec2(800 - kMargin, 600 - kMargin),
+      ImVec2(window_width - kMargin, window_height - kMargin),
       ImGuiCond_Always);
   ImGui::Begin("Onboarding", &editor::internal::show_onboarding_window,
                ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);

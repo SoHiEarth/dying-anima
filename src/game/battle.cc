@@ -148,13 +148,16 @@ void BattleScene::Update(double) {
 }
 
 void BattleScene::Render(GameWindow& window) {
-  auto ui_margin = std::min(window.width, window.height) / 15.0F;
+  int window_width;
+  int window_height;
+  glfwGetWindowSize(window.window, &window_width, &window_height);
+  auto ui_margin = std::min(window_width, window_height) / 15.0F;
   ImGui::SetNextWindowPos(
-      ImVec2(ui_margin, (static_cast<float>(window.height) / 2) - ui_margin),
+      ImVec2(ui_margin, (static_cast<float>(window_height) / 2) - ui_margin),
       ImGuiCond_Always);
   ImGui::SetNextWindowSize(
-      ImVec2(window.width - (ui_margin * 2),
-             (static_cast<float>(window.height) / 2) - (ui_margin * 2)),
+      ImVec2(window_width - (ui_margin * 2),
+             (static_cast<float>(window_height) / 2) - (ui_margin * 2)),
       ImGuiCond_Always);
   if (ImGui::Begin("BattleUI", nullptr,
                    ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |

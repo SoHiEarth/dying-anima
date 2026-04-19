@@ -54,7 +54,7 @@ void save_manager::SaveGame(const SaveData& data, const game::Log& log) {
   auto t = std::chrono::system_clock::to_time_t(now);
   auto tm = *std::localtime(&t);
   std::stringstream ss;
-  ss << std::put_time(&tm, "%Y-%m-%d_%H-%M-%S");
+  ss << std::put_time(&tm, "Save: %H:%M:%S (%Y/%m/%d)");
 
   std::string filename =
       (std::filesystem::path(savedata_directory) /

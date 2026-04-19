@@ -3,4 +3,8 @@
   <Enemy name="TestEnemy" max_health="100" max_stamina ="100">
     <Skill name="TestSkill" damage="10" health_used="5" stamina_used="5"/>
   </Enemy>
+  <Enemy name="The Architect" max_health="150" max_stamina ="100">
+    <Skill name="The Power of Lost Knowledge" damage="7.5" health_used="5" stamina_used="5"/>
+  </Enemy>
+
 </Enemies>
