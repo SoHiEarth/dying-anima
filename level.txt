@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <Level>
 	<Object>
+		<Transform pos.x="-14.4507027" pos.y="7.75468731" z_index="0" scale.x="1" scale.y="1" rotation="0" />
+		<Light type="1" intensity="1" radial_falloff="50" volumetric_intensity="0.0500000007" color.r="1" color.g="1" color.b="1" />
+	</Object>
+	<Object>
 		<Transform pos.x="-21.0827007" pos.y="0.212069035" z_index="0" scale.x="1" scale.y="1" rotation="0" />
 		<Light type="1" intensity="1" radial_falloff="50" volumetric_intensity="0.0500000007" color.r="1" color.g="1" color.b="1" />
 	</Object>
@@ -166,5 +170,14 @@
 	<Object>
 		<Transform pos.x="-7.40484381" pos.y="4.28085947" z_index="0" scale.x="1" scale.y="1" rotation="0" />
 		<Light type="1" intensity="1" radial_falloff="50" volumetric_intensity="0.0500000007" color.r="1" color.g="1" color.b="1" />
+	</Object>
+	<Object>
+		<Transform pos.x="-21.3045769" pos.y="0.640393972" z_index="0" scale.x="1" scale.y="1" rotation="0" />
+		<Light type="1" intensity="1" radial_falloff="50" volumetric_intensity="0.0500000007" color.r="1" color.g="1" color.b="1" />
+	</Object>
+	<Object>
+		<Transform pos.x="-15.5" pos.y="-3.5" z_index="0" scale.x="1" scale.y="1" rotation="0" />
+		<Sprite texture_tag="util.notexture" />
+		<Light type="1" intensity="5" radial_falloff="500" volumetric_intensity="0" color.r="1" color.g="1" color.b="1" />
 	</Object>
 </Level>

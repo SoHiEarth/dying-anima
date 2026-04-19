@@ -37,23 +37,20 @@ void GameWindow::SetWindowSizeType(WindowSizeType type) {
   int fb_height;
   glfwGetWindowSize(window, &window_width, &window_height);
   glfwGetFramebufferSize(window, &fb_width, &fb_height);
+  glfwSetWindowSizeCallback(window, nullptr);
+  glfwSetFramebufferSizeCallback(window, nullptr);
   switch (type) {
     case WindowSizeType::kWindowSize:
       glfwSetWindowSizeCallback(window, WindowSizeCallback);
-      width = window_width;
-      height = window_height;
       WindowSizeCallback(window, window_width, window_height);
       core::Log("Size type set to window size.", "Window");
       break;
     case WindowSizeType::kFramebufferSize:
       glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
-      width = fb_width;
-      height = fb_height;
       FramebufferSizeCallback(window, fb_width, fb_height);
       core::Log("Size type set to framebuffer size.", "Window");
       break;
   }
   core::Log(std::format("Window Size: {}x{}, Framebuffer size: {}x{}, Held size: {}x{}", window_width, window_height, fb_width, fb_height, width, height), "Window");
-  glfwSetWindowSize(window, window_width, window_height);
   size_type_ = type;
 }

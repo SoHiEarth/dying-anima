@@ -34,14 +34,14 @@
 #include "sprite.h"
 #include "util/calculate.h"
 
-namespace {
-bool show_log = false;
-bool show_player_info = false;
-}  // namespace
 SaveData game::save_data;
 entt::registry game::registry;
 game::Log game::player_log;
 entt::entity game::player;
+
+namespace {
+bool show_log = false;
+bool show_player_info = false;
 
 enum class GetPlayerSpawnError { kNoSpawnPoint };
 std::expected<Transform, GetPlayerSpawnError> GetPlayerSpawn() {
@@ -56,6 +56,22 @@ std::expected<Transform, GetPlayerSpawnError> GetPlayerSpawn() {
   }
   core::Log("No player spawn point found in the level.", "Game");
   return std::unexpected(GetPlayerSpawnError::kNoSpawnPoint);
+}
+
+void DeleteDefeatedEnemies(entt::registry& registry) {
+  auto view = registry.view<BattleTrigger>();
+  for (auto entity : view) {
+    auto& trigger = view.get<BattleTrigger>(entity);
+    for (auto& enemy : trigger.enemies) {
+      for (auto& uid : game::save_data.defeated_enemy_uids) {
+        if (enemy.uid == uid) {
+          registry.destroy(entity);
+          break;
+        }
+      }
+    }
+  }
+}
 }
 
 void GameScene::Init() {
@@ -108,6 +124,7 @@ void GameScene::Init() {
         .stamina_used = 0.0F,
     });
   }
+  DeleteDefeatedEnemies(game::registry);
   sprite_shader = resource_manager::GetShader("Sprite").shader;
   rect_shader = resource_manager::GetShader("Rect").shader;
   text_shader = resource_manager::GetShader("Text").shader;
