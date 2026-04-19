@@ -19,7 +19,7 @@ struct PlayerSpeed {
   float speed = 0.25F;
   float deceleration = 0.325F;
   float boost_speed = 1.75F;
-  float jump_impulse = 3.75F;
+  float jump_impulse = 10.75F;
 };
 
 struct PlayerSkills {

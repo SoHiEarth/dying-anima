@@ -237,7 +237,6 @@ void LevelEditor::Update(double /* dt */) {
   glfwGetWindowContentScale(GetGameWindow().window, &scale_x, &scale_y);
   mouse_position.x *= scale_x;
   mouse_position.y *= scale_y;
-  last_mouse_position = mouse_position;
 
   glm::vec2 world_pos =
       ScreenToWorld(mouse_position, GetCamera(), GetGameWindow());
@@ -334,6 +333,7 @@ void LevelEditor::Update(double /* dt */) {
       GetCamera().position.y+= (4/GetGameWindow().GetPixelsPerUnit());
     }
   }
+  last_mouse_position = mouse_position;
 }
 
 void LevelEditor::Render(GameWindow& window) {

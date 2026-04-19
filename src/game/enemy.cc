@@ -13,6 +13,7 @@
 #include "core/scene.h"
 #include "core/transform.h"
 #include "game/battle.h"
+#include "game/game.h"
 #include "game/player.h"
 
 namespace {
@@ -88,7 +89,9 @@ void game::UpdateBattleTriggers(entt::registry& registry,
       float distance =
           glm::distance(transform.position, player_transform.position);
       if (distance < damager.hitbox_radius) {
-        scene_manager.PopScene();
+        game::save_data.player_transform = game::registry.get<Transform>(game::player);
+        game::save_data.player_health = game::registry.get<Health>(game::player);
+        save_manager::SaveGame(game::save_data, game::player_log);
         scene_manager.PushScene(std::make_unique<BattleScene>(
             scene_manager, damager.enemies, player_skills, player_health));
       }
@@ -97,18 +100,21 @@ void game::UpdateBattleTriggers(entt::registry& registry,
 }
 
 void game::UpdatePathFinders(entt::registry &registry) {
-  auto view = registry.view<PhysicsBody, PathFinder2D>();
+  auto view = registry.view<Transform, PhysicsBody, PathFinder2D>();
   for (auto entity : view) {
+    auto& transform = view.get<Transform>(entity);
     auto& physics_body = view.get<PhysicsBody>(entity);
     auto& pathfinder = view.get<PathFinder2D>(entity);
     auto movement_vec = b2Body_GetLinearVelocity(physics_body.body);
     if (movement_vec.x > 0) { // Continue going positive-x
       b2Body_ApplyForceToCenter(physics_body.body, b2Vec2(pathfinder.speed, 0), true);
       pathfinder.internal_value = 1;
+      transform.scale.x = std::abs(transform.scale.x);
     }
     if (movement_vec.x < 0) { // Continue going negative-x
       b2Body_ApplyForceToCenter(physics_body.body, b2Vec2(-pathfinder.speed, 0), true);
       pathfinder.internal_value = -1;
+      transform.scale.x = std::abs(transform.scale.x) * -1;
     }
     if (movement_vec.x == 0) {
       if (pathfinder.internal_value == 0) pathfinder.internal_value = 1;

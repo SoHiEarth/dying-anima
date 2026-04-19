@@ -83,7 +83,13 @@ std::vector<int> defeated_enemy_uids;
 void BattleScene::Init() {
   defeated_enemy_uids.clear();
   // load defeated enemies from save data
-  auto save_data = save_manager::LoadLatestSave();
+  std::expected<SaveData, LoadError> save_data;
+  try {
+    save_data = save_manager::LoadLatestSave();
+  }
+  catch (std::exception& e) {
+    core::Log(std::format("Caught error {} while loading save.", e.what()), "BattleScene");
+  }
   // check if any enemies in this battle have been defeated before, and if so,
   // remove them from the battle
   for (const auto& uid : save_data->defeated_enemy_uids) {
@@ -98,7 +104,8 @@ void BattleScene::Init() {
                                 }),
                  enemies_.end());
   if (enemies_.empty()) {
-    throw core::Error("Logic Error: Enemy count empty.", "BattleScene");
+    core::Log("Logic Error: Enemy count empty.", "BattleScene");
+    scene_manager_.PopScene();
   }
 }
 
@@ -112,7 +119,6 @@ void BattleScene::Update(double) {
   }
   if (enemies_.empty()) {
     scene_manager_.PopScene();
-    scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_, ""));
   }
   if (turn_data.has_value() && current_turn == BattleTurn::kPlayer) {
     if (turn_data->target != nullptr) {
@@ -123,7 +129,6 @@ void BattleScene::Update(double) {
       }
       if (turn_data->target->health <= 0 && enemies_.empty()) {
         scene_manager_.PopScene();
-        scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_, ""));
       } else if (turn_data->target->health <= 0) {
         action_log.emplace_back("Enemy " + turn_data->target->name +
                                 " was defeated!");
@@ -248,7 +253,14 @@ void BattleScene::Render(GameWindow& window) {
 }
 
 void BattleScene::Quit() {
-  auto save_data = save_manager::LoadLatestSave();
+  std::expected<SaveData, LoadError> save_data;
+  try {
+    save_data = save_manager::LoadLatestSave();
+  }
+  catch (std::exception& e) {
+    core::Log(std::format("Caught exception: {} while loading save.", e.what()), "BattleScene");
+    save_data = {};
+  }
   save_data->completion_markers.push_back(
       "Battle." +
       std::to_string(

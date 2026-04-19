@@ -13,6 +13,9 @@ std::string savedata_directory = "saves";
 }
 
 void save_manager::SaveGame(const SaveData& data, const game::Log& log) {
+  if (!std::filesystem::exists("saves")) {
+    std::filesystem::create_directory("saves");
+  }
   pugi::xml_document doc;
   auto root = doc.append_child(savedata_root_name);
   auto player_node = root.append_child("Player");
@@ -54,23 +57,25 @@ void save_manager::SaveGame(const SaveData& data, const game::Log& log) {
   auto t = std::chrono::system_clock::to_time_t(now);
   auto tm = *std::localtime(&t);
   std::stringstream ss;
-  ss << std::put_time(&tm, "Save: %H:%M:%S (%Y/%m/%d)");
+  ss << std::put_time(&tm, "%H:%M:%S (%Y/%m/%d)");
 
   std::string filename =
       (std::filesystem::path(savedata_directory) /
        std::filesystem::path(ss.str() + ".save")).string();
-  core::Log(std::format("Saving game to {}", filename), "Saves");
-  doc.save_file(filename.c_str());
+  if (!doc.save_file(filename.c_str())) {
+    throw core::Error("Failed to save game.", "SaveManager");
+  }
+  core::Log(std::format("Saved game to {}", filename), "SaveManager");
 }
 
 std::expected<SaveData, LoadError> save_manager::LoadGame(std::string_view filename) {
-  if (!std::filesystem::exists(filename))
+  if (!std::filesystem::exists(filename) || !std::filesystem::is_regular_file(filename))
     return std::unexpected(LoadError::kFileNotFound);
   
   SaveData data{};
   pugi::xml_document doc;
   if (!doc.load_file(std::string(filename).c_str())) {
-    throw core::Error("Failed to load save file", "SaveManager");
+    throw core::Error(std::format("Failed to load save file \"{}\"", filename), "SaveManager");
   }
   auto root_node = doc.child(savedata_root_name);
   auto player_node = root_node.child("Player");
@@ -132,6 +137,10 @@ std::expected<SaveData, LoadError> save_manager::LoadLatestSave() {
         latest_save = filename;
       }
     }
+  }
+
+  if (latest_save.empty()) {
+    throw core::Error("No available files found.", "SaveManager");
   }
 
   return LoadGame("saves/" + latest_save);

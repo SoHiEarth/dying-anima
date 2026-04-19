@@ -28,10 +28,9 @@ void SaveSelect::Init() {
     }
   }
 
-  std::ranges::sort(saves, [](const auto& a, const auto& b) {
-    auto a_time = std::filesystem::last_write_time(a);
-    auto b_time = std::filesystem::last_write_time(b);
-    return a_time > b_time;
+  std::ranges::sort(saves,
+    [](const auto& a, const auto& b) {
+      return std::filesystem::last_write_time(a) > std::filesystem::last_write_time(b);
   });
 
   

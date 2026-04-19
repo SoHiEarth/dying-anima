@@ -124,7 +124,6 @@ void GameScene::Init() {
         .stamina_used = 0.0F,
     });
   }
-  DeleteDefeatedEnemies(game::registry);
   sprite_shader = resource_manager::GetShader("Sprite").shader;
   rect_shader = resource_manager::GetShader("Rect").shader;
   text_shader = resource_manager::GetShader("Text").shader;
@@ -208,7 +207,7 @@ void GameScene::Update(double dt) {
   }
   b2Body_SetLinearVelocity(player_body, velocity);
 
-  if (core::input::IsKeyPressed(GLFW_KEY_SPACE) && IsOnGround(player_body)) {
+  if (core::input::IsKeyPressedThisFrame(GLFW_KEY_SPACE) && IsOnGround(player_body)) {
     b2Body_ApplyLinearImpulse(player_body,
                               b2Vec2(0.0F, player_speed.jump_impulse),
                               b2Body_GetLocalCenterOfMass(player_body), true);
@@ -234,6 +233,7 @@ void GameScene::Update(double dt) {
       [](auto /* entity */, Transform& transform, PhysicsBody& physicsBody) {
         physics::SyncTransform(physicsBody.body, transform);
       });
+  DeleteDefeatedEnemies(game::registry);
   game::UpdatePathFinders(game::registry);
   game::UpdateBattleTriggers(game::registry, scene_manager_);
   UpdateAnimations(game::registry, static_cast<float>(dt));
