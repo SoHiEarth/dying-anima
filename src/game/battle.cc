@@ -3,10 +3,12 @@
 
 #include <GLFW/glfw3.h>
 #include <imgui.h>
+
+#include <algorithm>
 #include <vector>
 
-#include "game/battle.h"
 #include "core/log.h"
+#include "game/battle.h"
 #include "game/degradation.h"
 #include "game/game.h"
 #include "menu.h"
@@ -86,23 +88,21 @@ void BattleScene::Init() {
   std::expected<SaveData, LoadError> save_data;
   try {
     save_data = save_manager::LoadLatestSave();
-  }
-  catch (std::exception& e) {
-    core::Log(std::format("Caught error {} while loading save.", e.what()), "BattleScene");
+  } catch (std::exception& e) {
+    core::Log(std::format("Caught error {} while loading save.", e.what()),
+              "BattleScene");
   }
   // check if any enemies in this battle have been defeated before, and if so,
   // remove them from the battle
   for (const auto& uid : save_data->defeated_enemy_uids) {
     defeated_enemy_uids.push_back(uid);
   }
-  enemies_.erase(std::remove_if(enemies_.begin(), enemies_.end(),
+  std::ranges::remove_if(enemies_,
                                 [&](const Enemy& e) {
-                                  return std::find(defeated_enemy_uids.begin(),
-                                                   defeated_enemy_uids.end(),
+                                  return std::ranges::find(defeated_enemy_uids,
                                                    e.uid) !=
                                          defeated_enemy_uids.end();
-                                }),
-                 enemies_.end());
+                                });
   if (enemies_.empty()) {
     core::Log("Logic Error: Enemy count empty.", "BattleScene");
     scene_manager_.PopScene();
@@ -133,11 +133,10 @@ void BattleScene::Update(double) {
         action_log.emplace_back("Enemy " + turn_data->target->name +
                                 " was defeated!");
         defeated_enemy_uids.push_back(turn_data->target->uid);
-        enemies_.erase(std::remove_if(enemies_.begin(), enemies_.end(),
+        std::ranges::remove_if(enemies_,
                                       [&](const Enemy& e) {
                                         return &e == turn_data->target;
-                                      }),
-                       enemies_.end());
+                                      });
       }
       if (player_health_.stamina <= 0) {
         player_health_.stamina -= kStaminaDrainPenalty;
@@ -193,10 +192,10 @@ void BattleScene::Render(GameWindow& window) {
           ImGui::Text("Stamina Drained: %.2f", skill.stamina_used);
           if (ImGui::Button(std::string("Execute!##" + skill.name).c_str())) {
             temp_turn_data.used_skills = {skill};
-            if (enemies_.size() > 1)
+            if (enemies_.size() > 1) {
               ImGui::OpenPopup(
                   std::string("SelectEnemyPopup##" + skill.name).c_str());
-            else {
+            } else {
               temp_turn_data.target = enemies_.data();
               turn_data.emplace(temp_turn_data);
               temp_turn_data.target = nullptr;
@@ -233,7 +232,9 @@ void BattleScene::Render(GameWindow& window) {
         ImGui::SeparatorText(enemy.name.c_str());
         int j = 0;
         for (const auto& skill : enemy.skills) {
-          ImGui::PushID((enemy.name + std::to_string(i) + skill.name + std::to_string(j++)).c_str());
+          ImGui::PushID((enemy.name + std::to_string(i) + skill.name +
+                         std::to_string(j++))
+                            .c_str());
           if (ImGui::CollapsingHeader(skill.name.c_str())) {
             ImGui::Text("Damage: %.2f", skill.damage);
             ImGui::Text("Health Drained: %.2f", skill.health_used);
@@ -256,9 +257,9 @@ void BattleScene::Quit() {
   std::expected<SaveData, LoadError> save_data;
   try {
     save_data = save_manager::LoadLatestSave();
-  }
-  catch (std::exception& e) {
-    core::Log(std::format("Caught exception: {} while loading save.", e.what()), "BattleScene");
+  } catch (std::exception& e) {
+    core::Log(std::format("Caught exception: {} while loading save.", e.what()),
+              "BattleScene");
     save_data = {};
   }
   save_data->completion_markers.push_back(
@@ -280,8 +281,8 @@ void BattleScene::Quit() {
   save_data->player_health.health = player_health_.health;
   save_data->player_health.stamina = player_health_.stamina;
   save_data->defeated_enemy_uids.insert(save_data->defeated_enemy_uids.end(),
-                                  defeated_enemy_uids.begin(),
-                                       defeated_enemy_uids.end());
+                                        defeated_enemy_uids.begin(),
+                                        defeated_enemy_uids.end());
   if (save_data->acquired_skills.size() != player_skills_.skills.size()) {
     save_data->acquired_skills = player_skills_.skills;
   }

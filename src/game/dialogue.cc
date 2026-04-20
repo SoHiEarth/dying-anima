@@ -13,8 +13,8 @@ DialogueData game::LoadDialogue(std::string_view file) {
   DialogueData dialogue;
   pugi::xml_document doc;
   if (!doc.load_file(std::string(file).c_str())) {
-    throw core::Error("Failed to load dialogue file: " +
-                             std::string(file), "Dialogue");
+    throw core::Error("Failed to load dialogue file: " + std::string(file),
+                      "Dialogue");
   }
   for (const auto& character : doc.child("dialogue").children("character")) {
     DialogueMeta meta;
@@ -43,8 +43,8 @@ void game::SaveDialogue(const DialogueData& dialogue, std::string_view file) {
     }
   }
   if (!doc.save_file(std::string(file).c_str())) {
-    throw core::Error("Failed to save dialogue file: " +
-                             std::string(file), "Dialogue");
+    throw core::Error("Failed to save dialogue file: " + std::string(file),
+                      "Dialogue");
   }
 }
 

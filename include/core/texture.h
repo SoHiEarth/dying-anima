@@ -13,8 +13,8 @@ struct Texture {
   int channels;
   explicit Texture(std::string_view path);
   ~Texture();
-  void Render(const std::shared_ptr<Shader>& shader,
-              const glm::mat4& model) const;
+  void Render(const std::shared_ptr<Shader>& shader, const glm::mat4& model,
+              float z_index = 0.0F) const;
 };
 
 #endif  // CORE_TEXTURE_H

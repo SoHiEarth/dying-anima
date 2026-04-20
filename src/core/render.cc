@@ -17,11 +17,13 @@
 #include "sprite.h"
 #include "util/calculate.h"
 
+constexpr float kNearField = 2.5;
+
 namespace {
 std::vector<std::shared_ptr<Framebuffer>> framebuffers;
 std::shared_ptr<Framebuffer> default_framebuffer, color_framebuffer,
-    normal_framebuffer, bloom_framebuffer, bloom_framebuffer_2,
-    combine_framebuffer;
+    bloom_framebuffer, bloom_framebuffer_2,
+    combine_framebuffer, near_framebuffer, final_color_framebuffer;
 std::shared_ptr<Shader> deferred_shader;
 std::shared_ptr<Shader> fullscreen_shader;
 std::shared_ptr<Shader> sprite_shader;
@@ -67,20 +69,58 @@ void render::Render(entt::registry& registry) {
   glClear(GL_COLOR_BUFFER_BIT);
   for (auto entity : sorted_entities) {
     if (registry.get<Sprite>(entity).texture) {
+      auto& transform = registry.get<Transform>(entity);
+      if (transform.z_index <= kNearField)
       registry.get<Sprite>(entity).texture->Render(
-          sprite_shader, CalculateModelMatrix(registry.get<Transform>(entity)));
+          sprite_shader, CalculateModelMatrix(transform));
     }
   }
   UnbindFramebuffer();
 
-  BindFramebuffer(normal_framebuffer);
+  // Render only objects with z > kNearField
+  BindFramebuffer(near_framebuffer);
   glClear(GL_COLOR_BUFFER_BIT);
-  for (auto entity : sorted_entities) {
-    if (registry.get<Sprite>(entity).normal) {
-      registry.get<Sprite>(entity).normal->Render(
-          sprite_shader, CalculateModelMatrix(registry.get<Transform>(entity)));
+  for (auto entity : registry.view<Transform, Sprite>()) {
+    auto& transform = registry.get<Transform>(entity);
+    if (transform.z_index > kNearField) {
+      auto& sprite = registry.get<Sprite>(entity);
+      sprite.texture->Render(
+          sprite_shader, CalculateModelMatrix(transform));
     }
   }
+  UnbindFramebuffer();
+
+  BindFramebuffer(bloom_framebuffer);
+  bloom_blur_shader->Use();
+  bool horizontal = true;
+  for (int i = 0; i < 10; i++) {
+    auto& source = horizontal ? near_framebuffer : bloom_framebuffer;
+    auto& target = horizontal ? bloom_framebuffer : near_framebuffer;
+    BindFramebuffer(target);
+    bloom_blur_shader->SetUniform("horizontal", static_cast<int>(horizontal));
+    glActiveTexture(GL_TEXTURE0);
+    bloom_blur_shader->SetUniform("source", 0);
+    glBindTexture(GL_TEXTURE_2D, source->colorbuffer);
+    core::quad::Render(core::quad::kFullQuad);
+    horizontal = !horizontal;
+  }
+  UnbindFramebuffer();
+
+  BindFramebuffer(final_color_framebuffer);
+  glClear(GL_COLOR_BUFFER_BIT);
+  combine_shader->Use();
+  glActiveTexture(GL_TEXTURE0);
+  combine_shader->SetUniform("bloom_texture", 0);
+  glBindTexture(GL_TEXTURE_2D, horizontal ? near_framebuffer->colorbuffer
+                                          : bloom_framebuffer->colorbuffer);
+  glActiveTexture(GL_TEXTURE1);
+  combine_shader->SetUniform("scene_texture", 1);
+  glBindTexture(GL_TEXTURE_2D, color_framebuffer->colorbuffer);
+  core::quad::Render(core::quad::kFullQuad);
+  UnbindFramebuffer();
+
+  BindFramebuffer(bloom_framebuffer_2);
+  glClear(GL_COLOR_BUFFER_BIT);
   UnbindFramebuffer();
 
   BindFramebuffer(default_framebuffer);
@@ -118,14 +158,12 @@ void render::Render(entt::registry& registry) {
   }
   deferred_shader->SetUniform("light_count", light_count);
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, color_framebuffer->colorbuffer);
+  glBindTexture(GL_TEXTURE_2D, final_color_framebuffer->colorbuffer);
   deferred_shader->SetUniform("color_texture", 0);
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, normal_framebuffer->colorbuffer);
-  deferred_shader->SetUniform("normal_texture", 1);
   float aspect_ratio = static_cast<float>(GetGameWindow().width) /
                        static_cast<float>(GetGameWindow().height);
   deferred_shader->SetUniform("aspect_ratio", aspect_ratio);
+  deferred_shader->SetUniform("exposure", exposure);
   core::quad::Render(core::quad::kFullQuad);
 
   // bloom stuff
@@ -138,7 +176,7 @@ void render::Render(entt::registry& registry) {
   core::quad::Render(core::quad::kFullQuad);
 
   bloom_blur_shader->Use();
-  bool horizontal = true;
+  horizontal = true;
   for (int i = 0; i < 10; i++) {
     auto& source = horizontal ? bloom_framebuffer : bloom_framebuffer_2;
     auto& target = horizontal ? bloom_framebuffer_2 : bloom_framebuffer;
@@ -153,7 +191,6 @@ void render::Render(entt::registry& registry) {
 
   BindFramebuffer(combine_framebuffer);
   combine_shader->Use();
-  deferred_shader->SetUniform("exposure", exposure);
   glActiveTexture(GL_TEXTURE0);
   combine_shader->SetUniform("bloom_texture", 0);
   glBindTexture(GL_TEXTURE_2D, horizontal ? bloom_framebuffer->colorbuffer
@@ -211,10 +248,11 @@ void render::Init() {
   auto height = GetGameWindow().height;
   default_framebuffer = CreateFramebuffer(width, height);
   color_framebuffer = CreateFramebuffer(width, height);
-  normal_framebuffer = CreateFramebuffer(width, height);
+  final_color_framebuffer = CreateFramebuffer(width, height);
   bloom_framebuffer = CreateFramebuffer(width, height);
   bloom_framebuffer_2 = CreateFramebuffer(width, height);
   combine_framebuffer = CreateFramebuffer(width, height);
+  near_framebuffer = CreateFramebuffer(width, height);
   deferred_shader = resource_manager::GetShader("Deferred").shader;
   fullscreen_shader = resource_manager::GetShader("Fullscreen").shader;
   sprite_shader = resource_manager::GetShader("Sprite").shader;

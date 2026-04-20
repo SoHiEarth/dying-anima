@@ -13,16 +13,14 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "core/input.h"
+#include "core/log.h"
 #include "core/quad.h"
 #include "core/render.h"
 #include "core/resource_manager.h"
 #include "core/scene.h"
 #include "core/window.h"
-#include "core/log.h"
 #include "game/game.h"
 #include "menu.h"
-
-
 
 int main() {
   if (!glfwInit()) {
@@ -82,7 +80,7 @@ int main() {
   io.DisplayFramebufferScale = ImVec2(scale_x, scale_y);
   imgui_io.Fonts->AddFontFromFileTTF(
       resource_manager::GetFont("Debug").file.c_str(), 15.5F * scale_x);
-  
+
   render::Init();
   core::quad::Init();
   SceneManager scene_manager;

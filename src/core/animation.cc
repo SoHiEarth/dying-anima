@@ -2,8 +2,8 @@
 
 #include <pugixml.hpp>
 
-#include "core/resource_manager.h"
 #include "core/log.h"
+#include "core/resource_manager.h"
 #include "sprite.h"
 
 void UpdateAnimations(entt::registry& registry, float dt) {
@@ -37,7 +37,9 @@ Animation LoadAnimationFromFile(std::string_view filename) {
   animation.file_path = std::string(filename);
   pugi::xml_document doc;
   if (!doc.load_file(animation.file_path.c_str())) {
-    throw core::Error(std::format("Failed to load animation file: {}", filename), "Animation");
+    throw core::Error(
+        std::format("Failed to load animation file: {}", filename),
+        "Animation");
   }
   auto root = doc.child("Animation");
   for (auto frame : root.children("Frame")) {

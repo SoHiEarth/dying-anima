@@ -1,5 +1,4 @@
 #include "core/audio.h"
-#include "core/log.h"
 
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -7,13 +6,14 @@
 #include <fstream>
 #include <iostream>
 
+#include "core/log.h"
+
 namespace {
 void LoadWAV(const char* filename, std::vector<char>& data, ALenum& format,
              ALsizei& frequency) {
   std::ifstream file(filename, std::ios::binary);
   if (!file) {
-    throw core::Error(
-        std::format("Failed to open WAV file: {}", filename));
+    throw core::Error(std::format("Failed to open WAV file: {}", filename));
   }
   std::array<char, 4> chunk_id;
   std::array<char, 4> format_id;
@@ -82,8 +82,8 @@ void LoadWAV(const char* filename, std::vector<char>& data, ALenum& format,
   } else if (bits_per_sample == 16) {
     format = (channels == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
   } else {
-    throw core::Error(std::format(
-        "Unsupported WAV bit depth: {} in file {}", bits_per_sample, filename));
+    throw core::Error(std::format("Unsupported WAV bit depth: {} in file {}",
+                                  bits_per_sample, filename));
   }
   frequency = sample_rate;
 }
@@ -129,7 +129,9 @@ unsigned int core::audio::Load(const char* file) {
 
 void core::audio::Play(unsigned int handle) {
   if (!loaded_map.contains(handle)) {
-    core::Log(std::format("Ignoring request to play nonexistent handle {}", handle), "Audio");
+    core::Log(
+        std::format("Ignoring request to play nonexistent handle {}", handle),
+        "Audio");
     return;
   }
 
@@ -143,7 +145,9 @@ void core::audio::Play(unsigned int handle) {
 
 void core::audio::Stop(unsigned int handle) {
   if (!loaded_map.contains(handle)) {
-    core::Log(std::format("Ignoring request to play nonexistent handle {}", handle), "Audio");
+    core::Log(
+        std::format("Ignoring request to play nonexistent handle {}", handle),
+        "Audio");
     return;
   }
 

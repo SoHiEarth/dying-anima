@@ -5,6 +5,7 @@
 #include <ft2build.h>
 #include <stb_image.h>
 #include <tinyfiledialogs.h>
+
 #include <algorithm>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -50,18 +51,9 @@ void MenuScene::Init() {
       .AddElement(std::make_unique<ui::Button>(
           "Play", font,
           [this]() {
-          int result = tinyfd_messageBox(
-            "Game",
-            "The editor itself is complete while the game is in unfinished condition. Do you want to proceed?",
-            "yesno",
-            "question",
-            1
-          );
-          if (result == 1) {
             scene_manager_.PopScene();
             scene_manager_.PushScene(
                 std::make_unique<SaveSelect>(scene_manager_));
-          }
           }))
       ->size.y = kLabelSizeY;
   menu_layout.AddElement(std::make_unique<ui::Label>("Dying Anima", font))

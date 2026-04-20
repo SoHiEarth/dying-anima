@@ -1,4 +1,5 @@
 #include "game/enemy.h"
+
 #include <box2d/box2d.h>
 
 #include <algorithm>
@@ -46,12 +47,14 @@ void LoadEnemies() {
     }
     default_enemies.push_back(enemy);
   }
-  core::Log(std::format("Loaded {} enemy presets", default_enemies.size()), "Enemy");
+  core::Log(std::format("Loaded {} enemy presets", default_enemies.size()),
+            "Enemy");
 }
 
 }  // namespace
 
-Enemy game::CreateEnemyFromName(std::string_view name, int designated_enemy_id) {
+Enemy game::CreateEnemyFromName(std::string_view name,
+                                int designated_enemy_id) {
   static int last_uid = 0;
   // load default enemies if not already loaded
   if (default_enemies.empty()) {
@@ -89,8 +92,10 @@ void game::UpdateBattleTriggers(entt::registry& registry,
       float distance =
           glm::distance(transform.position, player_transform.position);
       if (distance < damager.hitbox_radius) {
-        game::save_data.player_transform = game::registry.get<Transform>(game::player);
-        game::save_data.player_health = game::registry.get<Health>(game::player);
+        game::save_data.player_transform =
+            game::registry.get<Transform>(game::player);
+        game::save_data.player_health =
+            game::registry.get<Health>(game::player);
         save_manager::SaveGame(game::save_data, game::player_log);
         scene_manager.PushScene(std::make_unique<BattleScene>(
             scene_manager, damager.enemies, player_skills, player_health));
@@ -99,27 +104,32 @@ void game::UpdateBattleTriggers(entt::registry& registry,
   }
 }
 
-void game::UpdatePathFinders(entt::registry &registry) {
+void game::UpdatePathFinders(entt::registry& registry) {
   auto view = registry.view<Transform, PhysicsBody, PathFinder2D>();
   for (auto entity : view) {
     auto& transform = view.get<Transform>(entity);
     auto& physics_body = view.get<PhysicsBody>(entity);
     auto& pathfinder = view.get<PathFinder2D>(entity);
     auto movement_vec = b2Body_GetLinearVelocity(physics_body.body);
-    if (movement_vec.x > 0) { // Continue going positive-x
-      b2Body_ApplyForceToCenter(physics_body.body, b2Vec2(pathfinder.speed, 0), true);
+    if (movement_vec.x > 0) {  // Continue going positive-x
+      b2Body_ApplyForceToCenter(physics_body.body, b2Vec2(pathfinder.speed, 0),
+                                true);
       pathfinder.internal_value = 1;
       transform.scale.x = std::abs(transform.scale.x);
     }
-    if (movement_vec.x < 0) { // Continue going negative-x
-      b2Body_ApplyForceToCenter(physics_body.body, b2Vec2(-pathfinder.speed, 0), true);
+    if (movement_vec.x < 0) {  // Continue going negative-x
+      b2Body_ApplyForceToCenter(physics_body.body, b2Vec2(-pathfinder.speed, 0),
+                                true);
       pathfinder.internal_value = -1;
       transform.scale.x = std::abs(transform.scale.x) * -1;
     }
     if (movement_vec.x == 0) {
       if (pathfinder.internal_value == 0) pathfinder.internal_value = 1;
-      // Probably hit a wall or something. Go the opposite direction of last direction
-      b2Body_ApplyForceToCenter(physics_body.body, b2Vec2(pathfinder.internal_value * -pathfinder.speed, 0), true);
+      // Probably hit a wall or something. Go the opposite direction of last
+      // direction
+      b2Body_ApplyForceToCenter(
+          physics_body.body,
+          b2Vec2(pathfinder.internal_value * -pathfinder.speed, 0), true);
     }
   }
 }

@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "core/log.h"
 #include "core/window.h"
 
 struct SceneManager;
@@ -56,10 +57,15 @@ struct SceneManager {
         case SceneChange::kPush:
           scenes_.push_back(std::move(scene));
           scenes_.back()->Init();
+          core::Log(
+              std::format("Initialized scene: {}", scenes_.back()->Name()),
+              "SceneManager");
           break;
         case SceneChange::kPop:
           if (scenes_.empty()) return;
           scenes_.back()->Quit();
+          core::Log(std::format("Removed scene: {}", scenes_.back()->Name()),
+                    "SceneManager");
           scenes_.pop_back();
           break;
         default:

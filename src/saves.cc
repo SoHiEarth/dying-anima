@@ -10,7 +10,7 @@
 namespace {
 std::string savedata_root_name = "SaveData";
 std::string savedata_directory = "saves";
-}
+}  // namespace
 
 void save_manager::SaveGame(const SaveData& data, const game::Log& log) {
   if (!std::filesystem::exists("saves")) {
@@ -59,23 +59,26 @@ void save_manager::SaveGame(const SaveData& data, const game::Log& log) {
   std::stringstream ss;
   ss << std::put_time(&tm, "%H:%M:%S (%Y:%m:%d)");
 
-  std::string filename =
-      (std::filesystem::path(savedata_directory) /
-       std::filesystem::path(ss.str() + ".save")).string();
+  std::string filename = (std::filesystem::path(savedata_directory) /
+                          std::filesystem::path(ss.str() + ".save"))
+                             .string();
   if (!doc.save_file(filename.c_str())) {
     throw core::Error("Failed to save game.", "SaveManager");
   }
   core::Log(std::format("Saved game to {}", filename), "SaveManager");
 }
 
-std::expected<SaveData, LoadError> save_manager::LoadGame(std::string_view filename) {
-  if (!std::filesystem::exists(filename) || !std::filesystem::is_regular_file(filename))
+std::expected<SaveData, LoadError> save_manager::LoadGame(
+    std::string_view filename) {
+  if (!std::filesystem::exists(filename) ||
+      !std::filesystem::is_regular_file(filename))
     return std::unexpected(LoadError::kFileNotFound);
-  
+
   SaveData data{};
   pugi::xml_document doc;
   if (!doc.load_file(std::string(filename).c_str())) {
-    throw core::Error(std::format("Failed to load save file \"{}\"", filename), "SaveManager");
+    throw core::Error(std::format("Failed to load save file \"{}\"", filename),
+                      "SaveManager");
   }
   auto root_node = doc.child(savedata_root_name);
   auto player_node = root_node.child("Player");
@@ -86,8 +89,10 @@ std::expected<SaveData, LoadError> save_manager::LoadGame(std::string_view filen
     data.player_transform.position.y =
         player_node.attribute("pos.y").as_float();
     auto health_node = player_node.child("Health");
-    data.player_health.max_health = health_node.attribute("max_health").as_float();
-    data.player_health.max_stamina = health_node.attribute("max_stamina").as_float();
+    data.player_health.max_health =
+        health_node.attribute("max_health").as_float();
+    data.player_health.max_stamina =
+        health_node.attribute("max_stamina").as_float();
     data.player_health.health = health_node.attribute("health").as_float();
     data.player_health.stamina = health_node.attribute("stamina").as_float();
   }
@@ -118,13 +123,14 @@ std::expected<SaveData, LoadError> save_manager::LoadGame(std::string_view filen
 
 std::expected<SaveData, LoadError> save_manager::LoadLatestSave() {
   if (!std::filesystem::exists("saves")) {
-    core::Log("Saves directory doesn't exist. Recreating directory.", "SaveManager");
+    core::Log("Saves directory doesn't exist. Recreating directory.",
+              "SaveManager");
     std::filesystem::create_directory("saves");
-    return {}; // No need to search empty directory
+    return {};  // No need to search empty directory
   }
-  
+
   std::string latest_save;
-  std::filesystem::file_time_type latest_time{};
+  std::optional<std::filesystem::file_time_type> latest_time;
 
   for (const auto& entry :
        std::filesystem::directory_iterator(savedata_directory)) {
@@ -132,7 +138,7 @@ std::expected<SaveData, LoadError> save_manager::LoadLatestSave() {
       std::string filename = entry.path().filename().string();
 
       auto file_time = entry.last_write_time();
-      if (file_time > latest_time) {
+      if (file_time > latest_time || !latest_time.has_value()) {
         latest_time = file_time;
         latest_save = filename;
       }

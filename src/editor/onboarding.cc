@@ -12,14 +12,14 @@ void editor::RenderOnboarding() {
   int window_width = 0;
   int window_height = 0;
   glfwGetWindowSize(GetGameWindow().window, &window_width, &window_height);
-  ImGui::SetNextWindowPos(
-      ImVec2(window_width / 2.0F, window_height / 2.0F),
-      ImGuiCond_Always, ImVec2(0.5F, 0.5F));
+  ImGui::SetNextWindowPos(ImVec2(window_width / 2.0F, window_height / 2.0F),
+                          ImGuiCond_Always, ImVec2(0.5F, 0.5F));
   ImGui::SetNextWindowSize(
       ImVec2(window_width - kMargin, window_height - kMargin),
       ImGuiCond_Always);
   ImGui::Begin("Onboarding", &editor::internal::show_onboarding_window,
-               ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+               ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+                   ImGuiWindowFlags_NoCollapse);
   ImGui::SeparatorText("Hey! I see you're new here.");
   ImGui::Text(
       "Here's some reference material to get you started with the level "
@@ -47,8 +47,8 @@ void editor::RenderOnboarding() {
       auto scene_texture = resource_manager::GetTexture("doc.scene").texture;
       ImGui::Image(
           scene_texture->id,
-          ImVec2(avail_width, scene_texture->height *
-                                  (avail_width / scene_texture->width)),
+          ImVec2(avail_width,
+                 scene_texture->height * (avail_width / scene_texture->width)),
           IMGUI_TEXTURE_FLIP);
       ImGui::TextWrapped(
           "To the left is the scene manager. You can use it to select entities "

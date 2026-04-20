@@ -30,9 +30,11 @@ b2BodyId physics::CreateChainBody(const std::vector<glm::vec2>& vertices) {
   return body;
 }
 
-PhysicsBody physics::CreateBody(Transform transform, bool is_dynamic, float friction) {
-  PhysicsBody physics_body = CreateBody(transform.position, transform.scale,
-                                        transform.rotation, is_dynamic, friction);
+PhysicsBody physics::CreateBody(Transform transform, bool is_dynamic,
+                                float friction) {
+  PhysicsBody physics_body =
+      CreateBody(transform.position, transform.scale, transform.rotation,
+                 is_dynamic, friction);
   return physics_body;
 }
 

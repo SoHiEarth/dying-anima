@@ -1,22 +1,24 @@
 #include "game/pause.h"
 
+#include <tinyfiledialogs/tinyfiledialogs.h>
+
 #include "core/camera.h"
 #include "core/input.h"
 #include "core/rect.h"
 #include "core/resource_manager.h"
 #include "core/window.h"
+#include "game/game.h"
 #include "level_editor.h"
 #include "menu.h"
-#include "ui/elements.h"
 #include "saves.h"
-#include "game/game.h"
-#include <tinyfiledialogs/tinyfiledialogs.h>
+#include "ui/elements.h"
 
 namespace {
 std::unique_ptr<ui::VerticalLayout> layout;
 glm::ivec2 GetMousePos() {
   glm::dvec2 mouse_position{};
-  glfwGetCursorPos(GetGameWindow().window, &mouse_position.x, &mouse_position.y);
+  glfwGetCursorPos(GetGameWindow().window, &mouse_position.x,
+                   &mouse_position.y);
   return mouse_position;
 }
 }  // namespace
@@ -53,7 +55,8 @@ void PauseScene::Init() {
     save_data.player_health = game::registry.get<Health>(game::player);
     save_data.completion_markers = game::save_data.completion_markers;
     save_manager::SaveGame(save_data, game::player_log);
-    tinyfd_messageBox("Game Saved", "Your game has been saved successfully!", "ok", "info", 1);
+    tinyfd_messageBox("Game Saved", "Your game has been saved successfully!",
+                      "ok", "info", 1);
   }));
   layout->AddElement(std::make_unique<ui::Button>("Menu", ui_font_, [this]() {
     scene_manager_.PopScene();

@@ -9,10 +9,10 @@
 #include <string>
 
 #include "core/camera.h"
+#include "core/log.h"
 #include "core/quad.h"
 #include "core/shader.h"
 #include "core/window.h"
-#include "core/log.h"
 
 namespace {
 glm::mat4 last_proj, last_view, last_vp;
@@ -46,7 +46,7 @@ Texture::Texture(std::string_view path) {
 Texture::~Texture() { glDeleteTextures(1, &id); }
 
 void Texture::Render(const std::shared_ptr<Shader>& shader,
-                     const glm::mat4& model) const {
+                     const glm::mat4& model, float z_index) const {
   shader->Use();
   bool recalculate_vp = false;
   if (last_proj != GetGameWindow().GetProjection()) {
@@ -62,6 +62,7 @@ void Texture::Render(const std::shared_ptr<Shader>& shader,
   }
 
   shader->SetUniform("mvp", last_vp * model);
+  shader->SetUniform("z_index", z_index);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, id);
   core::quad::Render(core::quad::QuadType::kWithTexcoords);

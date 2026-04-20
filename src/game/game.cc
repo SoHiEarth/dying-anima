@@ -9,8 +9,6 @@
 
 #include <entt/entt.hpp>
 #include <filesystem>
-#include "core/log.h"
-#include "game/spawn.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <pugixml.hpp>
@@ -19,6 +17,7 @@
 #include "core/atlas.h"
 #include "core/camera.h"
 #include "core/input.h"
+#include "core/log.h"
 #include "core/physics.h"
 #include "core/render.h"
 #include "core/resource_manager.h"
@@ -29,6 +28,7 @@
 #include "game/log.h"
 #include "game/pause.h"
 #include "game/player.h"
+#include "game/spawn.h"
 #include "level_utils.h"
 #include "saves.h"
 #include "sprite.h"
@@ -49,7 +49,8 @@ std::expected<Transform, GetPlayerSpawnError> GetPlayerSpawn() {
   auto spawn_entity = spawn_view.front();
   if (spawn_entity != entt::null) {
     auto transform = game::registry.get<Transform>(spawn_entity);
-    core::Log("Player spawn point found at (" + std::to_string(transform.position.x) + ", " +
+    core::Log("Player spawn point found at (" +
+                  std::to_string(transform.position.x) + ", " +
                   std::to_string(transform.position.y) + ")",
               "Game");
     return transform;
@@ -65,6 +66,10 @@ void DeleteDefeatedEnemies(entt::registry& registry) {
     for (auto& enemy : trigger.enemies) {
       for (auto& uid : game::save_data.defeated_enemy_uids) {
         if (enemy.uid == uid) {
+          if (registry.try_get<PhysicsBody>(entity)) {
+            b2DestroyBody(registry.get<PhysicsBody>(entity).body);
+          }
+
           registry.destroy(entity);
           break;
         }
@@ -72,7 +77,7 @@ void DeleteDefeatedEnemies(entt::registry& registry) {
     }
   }
 }
-}
+}  // namespace
 
 void GameScene::Init() {
   GetGameWindow().SetWindowSizeType(WindowSizeType::kFramebufferSize);
@@ -90,31 +95,35 @@ void GameScene::Init() {
       if (returned.has_value()) {
         game::save_data = returned.value();
       }
-    }
-    else {
+    } else {
       auto returned = save_manager::LoadLatestSave();
       if (returned.has_value()) {
         game::save_data = returned.value();
       }
     }
-  }
-  catch (std::exception& e) {
-    core::Log("Caught exception: " + std::string(e.what()) + " while loading save.", "Game");
+  } catch (std::exception& e) {
+    core::Log(
+        "Caught exception: " + std::string(e.what()) + " while loading save.",
+        "Game");
   }
   game::registry.emplace<PlayerSpeed>(game::player);
   auto& player_skills = game::registry.emplace<PlayerSkills>(game::player);
   auto& player_health = game::registry.emplace<Health>(game::player, 100.0F);
-  player_body = game::registry
-                    .emplace<PhysicsBody>(game::player,
-                                physics::CreateBody(player_transform, true, 0.0F))
-                    .body;
+  player_body =
+      game::registry
+          .emplace<PhysicsBody>(
+              game::player, physics::CreateBody(player_transform, true, 0.0F))
+          .body;
   game::registry.emplace<Sprite>(
       game::player, "game.player",
-                           resource_manager::GetTexture("game.player").texture);
-  player_transform = game::save_data.player_transform;
-  player_health = game::save_data.player_health;
-  game::player_log = game::save_data.log;
-  player_skills.skills = game::save_data.acquired_skills;
+      resource_manager::GetTexture("game.player").texture);
+  if (game::save_data.valid) {
+    core::Log("Valid save data found. Loading values.", "Game");
+    player_transform = game::save_data.player_transform;
+    player_health = game::save_data.player_health;
+    game::player_log = game::save_data.log;
+    player_skills.skills = game::save_data.acquired_skills;
+  }
   if (player_skills.skills.empty()) {
     player_skills.skills.push_back({
         .name = "Punch",
@@ -142,7 +151,7 @@ void GameScene::Quit() {
   SaveData save_data{};
   if (!std::filesystem::exists("saves")) {
     std::filesystem::create_directory("saves");
-  } else if (!std::filesystem::is_empty("saves")){
+  } else if (!std::filesystem::is_empty("saves")) {
     save_data = save_manager::LoadLatestSave().value();
   }
   save_data.player_transform = game::registry.get<Transform>(game::player);
@@ -207,7 +216,8 @@ void GameScene::Update(double dt) {
   }
   b2Body_SetLinearVelocity(player_body, velocity);
 
-  if (core::input::IsKeyPressedThisFrame(GLFW_KEY_SPACE) && IsOnGround(player_body)) {
+  if (core::input::IsKeyPressedThisFrame(GLFW_KEY_SPACE) &&
+      IsOnGround(player_body)) {
     b2Body_ApplyLinearImpulse(player_body,
                               b2Vec2(0.0F, player_speed.jump_impulse),
                               b2Body_GetLocalCenterOfMass(player_body), true);

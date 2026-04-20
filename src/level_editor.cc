@@ -11,6 +11,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <mutex>
 
 #include "core/animation.h"
 #include "core/camera.h"
@@ -25,8 +26,8 @@
 #include "core/transform.h"
 #include "core/window.h"
 #include "editor/animation.h"
-#include "editor/tooltip.h"
 #include "editor/onboarding.h"
+#include "editor/tooltip.h"
 #include "game/enemy.h"
 #include "game/game.h"
 #include "game/spawn.h"
@@ -36,7 +37,6 @@
 #include "sprite.h"
 #include "tinyfiledialogs/tinyfiledialogs.h"
 #include "util/calculate.h"
-#include <mutex>
 
 namespace {
 enum class Toolkit { kSelect, kMove, kCopy };
@@ -152,12 +152,12 @@ void LevelEditor::Init() {
     current_scene_path = "level.txt";
     registry = LoadLevel(current_scene_path);
   } else {
-  auto* level_path =
-      tinyfd_openFileDialog("Open Scene", "", 0, nullptr, nullptr, 0);
-  if (level_path) {
-    current_scene_path = level_path;
-    registry = LoadLevel(current_scene_path);
-  }
+    auto* level_path =
+        tinyfd_openFileDialog("Open Scene", "", 0, nullptr, nullptr, 0);
+    if (level_path) {
+      current_scene_path = level_path;
+      registry = LoadLevel(current_scene_path);
+    }
   }
 
   GetGameWindow().SetWindowSizeType(WindowSizeType::kFramebufferSize);
@@ -231,7 +231,8 @@ void LevelEditor::Update(double /* dt */) {
     }
   }
 
-  glfwGetCursorPos(GetGameWindow().window, &mouse_position.x, &mouse_position.y);
+  glfwGetCursorPos(GetGameWindow().window, &mouse_position.x,
+                   &mouse_position.y);
   float scale_x = 1.0F;
   float scale_y = 1.0F;
   glfwGetWindowContentScale(GetGameWindow().window, &scale_x, &scale_y);
@@ -283,21 +284,24 @@ void LevelEditor::Update(double /* dt */) {
           }
         } else {
           auto entity = registry.create();
-          
+
           auto& transform = registry.emplace<Transform>(entity);
           transform = registry.get<Transform>(selected_entity);
           transform.position = world_pos;
 
           if (registry.try_get<Sprite>(selected_entity)) {
-            registry.emplace<Sprite>(entity) = registry.get<Sprite>(selected_entity);
+            registry.emplace<Sprite>(entity) =
+                registry.get<Sprite>(selected_entity);
           }
 
           if (registry.try_get<Light>(selected_entity)) {
-            registry.emplace<Light>(entity) = registry.get<Light>(selected_entity);
+            registry.emplace<Light>(entity) =
+                registry.get<Light>(selected_entity);
           }
 
           if (registry.try_get<BattleTrigger>(selected_entity)) {
-            registry.emplace<BattleTrigger>(entity) = registry.get<BattleTrigger>(selected_entity);
+            registry.emplace<BattleTrigger>(entity) =
+                registry.get<BattleTrigger>(selected_entity);
           }
         }
       }
@@ -311,8 +315,10 @@ void LevelEditor::Update(double /* dt */) {
       }
     }
   }
-  if (core::input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL) || core::input::IsKeyPressed(GLFW_KEY_RIGHT_CONTROL) ||
-      core::input::IsKeyPressed(GLFW_KEY_LEFT_SUPER) || core::input::IsKeyPressed(GLFW_KEY_RIGHT_SUPER)) {
+  if (core::input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL) ||
+      core::input::IsKeyPressed(GLFW_KEY_RIGHT_CONTROL) ||
+      core::input::IsKeyPressed(GLFW_KEY_LEFT_SUPER) ||
+      core::input::IsKeyPressed(GLFW_KEY_RIGHT_SUPER)) {
     if (core::input::IsKeyPressed(GLFW_KEY_EQUAL)) {
       GetGameWindow().SetPixelsPerUnit(GetGameWindow().GetPixelsPerUnit() + 1);
     } else if (core::input::IsKeyPressed(GLFW_KEY_MINUS)) {
@@ -320,17 +326,17 @@ void LevelEditor::Update(double /* dt */) {
     }
 
     if (core::input::IsKeyPressed(GLFW_KEY_LEFT)) {
-      GetCamera().position.x-= (4/GetGameWindow().GetPixelsPerUnit());
+      GetCamera().position.x -= (4 / GetGameWindow().GetPixelsPerUnit());
     }
     if (core::input::IsKeyPressed(GLFW_KEY_RIGHT)) {
-      GetCamera().position.x+= (4/GetGameWindow().GetPixelsPerUnit());
+      GetCamera().position.x += (4 / GetGameWindow().GetPixelsPerUnit());
     }
 
     if (core::input::IsKeyPressed(GLFW_KEY_DOWN)) {
-      GetCamera().position.y-= (4/GetGameWindow().GetPixelsPerUnit());
+      GetCamera().position.y -= (4 / GetGameWindow().GetPixelsPerUnit());
     }
     if (core::input::IsKeyPressed(GLFW_KEY_UP)) {
-      GetCamera().position.y+= (4/GetGameWindow().GetPixelsPerUnit());
+      GetCamera().position.y += (4 / GetGameWindow().GetPixelsPerUnit());
     }
   }
   last_mouse_position = mouse_position;
@@ -418,7 +424,8 @@ void LevelEditor::Render(GameWindow& window) {
           current_scene_path = "level.txt";
           SaveLevel("level.txt", registry);
           scene_manager_.PopScene();
-          scene_manager_.PushScene(std::make_unique<GameScene>(scene_manager_, ""));
+          scene_manager_.PushScene(
+              std::make_unique<GameScene>(scene_manager_, ""));
         }
         editor::SetTooltip("menu_bar.file.play");
         ImGui::EndMenu();
@@ -456,7 +463,7 @@ void LevelEditor::Render(GameWindow& window) {
                        static_cast<int>(Toolkit::kMove));
     editor::SetTooltip("scene.toolkit.move");
     ImGui::RadioButton("Copy", reinterpret_cast<int*>(&current_tool),
-                      static_cast<int>(Toolkit::kCopy));
+                       static_cast<int>(Toolkit::kCopy));
     editor::SetTooltip("scene.toolkit.copy");
     ImGui::SeparatorText("Entities");
     auto transform_view = registry.view<const Transform>();
@@ -502,7 +509,10 @@ void LevelEditor::Render(GameWindow& window) {
       ImGui::TextWrapped("%s", key.c_str());
       ImGui::EndGroup();
       if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("Width: %dpx\nHeight: %dpx\nChannels: %d (%s)", value.texture->width, value.texture->height, value.texture->channels, (value.texture->channels == 3) ? "RGB" : "RGBA");
+        ImGui::SetTooltip("Width: %dpx\nHeight: %dpx\nChannels: %d (%s)",
+                          value.texture->width, value.texture->height,
+                          value.texture->channels,
+                          (value.texture->channels == 3) ? "RGB" : "RGBA");
       }
       ImGui::PopID();
       i++;
@@ -554,6 +564,11 @@ void LevelEditor::Render(GameWindow& window) {
         editor::SetTooltip("inspector.transform.position");
         ImGui::DragFloat("Z Index", &transform.z_index, 0.1F);
         editor::SetTooltip("inspector.transform.z_index");
+        if (transform.z_index <= 2.5F) {
+          ImGui::Text("This object is a FAR field object.");
+        } else {
+          ImGui::Text("This object is a NEAR field object.");
+        }
         ImGui::DragFloat2("Scale", glm::value_ptr(transform.scale), 0.1F);
         editor::SetTooltip("inspector.transform.scale");
         ImGui::DragFloat("Rotation", &transform.rotation, 1.0F);
@@ -669,7 +684,8 @@ void LevelEditor::Render(GameWindow& window) {
 
       if (registry.any_of<PathFinder2D>(selected_entity)) {
         if (ImGui::CollapsingHeader("PathFinder 2D")) {
-          ImGui::DragFloat("Speed", &registry.get<PathFinder2D>(selected_entity).speed);
+          ImGui::DragFloat("Speed",
+                           &registry.get<PathFinder2D>(selected_entity).speed);
         }
         if (ImGui::Button("Remove PathFinder2D Component")) {
           registry.remove<PathFinder2D>(selected_entity);
@@ -681,7 +697,8 @@ void LevelEditor::Render(GameWindow& window) {
           if (registry.view<PlayerSpawn>().front() == selected_entity) {
             ImGui::Text("This entity is used as player spawn.");
           } else {
-            ImGui::Text("Multiple instances of spawn found: This entity is not used.");
+            ImGui::Text(
+                "Multiple instances of spawn found: This entity is not used.");
           }
           if (ImGui::Button("Remove PlayerSpawn Component")) {
             registry.remove<PlayerSpawn>(selected_entity);
@@ -760,7 +777,6 @@ void LevelEditor::Render(GameWindow& window) {
   if (editor::internal::show_animation_window) {
     editor::AnimationWindow(registry.get<Animation>(selected_entity));
   }
-  
-  if (editor::internal::show_onboarding_window)
-    editor::RenderOnboarding();
+
+  if (editor::internal::show_onboarding_window) editor::RenderOnboarding();
 }

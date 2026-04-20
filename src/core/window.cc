@@ -1,5 +1,7 @@
 #include "core/window.h"
+
 #include <GLFW/glfw3.h>
+
 #include "core/log.h"
 #include "core/render.h"
 
@@ -51,6 +53,10 @@ void GameWindow::SetWindowSizeType(WindowSizeType type) {
       core::Log("Size type set to framebuffer size.", "Window");
       break;
   }
-  core::Log(std::format("Window Size: {}x{}, Framebuffer size: {}x{}, Held size: {}x{}", window_width, window_height, fb_width, fb_height, width, height), "Window");
+  core::Log(
+      std::format(
+          "Window Size: {}x{}, Framebuffer size: {}x{}, Held size: {}x{}",
+          window_width, window_height, fb_width, fb_height, width, height),
+      "Window");
   size_type_ = type;
 }

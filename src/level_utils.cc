@@ -4,10 +4,10 @@
 
 #include "core/animation.h"
 #include "core/light.h"
+#include "core/log.h"
 #include "core/physics.h"
 #include "core/resource_manager.h"
 #include "core/transform.h"
-#include "core/log.h"
 #include "game/enemy.h"
 #include "game/spawn.h"
 #include "sprite.h"
@@ -15,7 +15,8 @@
 entt::registry LoadLevel(std::string_view filename) {
   pugi::xml_document doc;
   if (!doc.load_file(std::string(filename).c_str())) {
-    throw core::Error(std::format("Failed to load level file: {}\n", filename), "Level");
+    throw core::Error(std::format("Failed to load level file: {}\n", filename),
+                      "Level");
   }
   auto registry = entt::registry{};
   auto root = doc.child("Level");
@@ -36,7 +37,8 @@ entt::registry LoadLevel(std::string_view filename) {
       if (sprite_node) {
         auto& sprite = registry.emplace<Sprite>(entity);
         sprite.texture_tag = sprite_node.attribute("texture_tag").as_string();
-        sprite.texture = resource_manager::GetTexture(sprite.texture_tag).texture;
+        sprite.texture =
+            resource_manager::GetTexture(sprite.texture_tag).texture;
       }
     }
     {
@@ -71,19 +73,24 @@ entt::registry LoadLevel(std::string_view filename) {
       auto enemy_node = object_node.child("BattleTrigger");
       if (enemy_node) {
         auto& battle_trigger = registry.emplace<BattleTrigger>(entity);
-        battle_trigger.hitbox_radius = enemy_node.attribute("hitbox_radius").as_float();
+        battle_trigger.hitbox_radius =
+            enemy_node.attribute("hitbox_radius").as_float();
         for (auto& e : enemy_node.children("Enemy")) {
-          core::Log(std::format("Added enemy {} to battle trigger", e.attribute("name").as_string()), "Level");
+          core::Log(std::format("Added enemy {} to battle trigger",
+                                e.attribute("name").as_string()),
+                    "Level");
           battle_trigger.enemies.push_back(
               game::CreateEnemyFromName(e.attribute("name").as_string()));
-          battle_trigger.enemies.back().uid = e.attribute("uid").as_int(battle_trigger.enemies.size());
+          battle_trigger.enemies.back().uid =
+              e.attribute("uid").as_int(battle_trigger.enemies.size());
         }
       }
     }
     {
       auto pathfinder_node = object_node.child("PathFinder2D");
       if (pathfinder_node) {
-        registry.emplace<PathFinder2D>(entity).speed = pathfinder_node.attribute("speed").as_float();
+        registry.emplace<PathFinder2D>(entity).speed =
+            pathfinder_node.attribute("speed").as_float();
       }
     }
     {
@@ -171,7 +178,8 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
     }
 
     if (registry.try_get<PathFinder2D>(entity)) {
-      object_node.append_child("PathFinder2D").append_attribute("speed") = registry.get<PathFinder2D>(entity).speed;
+      object_node.append_child("PathFinder2D").append_attribute("speed") =
+          registry.get<PathFinder2D>(entity).speed;
     }
 
     if (registry.all_of<PlayerSpawn>(entity)) {
@@ -186,6 +194,7 @@ void SaveLevel(std::string_view filename, const entt::registry& registry) {
     }
   }
   if (!doc.save_file(std::string(filename).c_str()))
-    throw core::Error(std::format("Failed to save level {}", filename), "Level");
+    throw core::Error(std::format("Failed to save level {}", filename),
+                      "Level");
   core::Log(std::format("Saved level {}", filename), "Level");
 }

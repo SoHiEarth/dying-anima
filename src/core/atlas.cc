@@ -4,6 +4,7 @@
 #include <format>
 #include <mutex>
 #include <pugixml.hpp>
+
 #include "core/log.h"
 namespace {
 std::once_flag font_flag, shader_flag, texture_flag;
@@ -12,24 +13,35 @@ void PrintFontResults(FONT_ATLAS& atlas) {
   core::Log("- Font Atlas Result -", "Atlas");
   core::Log(std::format("Loaded {} fonts from atlas", atlas.size()), "Atlas");
   for (const auto& [tag, entry] : atlas) {
-    core::Log(std::format("Name: {} (Tag: {}) File: {})", entry.name, tag, std::filesystem::relative(entry.file).string()), "Atlas");
+    core::Log(std::format("Name: {} (Tag: {}) File: {})", entry.name, tag,
+                          std::filesystem::relative(entry.file).string()),
+              "Atlas");
   }
 }
 
 void PrintShaderResults(SHADER_ATLAS& atlas) {
   core::Log("- Shader Atlas Result -", "Atlas");
-  core::Log(std::format("Loaded {} shaders from atlas.", atlas.size()), "Atlas");
+  core::Log(std::format("Loaded {} shaders from atlas.", atlas.size()),
+            "Atlas");
   for (const auto& [tag, entry] : atlas) {
-    core::Log(std::format("Name: {} (Tag: {}) Vertex File: {}, Fragment File: {})",
-          entry.name, tag, std::filesystem::relative(entry.vertex_file).string(), std::filesystem::relative(entry.fragment_file).string()), "Atlas");
+    core::Log(
+        std::format("Name: {} (Tag: {}) Vertex File: {}, Fragment File: {})",
+                    entry.name, tag,
+                    std::filesystem::relative(entry.vertex_file).string(),
+                    std::filesystem::relative(entry.fragment_file).string()),
+        "Atlas");
   }
 }
 
 void PrintTextureResults(TEXTURE_ATLAS& atlas) {
   core::Log("- Texture Atlas Result -", "Atlas");
-  core::Log(std::format("Loaded {} textures from atlas.", atlas.size()), "Atlas");
+  core::Log(std::format("Loaded {} textures from atlas.", atlas.size()),
+            "Atlas");
   for (const auto& [name, entry] : atlas) {
-    core::Log(std::format("Name: {} (File: {}, Dimensions: {}x{})", name, std::filesystem::relative(entry.path).string(), entry.texture->width, entry.texture->height), "Atlas");
+    core::Log(std::format("Name: {} (File: {}, Dimensions: {}x{})", name,
+                          std::filesystem::relative(entry.path).string(),
+                          entry.texture->width, entry.texture->height),
+              "Atlas");
   }
 }
 
@@ -41,8 +53,9 @@ FONT_ATLAS LoadFontAtlas(std::string_view filename) {
   pugi::xml_parse_result result =
       font_doc.load_file(std::string(filename).c_str());
   if (!result) {
-    throw core::Error(std::format("Failed to load font atlas XML: {}",
-                                         result.description()), "Atlas");
+    throw core::Error(
+        std::format("Failed to load font atlas XML: {}", result.description()),
+        "Atlas");
   }
   pugi::xml_node fonts_node = font_doc.child("fonts");
   std::filesystem::path base_path =
@@ -67,8 +80,9 @@ SHADER_ATLAS LoadShaderAtlas(std::string_view filename) {
   pugi::xml_parse_result shader_result =
       shader_doc.load_file(std::string(filename).c_str());
   if (!shader_result) {
-    throw core::Error(std::format(
-        "Failed to load shader atlas XML: {}", shader_result.description()), "Atlas");
+    throw core::Error(std::format("Failed to load shader atlas XML: {}",
+                                  shader_result.description()),
+                      "Atlas");
   }
   pugi::xml_node shaders_node = shader_doc.child("shaders");
   auto base_path = std::filesystem::path(filename).parent_path();
@@ -97,9 +111,9 @@ TEXTURE_ATLAS LoadTextureAtlas(std::string_view filename) {
   pugi::xml_parse_result texture_result =
       texture_doc.load_file(std::string(filename).c_str());
   if (!texture_result) {
-    throw core::Error(
-        std::format("Failed to load texture atlas XML: {}",
-                    texture_result.description()), "Atlas");
+    throw core::Error(std::format("Failed to load texture atlas XML: {}",
+                                  texture_result.description()),
+                      "Atlas");
   }
   pugi::xml_node textures_node = texture_doc.child("textures");
   auto base_path = std::filesystem::path(filename).parent_path();
