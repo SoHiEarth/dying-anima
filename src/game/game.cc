@@ -17,6 +17,7 @@
 #include "core/atlas.h"
 #include "core/camera.h"
 #include "core/input.h"
+#include "core/light.h"
 #include "core/log.h"
 #include "core/physics.h"
 #include "core/render.h"
@@ -61,7 +62,6 @@ std::expected<Transform, GetPlayerSpawnError> GetPlayerSpawn() {
 }
 
 void DeleteDefeatedEnemies(entt::registry& registry) {
-  core::Log(std::format("Defeated enemy uids: {}", game::save_data.defeated_enemy_uids), "Game");
   auto view = registry.view<BattleTrigger>();
   for (auto entity : view) {
     auto& trigger = view.get<BattleTrigger>(entity);
@@ -73,7 +73,6 @@ void DeleteDefeatedEnemies(entt::registry& registry) {
           }
 
           registry.destroy(entity);
-          core::Log(std::format("Removed defeated enemy with uid: {}", uid), "Game");
         }
       }
     }
@@ -135,6 +134,13 @@ void GameScene::Init() {
         .stamina_used = 0.0F,
     });
   }
+
+  auto& player_light = game::registry.emplace<Light>(game::player);
+  player_light.type = LightType::kPoint;
+  player_light.intensity = 1.0F;
+  player_light.color = glm::vec3{0.8F, 0.8F, 1.0F};
+  player_light.radial_falloff = 500.0F;
+  player_light.volumetric_intensity = 0.01F;
   sprite_shader = resource_manager::GetShader("Sprite").shader;
   rect_shader = resource_manager::GetShader("Rect").shader;
   text_shader = resource_manager::GetShader("Text").shader;
