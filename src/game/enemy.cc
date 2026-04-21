@@ -77,7 +77,7 @@ Enemy game::CreateEnemyFromName(std::string_view name,
   throw core::Error("Enemy type not found: " + std::string(name), "Enemy");
 }
 
-void game::UpdateBattleTriggers(entt::registry& registry,
+bool game::UpdateBattleTriggers(entt::registry& registry,
                                 SceneManager& scene_manager) {
   auto view = registry.view<BattleTrigger>();
   auto player_entity = registry.view<PlayerSkills>().front();
@@ -99,9 +99,11 @@ void game::UpdateBattleTriggers(entt::registry& registry,
         save_manager::SaveGame(game::save_data, game::player_log);
         scene_manager.PushScene(std::make_unique<BattleScene>(
             scene_manager, damager.enemies, player_skills, player_health));
+        return true;
       }
     }
   }
+  return false;
 }
 
 void game::UpdatePathFinders(entt::registry& registry) {

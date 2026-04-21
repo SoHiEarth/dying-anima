@@ -83,6 +83,12 @@ int main() {
 
   render::Init();
   core::quad::Init();
+  
+  // Set window to fullscreen
+  auto *monitor = glfwGetPrimaryMonitor();
+  const auto *mode = glfwGetVideoMode(monitor);
+  glfwSetWindowMonitor(window.window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+
   SceneManager scene_manager;
   scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
   scene_manager.ProcessSceneChanges();

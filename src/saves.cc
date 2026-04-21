@@ -45,14 +45,14 @@ void save_manager::SaveGame(const SaveData& data, const game::Log& log) {
   }
 
   auto defeated_enemies_node = root.append_child("DefeatedEnemies");
-  for (const auto& uid : data.defeated_enemy_uids) {
-    auto enemy_node = defeated_enemies_node.append_child("Enemy");
-    enemy_node.append_attribute("uid") = uid;
+  for (int uid : data.defeated_enemy_uids) {
+    defeated_enemies_node.append_child("Enemy").append_attribute("uid") = uid;
   }
 
   if (!std::filesystem::exists(savedata_directory)) {
     std::filesystem::create_directory(savedata_directory);
   }
+
   auto now = std::chrono::system_clock::now();
   auto t = std::chrono::system_clock::to_time_t(now);
   auto tm = *std::localtime(&t);
@@ -116,8 +116,9 @@ std::expected<SaveData, LoadError> save_manager::LoadGame(
   for (auto enemy_node : defeated_enemies_node.children("Enemy")) {
     data.defeated_enemy_uids.emplace_back(enemy_node.attribute("uid").as_int());
   }
-  core::Log(std::format("Loaded game from {}", filename), "SaveManager");
+
   data.valid = true;
+  core::Log(std::format("Loaded game from {}", filename), "SaveManager");
   return data;
 }
 
@@ -126,7 +127,7 @@ std::expected<SaveData, LoadError> save_manager::LoadLatestSave() {
     core::Log("Saves directory doesn't exist. Recreating directory.",
               "SaveManager");
     std::filesystem::create_directory("saves");
-    return {};  // No need to search empty directory
+    return std::unexpected<LoadError>(LoadError::kFileNotFound);
   }
 
   std::string latest_save;
@@ -146,7 +147,7 @@ std::expected<SaveData, LoadError> save_manager::LoadLatestSave() {
   }
 
   if (latest_save.empty()) {
-    throw core::Error("No available files found.", "SaveManager");
+    return std::unexpected<LoadError>(LoadError::kFileNotFound);
   }
 
   return LoadGame("saves/" + latest_save);

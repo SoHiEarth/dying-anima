@@ -32,7 +32,8 @@ struct BattleTrigger {
 
 namespace game {
 Enemy CreateEnemyFromName(std::string_view name, int designated_enemy_id = 0);
-void UpdateBattleTriggers(entt::registry& registry,
+// Returns true if a hit is found.
+bool UpdateBattleTriggers(entt::registry& registry,
                           SceneManager& scene_manager);
 void UpdatePathFinders(entt::registry& registry);
 }  // namespace game

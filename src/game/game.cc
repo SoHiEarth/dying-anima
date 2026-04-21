@@ -42,6 +42,7 @@ entt::entity game::player;
 namespace {
 bool show_log = false;
 bool show_player_info = false;
+bool reload_latest_save = false;
 
 enum class GetPlayerSpawnError { kNoSpawnPoint };
 std::expected<Transform, GetPlayerSpawnError> GetPlayerSpawn() {
@@ -60,6 +61,7 @@ std::expected<Transform, GetPlayerSpawnError> GetPlayerSpawn() {
 }
 
 void DeleteDefeatedEnemies(entt::registry& registry) {
+  core::Log(std::format("Defeated enemy uids: {}", game::save_data.defeated_enemy_uids), "Game");
   auto view = registry.view<BattleTrigger>();
   for (auto entity : view) {
     auto& trigger = view.get<BattleTrigger>(entity);
@@ -71,7 +73,7 @@ void DeleteDefeatedEnemies(entt::registry& registry) {
           }
 
           registry.destroy(entity);
-          break;
+          core::Log(std::format("Removed defeated enemy with uid: {}", uid), "Game");
         }
       }
     }
@@ -163,6 +165,32 @@ void GameScene::Quit() {
 }
 
 void GameScene::Update(double dt) {
+  if (reload_latest_save) {
+    try {
+    if (std::filesystem::exists(save_data_path)) {
+      auto returned = save_manager::LoadGame(save_data_path.generic_string());
+      if (returned.has_value()) {
+        game::save_data = returned.value();
+      }
+    } else {
+      auto returned = save_manager::LoadLatestSave();
+      if (returned.has_value()) {
+        game::save_data = returned.value();
+      }
+    }
+  } catch (std::exception& e) {
+    core::Log(
+        "Caught exception: " + std::string(e.what()) + " while loading save.",
+        "Game");
+  }
+    if (game::save_data.valid) {
+    core::Log("Valid save data found. Loading values.", "Game");
+    game::player_log = game::save_data.log;
+    game::registry.get<Health>(game::player).health = game::save_data.player_health.health;
+    game::registry.get<Health>(game::player).stamina = game::save_data.player_health.stamina;
+  }
+
+  }
   auto& player_speed = game::registry.get<PlayerSpeed>(game::player);
   player_body = game::registry.get<PhysicsBody>(game::player).body;
 
@@ -245,7 +273,7 @@ void GameScene::Update(double dt) {
       });
   DeleteDefeatedEnemies(game::registry);
   game::UpdatePathFinders(game::registry);
-  game::UpdateBattleTriggers(game::registry, scene_manager_);
+  reload_latest_save = game::UpdateBattleTriggers(game::registry, scene_manager_);
   UpdateAnimations(game::registry, static_cast<float>(dt));
 
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_TAB)) {

@@ -97,12 +97,13 @@ void BattleScene::Init() {
   for (const auto& uid : save_data->defeated_enemy_uids) {
     defeated_enemy_uids.push_back(uid);
   }
-  std::ranges::remove_if(enemies_,
+  auto enemies_to_erase = std::ranges::remove_if(enemies_,
                                 [&](const Enemy& e) {
                                   return std::ranges::find(defeated_enemy_uids,
                                                    e.uid) !=
                                          defeated_enemy_uids.end();
                                 });
+  enemies_.erase(enemies_to_erase.begin(), enemies_to_erase.end());
   if (enemies_.empty()) {
     core::Log("Logic Error: Enemy count empty.", "BattleScene");
     scene_manager_.PopScene();
@@ -133,10 +134,11 @@ void BattleScene::Update(double) {
         action_log.emplace_back("Enemy " + turn_data->target->name +
                                 " was defeated!");
         defeated_enemy_uids.push_back(turn_data->target->uid);
-        std::ranges::remove_if(enemies_,
+        auto enemies_to_erase = std::ranges::remove_if(enemies_,
                                       [&](const Enemy& e) {
                                         return &e == turn_data->target;
                                       });
+        enemies_.erase(enemies_to_erase.begin(), enemies_to_erase.end());
       }
       if (player_health_.stamina <= 0) {
         player_health_.stamina -= kStaminaDrainPenalty;
