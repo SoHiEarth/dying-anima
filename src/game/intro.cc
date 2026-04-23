@@ -92,27 +92,32 @@ void IntroScene::Render(GameWindow& window) {
                      ImGuiWindowFlags_NoResize);
     ImGui::Text("Controls");
     ImGui::SeparatorText("Movement");
-    ImGui::Image(resource_manager::GetTexture("ui.movement").texture->id,
-                 ImVec2(ImGui::GetContentRegionAvail().x, 200),
+    auto avail_width = ImGui::GetContentRegionAvail().x;
+    avail_width = std::min(avail_width, 350.0F);
+   
+    static auto movement_texture = resource_manager::GetTexture("ui.movement").texture;
+    ImGui::Image(
+        movement_texture->id,
+        ImVec2(avail_width, movement_texture->height * (avail_width / movement_texture->width)),
                  IMGUI_TEXTURE_FLIP);
     ImGui::Text("Use WASD to Move.");
     ImGui::SeparatorText("Journal");
-    ImGui::Image(resource_manager::GetTexture("ui.journal").texture->id,
-                 ImVec2(ImGui::GetContentRegionAvail().x, 200),
+    static auto journal_texture = resource_manager::GetTexture("ui.journal").texture;
+    ImGui::Image(journal_texture->id,
+                 ImVec2(avail_width, journal_texture->height * (avail_width / journal_texture->width)),
                  IMGUI_TEXTURE_FLIP);
     ImGui::Text("Press TAB to open your journal.");
     ImGui::Text(
         "Your journey throughout Mer will be recorded in your journal.");
     ImGui::SeparatorText("Your Character");
-    ImGui::Image(resource_manager::GetTexture("ui.character").texture->id,
-                 ImVec2(ImGui::GetContentRegionAvail().x, 200),
-                 IMGUI_TEXTURE_FLIP);
-    ImGui::Text("You are a lost soul moving throughout Mer.");
+    static auto character_texture = resource_manager::GetTexture("ui.character").texture;
+    ImGui::Image(character_texture->id,
+                         ImVec2(avail_width, character_texture->height * (avail_width / character_texture->width)),         
+        IMGUI_TEXTURE_FLIP);
     ImGui::TextWrapped(
         "Information about your character can be viewed from the Character "
         "window. Press P to open it.");
-    if (ImGui::Button("Start Your Journey",
-                      ImVec2(ImGui::GetContentRegionAvail().x, 50))) {
+    if (ImGui::Button("----- Start Your Journey -----")) {
       scene_manager_.PopScene();
     }
     ImGui::End();

@@ -24,12 +24,12 @@ glm::ivec2 GetMousePos() {
 }  // namespace
 
 void PauseScene::Init() {
+  glfwSwapInterval(1);
   GetGameWindow().SetWindowSizeType(WindowSizeType::kWindowSize);
   rect_shader_ = resource_manager::GetShader("Rect").shader;
   text_shader_ = resource_manager::GetShader("Text").shader;
   title_font_ = resource_manager::GetFont("Title").font;
   ui_font_ = resource_manager::GetFont("UI").font;
-  glfwSwapInterval(1);  // Save resources
   layout = std::make_unique<ui::VerticalLayout>();
   layout->SetSpacing(20);
   layout->SetPadding(20, 20, 20, 20);
@@ -66,9 +66,7 @@ void PauseScene::Init() {
   layout->AddElement(std::make_unique<ui::Label>("PAUSED", title_font_));
 }
 
-void PauseScene::Quit() {
-  glfwSwapInterval(0);  // Psycho mode
-}
+void PauseScene::Quit() { }
 
 void PauseScene::Update(double dt) {
   layout->SetPosition(

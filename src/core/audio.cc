@@ -124,7 +124,7 @@ unsigned int core::audio::Load(const char* file) {
   alSourcei(source, AL_LOOPING, AL_FALSE);
   loaded_map.insert(
       {loaded_map.size(), Handle{.buffer = buffer, .source = source}});
-  return loaded_map.end()->first;
+  return loaded_map.rbegin()->first;
 }
 
 void core::audio::Play(unsigned int handle) {

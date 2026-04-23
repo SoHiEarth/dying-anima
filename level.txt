@@ -157,7 +157,7 @@
 		<Physics is_dynamic="true" is_chained="false" />
 		<Light type="1" intensity="2" radial_falloff="500" volumetric_intensity="0.0199999996" color.r="1" color.g="0.392156869" color.b="0.392156869" />
 		<BattleTrigger hitbox_radius="1">
-			<Enemy name="The Architect" uid="4" />
+			<Enemy name="The Architect" uid="1" />
 		</BattleTrigger>
 		<PathFinder2D speed="1" />
 	</Object>

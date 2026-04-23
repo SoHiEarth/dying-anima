@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <mutex>
-#include <print>
 #include <pugixml.hpp>
 
 #include "core/log.h"
@@ -112,26 +111,19 @@ void game::UpdatePathFinders(entt::registry& registry) {
     auto& transform = view.get<Transform>(entity);
     auto& physics_body = view.get<PhysicsBody>(entity);
     auto& pathfinder = view.get<PathFinder2D>(entity);
+
+    if (pathfinder.internal_value == 0) pathfinder.internal_value = 1;
+
     auto movement_vec = b2Body_GetLinearVelocity(physics_body.body);
-    if (movement_vec.x > 0) {  // Continue going positive-x
-      b2Body_ApplyForceToCenter(physics_body.body, b2Vec2(pathfinder.speed, 0),
-                                true);
-      pathfinder.internal_value = 1;
-      transform.scale.x = std::abs(transform.scale.x);
+
+    if (std::abs(movement_vec.x) == 0) {
+      pathfinder.internal_value *= -1;  // Reverse on wall hit
+    } else {
+      pathfinder.internal_value = (movement_vec.x > 0) ? 1 : -1;  // Track direction
     }
-    if (movement_vec.x < 0) {  // Continue going negative-x
-      b2Body_ApplyForceToCenter(physics_body.body, b2Vec2(-pathfinder.speed, 0),
-                                true);
-      pathfinder.internal_value = -1;
-      transform.scale.x = std::abs(transform.scale.x) * -1;
-    }
-    if (movement_vec.x == 0) {
-      if (pathfinder.internal_value == 0) pathfinder.internal_value = 1;
-      // Probably hit a wall or something. Go the opposite direction of last
-      // direction
-      b2Body_ApplyForceToCenter(
-          physics_body.body,
-          b2Vec2(pathfinder.internal_value * -pathfinder.speed, 0), true);
-    }
+    b2Body_SetLinearVelocity(physics_body.body, b2Vec2(pathfinder.speed * pathfinder.internal_value, movement_vec.y));
+    movement_vec = b2Body_GetLinearVelocity(physics_body.body);
+
+    transform.scale.x = std::abs(transform.scale.x) * pathfinder.internal_value;
   }
 }

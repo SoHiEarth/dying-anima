@@ -81,6 +81,7 @@ void DeleteDefeatedEnemies(entt::registry& registry) {
 }  // namespace
 
 void GameScene::Init() {
+  glfwSwapInterval(0);
   GetGameWindow().SetWindowSizeType(WindowSizeType::kFramebufferSize);
   physics::Init({0, -35.0F});
   game::registry = LoadLevel("level.txt");
@@ -96,11 +97,6 @@ void GameScene::Init() {
       if (returned.has_value()) {
         game::save_data = returned.value();
       }
-    } else {
-      auto returned = save_manager::LoadLatestSave();
-      if (returned.has_value()) {
-        game::save_data = returned.value();
-      }
     }
   } catch (std::exception& e) {
     core::Log(
@@ -110,17 +106,16 @@ void GameScene::Init() {
   game::registry.emplace<PlayerSpeed>(game::player);
   auto& player_skills = game::registry.emplace<PlayerSkills>(game::player);
   auto& player_health = game::registry.emplace<Health>(game::player, 100.0F);
-  player_body =
-      game::registry
-          .emplace<PhysicsBody>(
-              game::player, physics::CreateBody(player_transform, true, 0.0F))
-          .body;
   game::registry.emplace<Sprite>(
       game::player, "game.player",
       resource_manager::GetTexture("game.player").texture);
   if (game::save_data.valid) {
     core::Log("Valid save data found. Loading values.", "Game");
-    player_transform = game::save_data.player_transform;
+    player_transform.position = game::save_data.player_transform.position;
+    core::Log(
+        std::format("Player position set to: x: {} y: {}",
+                    player_transform.position.x, player_transform.position.y),
+        "Game");
     player_health = game::save_data.player_health;
     game::player_log = game::save_data.log;
     player_skills.skills = game::save_data.acquired_skills;
@@ -134,6 +129,12 @@ void GameScene::Init() {
         .stamina_used = 0.0F,
     });
   }
+
+  player_body =
+      game::registry
+          .emplace<PhysicsBody>(
+              game::player, physics::CreateBody(player_transform, true, 0.0F))
+          .body;
 
   auto& player_light = game::registry.emplace<Light>(game::player);
   player_light.type = LightType::kPoint;
@@ -152,7 +153,6 @@ void GameScene::Init() {
   text_shader->Use();
   text_shader->SetUniform("character", 0);
   GetGameWindow().SetPixelsPerUnit(150.0F);
-  glfwSwapInterval(0);
 }
 
 void GameScene::Quit() {
@@ -173,29 +173,30 @@ void GameScene::Quit() {
 void GameScene::Update(double dt) {
   if (reload_latest_save) {
     try {
-    if (std::filesystem::exists(save_data_path)) {
-      auto returned = save_manager::LoadGame(save_data_path.generic_string());
-      if (returned.has_value()) {
-        game::save_data = returned.value();
+      if (std::filesystem::exists(save_data_path)) {
+        auto returned = save_manager::LoadGame(save_data_path.generic_string());
+        if (returned.has_value()) {
+          game::save_data = returned.value();
+        }
+      } else {
+        auto returned = save_manager::LoadLatestSave();
+        if (returned.has_value()) {
+          game::save_data = returned.value();
+        }
       }
-    } else {
-      auto returned = save_manager::LoadLatestSave();
-      if (returned.has_value()) {
-        game::save_data = returned.value();
-      }
+    } catch (std::exception& e) {
+      core::Log(
+          "Caught exception: " + std::string(e.what()) + " while loading save.",
+          "Game");
     }
-  } catch (std::exception& e) {
-    core::Log(
-        "Caught exception: " + std::string(e.what()) + " while loading save.",
-        "Game");
-  }
     if (game::save_data.valid) {
-    core::Log("Valid save data found. Loading values.", "Game");
-    game::player_log = game::save_data.log;
-    game::registry.get<Health>(game::player).health = game::save_data.player_health.health;
-    game::registry.get<Health>(game::player).stamina = game::save_data.player_health.stamina;
-  }
-
+      core::Log("Valid save data found. Loading values.", "Game");
+      game::player_log = game::save_data.log;
+      game::registry.get<Health>(game::player).health =
+          game::save_data.player_health.health;
+      game::registry.get<Health>(game::player).stamina =
+          game::save_data.player_health.stamina;
+    }
   }
   auto& player_speed = game::registry.get<PlayerSpeed>(game::player);
   player_body = game::registry.get<PhysicsBody>(game::player).body;
@@ -279,7 +280,8 @@ void GameScene::Update(double dt) {
       });
   DeleteDefeatedEnemies(game::registry);
   game::UpdatePathFinders(game::registry);
-  reload_latest_save = game::UpdateBattleTriggers(game::registry, scene_manager_);
+  reload_latest_save =
+      game::UpdateBattleTriggers(game::registry, scene_manager_);
   UpdateAnimations(game::registry, static_cast<float>(dt));
 
   if (core::input::IsKeyPressedThisFrame(GLFW_KEY_TAB)) {

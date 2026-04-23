@@ -8,16 +8,17 @@
 #include <vector>
 
 #include "core/log.h"
+#include "core/render.h"
 #include "game/battle.h"
 #include "game/degradation.h"
 #include "game/game.h"
+#include "level_utils.h"
 #include "menu.h"
 #include "saves.h"
 
 constexpr float kStaminaDrainPenalty = 10.0F;
 
 namespace {
-
 struct TurnData {
   Enemy* target = nullptr;
   std::vector<Skill> used_skills;
@@ -69,7 +70,7 @@ void UpdateEnemyAI(std::vector<Enemy>& enemies, Health& player_health_) {
   }
   current_turn = BattleTurn::kPlayer;
 }
-std::string ListEnemyNames(const std::vector<Enemy>& enemies) {
+std::optional<std::string> ListEnemyNames(const std::vector<Enemy>& enemies) {
   std::string result;
   for (size_t i = 0; i < enemies.size(); ++i) {
     result += enemies[i].name;
@@ -77,13 +78,19 @@ std::string ListEnemyNames(const std::vector<Enemy>& enemies) {
       result += ", ";
     }
   }
+  if (result.empty()) {
+    return std::nullopt;
+  }
   return result;
 }
-std::vector<int> defeated_enemy_uids;
+std::vector<int> defeated_enemies;
 }  // namespace
 
+entt::registry battle::registry;
+
 void BattleScene::Init() {
-  defeated_enemy_uids.clear();
+  defeated_enemies.clear();
+  battle::registry = LoadLevel("battle.txt");
   // load defeated enemies from save data
   std::expected<SaveData, LoadError> save_data;
   try {
@@ -92,18 +99,16 @@ void BattleScene::Init() {
     core::Log(std::format("Caught error {} while loading save.", e.what()),
               "BattleScene");
   }
-  // check if any enemies in this battle have been defeated before, and if so,
-  // remove them from the battle
-  for (const auto& uid : save_data->defeated_enemy_uids) {
-    defeated_enemy_uids.push_back(uid);
+
+  if (save_data.has_value()) {
+    defeated_enemies = save_data->defeated_enemy_uids;
+    auto enemies_to_erase =
+        std::ranges::remove_if(enemies_, [&](const Enemy& e) {
+          return std::ranges::find(defeated_enemies, e.uid) !=
+                 defeated_enemies.end();
+        });
+    enemies_.erase(enemies_to_erase.begin(), enemies_to_erase.end());
   }
-  auto enemies_to_erase = std::ranges::remove_if(enemies_,
-                                [&](const Enemy& e) {
-                                  return std::ranges::find(defeated_enemy_uids,
-                                                   e.uid) !=
-                                         defeated_enemy_uids.end();
-                                });
-  enemies_.erase(enemies_to_erase.begin(), enemies_to_erase.end());
   if (enemies_.empty()) {
     core::Log("Logic Error: Enemy count empty.", "BattleScene");
     scene_manager_.PopScene();
@@ -133,11 +138,9 @@ void BattleScene::Update(double) {
       } else if (turn_data->target->health <= 0) {
         action_log.emplace_back("Enemy " + turn_data->target->name +
                                 " was defeated!");
-        defeated_enemy_uids.push_back(turn_data->target->uid);
-        auto enemies_to_erase = std::ranges::remove_if(enemies_,
-                                      [&](const Enemy& e) {
-                                        return &e == turn_data->target;
-                                      });
+        defeated_enemies.push_back(turn_data->target->uid);
+        auto enemies_to_erase = std::ranges::remove_if(
+            enemies_, [&](const Enemy& e) { return &e == turn_data->target; });
         enemies_.erase(enemies_to_erase.begin(), enemies_to_erase.end());
       }
       if (player_health_.stamina <= 0) {
@@ -154,6 +157,7 @@ void BattleScene::Update(double) {
 }
 
 void BattleScene::Render(GameWindow& window) {
+  render::Render(battle::registry);
   int window_width;
   int window_height;
   glfwGetWindowSize(window.window, &window_width, &window_height);
@@ -262,31 +266,38 @@ void BattleScene::Quit() {
   } catch (std::exception& e) {
     core::Log(std::format("Caught exception: {} while loading save.", e.what()),
               "BattleScene");
-    save_data = {};
   }
-  save_data->completion_markers.push_back(
-      "Battle." +
-      std::to_string(
-          std::chrono::system_clock::now().time_since_epoch().count()) +
-      "." + ListEnemyNames(enemies_));
-  save_data->log.NewLog(
-      {.title = {{game::DegradationLevel::kLevel0,
-                  "Battle against " + ListEnemyNames(enemies_)}},
-       .description = {{game::DegradationLevel::kLevel0, "No description."}},
-       .timestamp = std::to_string(
-           std::chrono::system_clock::now().time_since_epoch().count()),
-       .texture = {}});
-  if (player_health_.health <= 0) {
-    save_data->death_count++;
-    player_health_.health = 100;
-  }
-  save_data->player_health.health = player_health_.health;
-  save_data->player_health.stamina = player_health_.stamina;
-  save_data->defeated_enemy_uids.insert(save_data->defeated_enemy_uids.end(),
-                                        defeated_enemy_uids.begin(),
-                                        defeated_enemy_uids.end());
-  if (save_data->acquired_skills.size() != player_skills_.skills.size()) {
+  auto enemy_names = ListEnemyNames(enemies_);
+
+  if (save_data.has_value()) {
+    if (enemy_names.has_value()) {
+      save_data->completion_markers.push_back(
+          "Battle." +
+          std::to_string(
+              std::chrono::system_clock::now().time_since_epoch().count()) +
+          "." + enemy_names.value());
+    }
+
+    if (enemy_names.has_value()) {
+      save_data->log.NewLog(
+          {.title = {{game::DegradationLevel::kLevel0,
+                      "Battle against " + enemy_names.value()}},
+           .description = {{game::DegradationLevel::kLevel0,
+                            "No description."}},
+           .timestamp = std::to_string(
+               std::chrono::system_clock::now().time_since_epoch().count()),
+           .texture = {}});
+    }
+    if (player_health_.health <= 0) {
+      save_data->death_count++;
+      player_health_.health = player_health_.max_health;
+    }
+
+    save_data->player_health = player_health_;
+    save_data->defeated_enemy_uids.insert(save_data->defeated_enemy_uids.end(),
+                                          defeated_enemies.begin(),
+                                          defeated_enemies.end());
     save_data->acquired_skills = player_skills_.skills;
+    save_manager::SaveGame(save_data.value(), save_data->log);
   }
-  save_manager::SaveGame(save_data.value(), save_data->log);
 }

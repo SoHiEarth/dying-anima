@@ -22,8 +22,8 @@ constexpr float kNearField = 2.5;
 namespace {
 std::vector<std::shared_ptr<Framebuffer>> framebuffers;
 std::shared_ptr<Framebuffer> default_framebuffer, color_framebuffer,
-    bloom_framebuffer, bloom_framebuffer_2,
-    combine_framebuffer, near_framebuffer, final_color_framebuffer;
+    bloom_framebuffer, bloom_framebuffer_2, combine_framebuffer,
+    near_framebuffer, final_color_framebuffer;
 std::shared_ptr<Shader> deferred_shader;
 std::shared_ptr<Shader> fullscreen_shader;
 std::shared_ptr<Shader> sprite_shader;
@@ -71,8 +71,8 @@ void render::Render(entt::registry& registry) {
     if (registry.get<Sprite>(entity).texture) {
       auto& transform = registry.get<Transform>(entity);
       if (transform.z_index <= kNearField)
-      registry.get<Sprite>(entity).texture->Render(
-          sprite_shader, CalculateModelMatrix(transform));
+        registry.get<Sprite>(entity).texture->Render(
+            sprite_shader, CalculateModelMatrix(transform));
     }
   }
   UnbindFramebuffer();
@@ -84,8 +84,7 @@ void render::Render(entt::registry& registry) {
     auto& transform = registry.get<Transform>(entity);
     if (transform.z_index > kNearField) {
       auto& sprite = registry.get<Sprite>(entity);
-      sprite.texture->Render(
-          sprite_shader, CalculateModelMatrix(transform));
+      sprite.texture->Render(sprite_shader, CalculateModelMatrix(transform));
     }
   }
   UnbindFramebuffer();

@@ -32,7 +32,7 @@ void editor::RenderOnboarding() {
       avail_width = std::min(avail_width, 350.0F);
 
       ImGui::SeparatorText("VIEWPORT");
-      auto viewport_texture =
+      static auto viewport_texture =
           resource_manager::GetTexture("doc.viewport").texture;
       ImGui::Image(
           viewport_texture->id,
@@ -44,7 +44,7 @@ void editor::RenderOnboarding() {
           "convinenince, your zoom settings in the editor is passed down to "
           "the game temporarily, so you can debug scenes with ease.");
       ImGui::SeparatorText("SCENE");
-      auto scene_texture = resource_manager::GetTexture("doc.scene").texture;
+      static auto scene_texture = resource_manager::GetTexture("doc.scene").texture;
       ImGui::Image(
           scene_texture->id,
           ImVec2(avail_width,
@@ -54,7 +54,7 @@ void editor::RenderOnboarding() {
           "To the left is the scene manager. You can use it to select entities "
           "and change the editing mode.");
       ImGui::SeparatorText("INSPECTOR");
-      auto inspector_texture =
+      static auto inspector_texture =
           resource_manager::GetTexture("doc.inspector").texture;
       ImGui::Image(
           inspector_texture->id,
@@ -66,7 +66,7 @@ void editor::RenderOnboarding() {
           "various properties on entities, add or remove components and delete "
           "entities altogether.");
       ImGui::SeparatorText("RESOURCE MANAGER");
-      auto resource_texture =
+      static auto resource_texture =
           resource_manager::GetTexture("doc.resource").texture;
       ImGui::Image(
           resource_texture->id,

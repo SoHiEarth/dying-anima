@@ -1,6 +1,8 @@
 #include <glad/glad.h>
 // Code block
 #include <GLFW/glfw3.h>
+
+#include "core/audio.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -83,11 +85,14 @@ int main() {
 
   render::Init();
   core::quad::Init();
-  
+
+  core::audio::Init();
+
   // Set window to fullscreen
-  auto *monitor = glfwGetPrimaryMonitor();
-  const auto *mode = glfwGetVideoMode(monitor);
-  glfwSetWindowMonitor(window.window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+  auto* monitor = glfwGetPrimaryMonitor();
+  const auto* mode = glfwGetVideoMode(monitor);
+  glfwSetWindowMonitor(window.window, monitor, 0, 0, mode->width, mode->height,
+                       mode->refreshRate);
 
   SceneManager scene_manager;
   scene_manager.PushScene(std::make_unique<MenuScene>(scene_manager));
@@ -154,6 +159,7 @@ int main() {
     scene_manager.ProcessSceneChanges();
   }
   scene_manager.PopScene();
+  core::audio::Quit();
   core::quad::Quit();
   resource_manager::Quit();
   render::Quit();

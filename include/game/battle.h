@@ -7,6 +7,10 @@
 #include "game/enemy.h"
 #include "game/player.h"
 
+namespace battle {
+extern entt::registry registry;
+}
+
 struct BattleScene : public Scene {
   std::vector<Enemy> enemies_;
   PlayerSkills player_skills_;
