@@ -774,7 +774,7 @@ void LevelEditor::Render(GameWindow& window) {
     ImGui::End();
   }
 
-  if (editor::internal::show_animation_window) {
+  if (editor::internal::show_animation_window && registry.try_get<Animation>(selected_entity)) {
     editor::AnimationWindow(registry.get<Animation>(selected_entity));
   }
 

@@ -92,7 +92,6 @@ entt::registry battle::registry;
 void BattleScene::Init() {
   GetGameWindow().SetWindowSizeType(WindowSizeType::kFramebufferSize);
   defeated_enemies.clear();
-  battle::registry = LoadLevel("battle.txt");
   // load defeated enemies from save data
   std::expected<SaveData, LoadError> save_data;
   try {
@@ -159,7 +158,6 @@ void BattleScene::Update(double) {
 }
 
 void BattleScene::Render(GameWindow& window) {
-  render::Render(battle::registry);
   int window_width;
   int window_height;
   glfwGetWindowSize(window.window, &window_width, &window_height);

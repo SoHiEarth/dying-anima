@@ -27,16 +27,6 @@ Boss souls could be concentrated anima from those who died so many times they co
 # Mer, the Sunken Triumph
 The name itself has degraded - scholars debate whether it was once "Mera," "Merul," or "Memoria." The citizens who remember the original name have died so many times the memory blurs with contradictory certainties. Now it's just Mer. Short, blunt, like something worn smooth.
 
-# Visual Degradation System
-Your first life in Mer is crystal clear. The bioluminescent fungi glow in distinct blues and greens. You can read the inscriptions on walls. NPC faces have definition - you can see the weariness in their eyes, the minute expressions that make them human.
-Each death layers fog over your perception:
-- Deaths 1-5: Colors begin to desaturate slightly. Sharp edges soften. You start noticing visual artifacts at the periphery - ghostly afterimages of your previous deaths, faint silhouettes where you once stood.
-- Deaths 6-15: Text becomes harder to read, letters swimming slightly. NPC dialogue options shorten because you can't quite remember complex conversation threads. The architecture of Mer starts feeling repetitive - did that archway always look like the other one, or are you losing the ability to distinguish?
-- Deaths 16-30: Significant color loss. The world takes on a grey-blue wash, like viewing everything through murky water. Character models blur at the edges. You sometimes forget which direction you were heading. Environmental storytelling becomes harder to parse because the details fade.
-- Deaths 31-50: Heavy vignetting. The edges of your screen darken constantly. Colors are almost entirely gone except for the sickly glow of anima - it's the only thing that stays vibrant, which becomes its own horror. You're forgetting NPC names. The subtitles show "[Forgotten Merchant]" or "[Someone You Knew]."
-- Deaths 51+: Extreme blur except for a small circle of clarity in the center of your vision. Sounds muffle and echo. Music layers become stripped away until only a single mournful melody remains. You occasionally respawn at the wrong anchor because you can't remember where you last died. Boss encounters you've completed before feel unfamiliar - did you fight this thing already?
-- Deaths 100+: The game becomes almost abstract. Mer is now just shapes and light and darkness. NPCs are silhouettes. Dialogue is fragmented. The only thing that remains perfectly clear is the combat - muscle memory, the last thing to fade. You are becoming like the Quiet Ones, going through motions you no longer understand.
-
 # Memory Mechanics
 The game could track specific memories tied to each area or NPC:
 
