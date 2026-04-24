@@ -10,6 +10,7 @@
 #include "core/log.h"
 #include "core/render.h"
 #include "game/battle.h"
+#include "core/window.h"
 #include "game/degradation.h"
 #include "game/game.h"
 #include "level_utils.h"
@@ -89,6 +90,7 @@ std::vector<int> defeated_enemies;
 entt::registry battle::registry;
 
 void BattleScene::Init() {
+  GetGameWindow().SetWindowSizeType(WindowSizeType::kFramebufferSize);
   defeated_enemies.clear();
   battle::registry = LoadLevel("battle.txt");
   // load defeated enemies from save data

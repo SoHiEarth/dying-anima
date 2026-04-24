@@ -25,4 +25,7 @@
 	<texture name="doc.scene" path="doc.scene.png"/>
 	<texture name="doc.inspector" path="doc.inspector.png"/>
 	<texture name="doc.resource" path="doc.resource.png"/>
+  <texture name="game.city.building_2" path="building 2.png"/>
+  <texture name="game.city.lamp_2" path="lamp 2.png"/>
+  <texture name="game.city.junk" path="junk.png"/>
 </textures>
