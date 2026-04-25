@@ -1,14 +1,17 @@
 <div align="center">
 
-# Dying Anima
-
-**A story about Death and Immortality**
+![Banner](docs/assets/banner.png)
 
 </div>
 
 ---
 
-![Banner](docs/assets/banner.png)
+**A story about Death and Immortality**
+
+# Attention
+
+*This project is still in development. You can experience the core features here.*
+
 # Screenshots
 ## In Game
 ![Screenshot 1](docs/assets/screenshot1.png)
@@ -17,11 +20,12 @@
 ![Editor Screenshot 1](docs/assets/editor1.png)
 ![Editor Screenshot 2](docs/assets/editor2.png)
 # Story
-Check out [the story](docs/story.md)
-TL;DR:
+## TL;DR:
 - You play as a character who has been reincarnated by *the binding* which grants immortality to everyone in the ultradeveloped city of *Mer*.
 - Every reincarnation fragments more and more of your memories, making spells harder to cast and making you vulnerable to the dangers of the world.
 - You go on a journey to break this binding and free everyone from immortality.
+
+**Check out [the full story](docs/story.md)**
 
 # More Info
 ## Used Dependencies

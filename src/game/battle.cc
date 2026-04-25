@@ -163,11 +163,11 @@ void BattleScene::Render(GameWindow& window) {
   glfwGetWindowSize(window.window, &window_width, &window_height);
   auto ui_margin = std::min(window_width, window_height) / 15.0F;
   ImGui::SetNextWindowPos(
-      ImVec2(ui_margin, (static_cast<float>(window_height) / 2) - ui_margin),
+      ImVec2(ui_margin, ui_margin),
       ImGuiCond_Always);
   ImGui::SetNextWindowSize(
       ImVec2(window_width - (ui_margin * 2),
-             (static_cast<float>(window_height) / 2) - (ui_margin * 2)),
+             static_cast<float>(window_height) - (ui_margin * 2)),
       ImGuiCond_Always);
   if (ImGui::Begin("BattleUI", nullptr,
                    ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
@@ -241,7 +241,7 @@ void BattleScene::Render(GameWindow& window) {
           ImGui::PushID((enemy.name + std::to_string(i) + skill.name +
                          std::to_string(j++))
                             .c_str());
-          if (ImGui::CollapsingHeader(skill.name.c_str())) {
+          if (ImGui::CollapsingHeader(skill.name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
             ImGui::Text("Damage: %.2f", skill.damage);
             ImGui::Text("Health Drained: %.2f", skill.health_used);
             ImGui::Text("Stamina Drained: %.2f", skill.stamina_used);

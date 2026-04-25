@@ -28,4 +28,9 @@
   <texture name="game.city.building_2" path="building 2.png"/>
   <texture name="game.city.lamp_2" path="lamp 2.png"/>
   <texture name="game.city.junk" path="junk.png"/>
+	<texture name="game.city.caution" path="caution.png"/>
+	<texture name="game.city.welcome" path="welcome.png"/>
+	<texture name="game.cathedral.1" path="cathedral_1.png"/>
+	<texture name="game.cathedral.background" path="cathedral_background.png"/>
+	<texture name="game.cathedral.floor" path="cathedral_floor.png"/>
 </textures>
