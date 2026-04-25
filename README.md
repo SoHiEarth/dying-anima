@@ -45,8 +45,11 @@
 1. Clone this repo: `git clone https://github.com/sohiearth/dying-anima --recursive`
 2. cd into the newly cloned repo: `cd dying-anima`
 3. Use the `linux` configure preset to configure cmake. `cmake --preset=linux`
+#### Using CMake
 4. If no vcpkg errors occurred, build the app using `cmake --build --preset=debug-linux` (Debug) or `cmake --build --preset=release-linux` (Release)
 5. Run the app `./build/linux/debug/dying-anima` (Debug) || `./build/linux/release/dying-anima` (Release)
+#### Using `build.sh`
+Run `build.sh`. It will automatically detect your system, compile the project and run the executable.
 ### Download
 1. Download the latest Linux release.
 2. Install dependencies from your package manager.
@@ -65,8 +68,11 @@ Example on arch: `sudo pacman -Sy pugixml`
 1. Clone this repo: `git clone https://github.com/sohiearth/dying-anima --recursive`
 1. cd into the newly cloned repo: `cd dying-anima`
 1. Use the `macos` configure preset to configure cmake. `cmake --preset=macos`
+#### Using CMake
 1. If no vcpkg errors occurred, build the app using `cmake --build --preset=debug-macos` (Debug) or `cmake --build --preset=release-macos` (Release)
 1. Run the app `./build/macos/debug/dying-anima` (Debug) || `./build/macos/release/dying-anima` (Release)
+#### Using `build.sh`
+Run `build.sh`. It will automatically detect your system, compile the project and run the executable.
 ### Download
 *Good news! No need to install dependencies on Mac!*
 1. Download the latest Mac release.
