@@ -1,11 +1,80 @@
 <?xml version="1.0"?>
 <Level>
 	<Object>
-		<Transform pos.x="16.2999992" pos.y="6.4000001" z_index="0" scale.x="1" scale.y="1" rotation="0" />
-		<Light type="1" intensity="5" radial_falloff="1000" volumetric_intensity="0.100000001" color.r="1" color.g="1" color.b="1" />
+		<Transform pos.x="64" pos.y="-13.5" z_index="0" scale.x="4" scale.y="16" rotation="0" />
+		<Sprite texture_tag="game.cathedral.1" />
 	</Object>
 	<Object>
-		<Transform pos.x="16.5" pos.y="5" z_index="2.5" scale.x="1" scale.y="3" rotation="0" />
+		<Transform pos.x="66" pos.y="-13.5" z_index="2.5999999" scale.x="4" scale.y="16" rotation="0" />
+		<Sprite texture_tag="game.cathedral.1" />
+	</Object>
+	<Object>
+		<Transform pos.x="68" pos.y="-13.5" z_index="0" scale.x="4" scale.y="16" rotation="0" />
+		<Sprite texture_tag="game.cathedral.1" />
+	</Object>
+	<Object>
+		<Transform pos.x="70" pos.y="-13.5" z_index="2.79999995" scale.x="4" scale.y="16" rotation="0" />
+		<Sprite texture_tag="game.cathedral.1" />
+	</Object>
+	<Object>
+		<Transform pos.x="72" pos.y="-13.5" z_index="0" scale.x="4" scale.y="16" rotation="0" />
+		<Sprite texture_tag="game.cathedral.1" />
+	</Object>
+	<Object>
+		<Transform pos.x="74" pos.y="-13.5" z_index="2.70000005" scale.x="4" scale.y="16" rotation="0" />
+		<Sprite texture_tag="game.cathedral.1" />
+	</Object>
+	<Object>
+		<Transform pos.x="76" pos.y="-13.5" z_index="0" scale.x="4" scale.y="16" rotation="0" />
+		<Sprite texture_tag="game.cathedral.1" />
+	</Object>
+	<Object>
+		<Transform pos.x="69" pos.y="-17" z_index="-3.20000005" scale.x="16" scale.y="8" rotation="0" />
+		<Sprite texture_tag="game.cathedral.background" />
+	</Object>
+	<Object>
+		<Transform pos.x="69" pos.y="-21.5" z_index="0" scale.x="16" scale.y="1" rotation="0" />
+		<Sprite texture_tag="game.cathedral.floor" />
+		<Physics is_dynamic="false" is_chained="false" />
+	</Object>
+	<Object>
+		<Transform pos.x="60" pos.y="-21" z_index="0" scale.x="2" scale.y="1" rotation="0" />
+		<Sprite texture_tag="game.cathedral.floor" />
+		<Physics is_dynamic="false" is_chained="false" />
+	</Object>
+	<Object>
+		<Transform pos.x="54" pos.y="-20.5" z_index="0" scale.x="10" scale.y="1" rotation="0" />
+		<Sprite texture_tag="game.cathedral.floor" />
+		<Physics is_dynamic="false" is_chained="false" />
+	</Object>
+	<Object>
+		<Transform pos.x="48" pos.y="-21" z_index="0" scale.x="2" scale.y="1" rotation="0" />
+		<Sprite texture_tag="game.cathedral.floor" />
+		<Physics is_dynamic="false" is_chained="false" />
+	</Object>
+	<Object>
+		<Transform pos.x="44.5" pos.y="-13.5" z_index="0" scale.x="4" scale.y="16" rotation="0" />
+		<Sprite texture_tag="game.cathedral.1" />
+	</Object>
+	<Object>
+		<Transform pos.x="42.5" pos.y="-13.5" z_index="2.5999999" scale.x="4" scale.y="16" rotation="0" />
+		<Sprite texture_tag="game.cathedral.1" />
+	</Object>
+	<Object>
+		<Transform pos.x="40.5" pos.y="-13.5" z_index="0" scale.x="4" scale.y="16" rotation="0" />
+		<Sprite texture_tag="game.cathedral.1" />
+	</Object>
+	<Object>
+		<Transform pos.x="17.5" pos.y="-16" z_index="0" scale.x="10" scale.y="1" rotation="270" />
+		<Sprite texture_tag="game.city.floor" />
+		<Physics is_dynamic="false" is_chained="false" />
+	</Object>
+	<Object>
+		<Transform pos.x="16.2999992" pos.y="6.4000001" z_index="0" scale.x="1" scale.y="1" rotation="0" />
+		<Light type="1" intensity="2" radial_falloff="100" volumetric_intensity="0.00100000005" color.r="1" color.g="0.50442481" color.b="0.50442481" />
+	</Object>
+	<Object>
+		<Transform pos.x="16.5" pos.y="5" z_index="2.79999995" scale.x="1" scale.y="3" rotation="0" />
 		<Sprite texture_tag="game.city.lamp_2" />
 	</Object>
 	<Object>
@@ -19,11 +88,11 @@
 	</Object>
 	<Object>
 		<Transform pos.x="7.5" pos.y="-1.5" z_index="0" scale.x="1" scale.y="1" rotation="0" />
-		<Light type="1" intensity="1" radial_falloff="500" volumetric_intensity="0.5" color.r="1" color.g="1" color.b="1" />
+		<Light type="1" intensity="1" radial_falloff="500" volumetric_intensity="0.100000001" color.r="1" color.g="1" color.b="1" />
 	</Object>
 	<Object>
 		<Transform pos.x="-4.5" pos.y="9.5" z_index="0" scale.x="1" scale.y="1" rotation="0" />
-		<Light type="0" intensity="0.300000012" radial_falloff="1" volumetric_intensity="0" color.r="1" color.g="1" color.b="1" />
+		<Light type="0" intensity="0.5" radial_falloff="1" volumetric_intensity="0" color.r="1" color.g="1" color.b="1" />
 	</Object>
 	<Object>
 		<Transform pos.x="7.4000001" pos.y="3.5" z_index="0" scale.x="6" scale.y="4" rotation="0" />
@@ -73,7 +142,7 @@
 	</Object>
 	<Object>
 		<Transform pos.x="-11.5" pos.y="-1" z_index="0" scale.x="1" scale.y="1" rotation="0" />
-		<Light type="1" intensity="1" radial_falloff="500" volumetric_intensity="0.5" color.r="1" color.g="1" color.b="1" />
+		<Light type="1" intensity="1" radial_falloff="500" volumetric_intensity="0.100000001" color.r="1" color.g="1" color.b="1" />
 	</Object>
 	<Object>
 		<Transform pos.x="-1.5" pos.y="0" z_index="-1.29999995" scale.x="4" scale.y="5" rotation="0" />
@@ -141,7 +210,7 @@
 	</Object>
 	<Object>
 		<Transform pos.x="-4" pos.y="1" z_index="-1.10000002" scale.x="1" scale.y="1" rotation="0" />
-		<Light type="1" intensity="1" radial_falloff="500" volumetric_intensity="0.5" color.r="1" color.g="1" color.b="1" />
+		<Light type="1" intensity="1" radial_falloff="500" volumetric_intensity="0.100000001" color.r="1" color.g="1" color.b="1" />
 	</Object>
 	<Object>
 		<Transform pos.x="0.5" pos.y="-0.800000012" z_index="2.0999999" scale.x="1" scale.y="0.5" rotation="0" />
@@ -231,5 +300,76 @@
 		<Transform pos.x="3.5" pos.y="-2.4000001" z_index="0.600000024" scale.x="1" scale.y="0.200000003" rotation="0" />
 		<Sprite texture_tag="game.city.junk" />
 		<Physics is_dynamic="false" is_chained="false" />
+	</Object>
+	<Object>
+		<Transform pos.x="23.3999996" pos.y="6.19999981" z_index="0" scale.x="1" scale.y="1" rotation="0" />
+		<Light type="1" intensity="2" radial_falloff="500" volumetric_intensity="0" color.r="0.970397115" color.g="1" color.b="0.163716793" />
+	</Object>
+	<Object>
+		<Transform pos.x="25" pos.y="-4.5" z_index="0" scale.x="4" scale.y="16" rotation="0" />
+		<Sprite texture_tag="game.city.building_2" />
+	</Object>
+	<Object>
+		<Transform pos.x="23.5" pos.y="5" z_index="2.5999999" scale.x="1" scale.y="3" rotation="0" />
+		<Sprite texture_tag="game.city.lamp_2" />
+	</Object>
+	<Object>
+		<Transform pos.x="20" pos.y="3.75" z_index="2.0999999" scale.x="8" scale.y="0.5" rotation="0" />
+		<Sprite texture_tag="game.city.fence" />
+	</Object>
+	<Object>
+		<Transform pos.x="15.5" pos.y="4.5" z_index="-1" scale.x="1" scale.y="2" rotation="0" />
+		<Sprite texture_tag="game.city.caution" />
+	</Object>
+	<Object>
+		<Transform pos.x="24.5" pos.y="-18.2999992" z_index="0" scale.x="1" scale.y="1" rotation="0" />
+		<Light type="1" intensity="0.200000003" radial_falloff="20" volumetric_intensity="0.699999988" color.r="1" color.g="1" color.b="1" />
+	</Object>
+	<Object>
+		<Transform pos.x="20" pos.y="-21.5" z_index="2.0999999" scale.x="21" scale.y="1" rotation="0" />
+		<Sprite texture_tag="game.city.floor" />
+		<Physics is_dynamic="false" is_chained="false" />
+	</Object>
+	<Object>
+		<Transform pos.x="23.5" pos.y="-19.5" z_index="-0.600000024" scale.x="1" scale.y="4" rotation="-36" />
+		<Sprite texture_tag="game.city.lamp" />
+	</Object>
+	<Object>
+		<Transform pos.x="22.5" pos.y="-20.5" z_index="0" scale.x="2" scale.y="1" rotation="0" />
+		<Sprite texture_tag="game.city.junk" />
+	</Object>
+	<Object>
+		<Transform pos.x="19.8999996" pos.y="-20" z_index="0.899999976" scale.x="4" scale.y="2" rotation="0" />
+		<Sprite texture_tag="game.city.junk" />
+	</Object>
+	<Object>
+		<Transform pos.x="22.2000008" pos.y="-20.7000008" z_index="0.600000024" scale.x="1" scale.y="0.5" rotation="9" />
+		<Sprite texture_tag="game.city.welcome" />
+		<Light type="1" intensity="0.100000001" radial_falloff="500" volumetric_intensity="3" color.r="1" color.g="1" color.b="1" />
+	</Object>
+	<Object>
+		<Transform pos.x="32" pos.y="-13.5" z_index="-0.300000012" scale.x="4" scale.y="16" rotation="0" />
+		<Sprite texture_tag="game.cathedral.1" />
+	</Object>
+	<Object>
+		<Transform pos.x="38.7999992" pos.y="-17" z_index="-6.5999999" scale.x="16" scale.y="8" rotation="0" />
+		<Sprite texture_tag="game.cathedral.background" />
+	</Object>
+	<Object>
+		<Transform pos.x="34.2999992" pos.y="-13.5" z_index="2.79999995" scale.x="4" scale.y="16" rotation="0" />
+		<Sprite texture_tag="game.cathedral.1" />
+	</Object>
+	<Object>
+		<Transform pos.x="38.5" pos.y="-21.5" z_index="0" scale.x="17" scale.y="1" rotation="0" />
+		<Sprite texture_tag="game.cathedral.floor" />
+		<Physics is_dynamic="false" is_chained="false" />
+	</Object>
+	<Object>
+		<Transform pos.x="36.5" pos.y="-13.5" z_index="-0.400000006" scale.x="4" scale.y="16" rotation="0" />
+		<Sprite texture_tag="game.cathedral.1" />
+	</Object>
+	<Object>
+		<Transform pos.x="38.5" pos.y="-13.5" z_index="2.70000005" scale.x="4" scale.y="16" rotation="0" />
+		<Sprite texture_tag="game.cathedral.1" />
 	</Object>
 </Level>
