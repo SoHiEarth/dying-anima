@@ -70,10 +70,9 @@ Example on arch: `sudo pacman -Sy pugixml`
 1. Use the `macos` configure preset to configure cmake. `cmake --preset=macos`
 #### Using CMake
 1. If no vcpkg errors occurred, build the app using `cmake --build --preset=debug-macos` (Debug) or `cmake --build --preset=release-macos` (Release)
-1. Run the app `./build/macos/debug/dying-anima` (Debug) || `./build/macos/release/dying-anima` (Release)
+1. Run the app `./build/macos/debug/Dying Anima.app/` (Debug) || `./build/macos/release/Dying Anima.app` (Release) **from Finder**.
 #### Using `build.sh`
 Run `build.sh`. It will automatically detect your system, compile the project and run the executable.
 ### Download
-*Good news! No need to install dependencies on Mac!*
 1. Download the latest Mac release.
-2. Run the app. (make sure working directory contains the assets folder.)
+2. Run the app.
