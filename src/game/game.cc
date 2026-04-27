@@ -19,6 +19,7 @@
 #include "core/input.h"
 #include "core/light.h"
 #include "core/log.h"
+#include "core/path_resolve.h"
 #include "core/physics.h"
 #include "core/render.h"
 #include "core/resource_manager.h"
@@ -84,7 +85,7 @@ void GameScene::Init() {
   glfwSwapInterval(0);
   GetGameWindow().SetWindowSizeType(WindowSizeType::kFramebufferSize);
   physics::Init({0, -35.0F});
-  game::registry = LoadLevel("level.txt");
+  game::registry = LoadLevel(core::path::GetAssetPath().string() + "/level.txt");
   game::player = game::registry.create();
   auto& player_transform = game::registry.emplace<Transform>(game::player);
   auto player_spawn = GetPlayerSpawn();
@@ -157,15 +158,14 @@ void GameScene::Init() {
 
 void GameScene::Quit() {
   SaveData save_data{};
-  if (!std::filesystem::exists("saves")) {
-    std::filesystem::create_directory("saves");
-  } else if (!std::filesystem::is_empty("saves")) {
-    save_data = save_manager::LoadLatestSave().value();
+  auto save = save_manager::LoadLatestSave();
+  if (save.has_value()) {
+    auto save_data = save.value();
+    save_data.player_transform = game::registry.get<Transform>(game::player);
+    save_data.player_health = game::registry.get<Health>(game::player);
+    save_data.completion_markers = game::save_data.completion_markers;
+    save_manager::SaveGame(save_data, game::player_log);
   }
-  save_data.player_transform = game::registry.get<Transform>(game::player);
-  save_data.player_health = game::registry.get<Health>(game::player);
-  save_data.completion_markers = game::save_data.completion_markers;
-  save_manager::SaveGame(save_data, game::player_log);
   physics::Quit();
   game::registry.clear();
 }

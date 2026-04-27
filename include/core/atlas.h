@@ -34,8 +34,8 @@ struct TextureHandle {
 #define SHADER_ATLAS std::map<std::string, ShaderHandle>
 #define TEXTURE_ATLAS std::map<std::string, TextureHandle>
 
-FONT_ATLAS LoadFontAtlas(std::string_view filename);
-SHADER_ATLAS LoadShaderAtlas(std::string_view filename);
-TEXTURE_ATLAS LoadTextureAtlas(std::string_view filename);
+FONT_ATLAS LoadFontAtlas(const std::filesystem::path& filename);
+SHADER_ATLAS LoadShaderAtlas(const std::filesystem::path& filename);
+TEXTURE_ATLAS LoadTextureAtlas(const std::filesystem::path& filename);
 
 #endif  // CORE_ATLAS_H

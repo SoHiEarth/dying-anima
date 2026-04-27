@@ -16,8 +16,13 @@ find_package(OpenGL REQUIRED)
 find_package(pugixml CONFIG REQUIRED)
 find_package(EnTT CONFIG REQUIRED)
 find_package(tinyfiledialogs CONFIG REQUIRED)
+find_package(unofficial-whereami CONFIG REQUIRED)
+if (APPLE)
+  add_executable(DyingAnima MACOSX_BUNDLE)
+else()
+  add_executable(DyingAnima)
+endif()
 
-add_executable(DyingAnima)
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
   src/*.c
   src/**/*.c
@@ -59,6 +64,7 @@ target_link_libraries(DyingAnima PRIVATE
   pugixml::pugixml
   EnTT::EnTT
   tinyfiledialogs::tinyfiledialogs
+  unofficial::whereami::whereami
 )
 set_target_properties(DyingAnima PROPERTIES
   OUTPUT_NAME "Dying Anima"
@@ -69,6 +75,13 @@ add_custom_command(TARGET DyingAnima POST_BUILD
     $<TARGET_FILE_DIR:DyingAnima>/assets
   COMMENT "Copying assets folder to build directory"
 )
-install(TARGETS DyingAnima
-  RUNTIME DESTINATION bin
-)
+
+if(APPLE)
+  install(TARGETS DyingAnima
+    BUNDLE DESTINATION .
+  )
+else()
+  install(TARGETS DyingAnima
+    RUNTIME DESTINATION bin
+  )
+endif()

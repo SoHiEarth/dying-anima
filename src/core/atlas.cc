@@ -47,11 +47,11 @@ void PrintTextureResults(TEXTURE_ATLAS& atlas) {
 
 }  // namespace
 
-FONT_ATLAS LoadFontAtlas(std::string_view filename) {
+FONT_ATLAS LoadFontAtlas(const std::filesystem::path& filename) {
   FONT_ATLAS font_atlas{};
   pugi::xml_document font_doc;
   pugi::xml_parse_result result =
-      font_doc.load_file(std::string(filename).c_str());
+      font_doc.load_file(filename.c_str());
   if (!result) {
     throw core::Error(
         std::format("Failed to load font atlas XML: {}", result.description()),
@@ -74,11 +74,11 @@ FONT_ATLAS LoadFontAtlas(std::string_view filename) {
   return font_atlas;
 }
 
-SHADER_ATLAS LoadShaderAtlas(std::string_view filename) {
+SHADER_ATLAS LoadShaderAtlas(const std::filesystem::path& filename) {
   SHADER_ATLAS shader_atlas{};
   pugi::xml_document shader_doc;
   pugi::xml_parse_result shader_result =
-      shader_doc.load_file(std::string(filename).c_str());
+      shader_doc.load_file(filename.c_str());
   if (!shader_result) {
     throw core::Error(std::format("Failed to load shader atlas XML: {}",
                                   shader_result.description()),
@@ -105,14 +105,14 @@ SHADER_ATLAS LoadShaderAtlas(std::string_view filename) {
   return shader_atlas;
 }
 
-TEXTURE_ATLAS LoadTextureAtlas(std::string_view filename) {
+TEXTURE_ATLAS LoadTextureAtlas(const std::filesystem::path& filename) {
   TEXTURE_ATLAS texture_atlas{};
   pugi::xml_document texture_doc;
   pugi::xml_parse_result texture_result =
-      texture_doc.load_file(std::string(filename).c_str());
+      texture_doc.load_file(filename.c_str());
   if (!texture_result) {
-    throw core::Error(std::format("Failed to load texture atlas XML: {}",
-                                  texture_result.description()),
+    throw core::Error(std::format("Failed to load texture atlas XML: {}, Path: {}",
+                                  texture_result.description(), filename.c_str()),
                       "Atlas");
   }
   pugi::xml_node textures_node = texture_doc.child("textures");

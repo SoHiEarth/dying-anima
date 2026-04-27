@@ -5,11 +5,12 @@
 #include <pugixml.hpp>
 
 #include "core/log.h"
+#include "core/path_resolve.h"
 #include "game/log.h"
 
 namespace {
 std::string savedata_root_name = "SaveData";
-std::string savedata_directory = "saves";
+std::string savedata_directory = core::path::GetTempPath() / "saves/";
 }  // namespace
 
 void save_manager::SaveGame(const SaveData& data, const game::Log& log) {
@@ -121,10 +122,10 @@ std::expected<SaveData, LoadError> save_manager::LoadGame(
 }
 
 std::expected<SaveData, LoadError> save_manager::LoadLatestSave() {
-  if (!std::filesystem::exists("saves")) {
+  if (!std::filesystem::exists(savedata_directory)) {
     core::Log("Saves directory doesn't exist. Recreating directory.",
               "SaveManager");
-    std::filesystem::create_directory("saves");
+    std::filesystem::create_directory(savedata_directory);
     return std::unexpected<LoadError>(LoadError::kFileNotFound);
   }
 
@@ -148,5 +149,5 @@ std::expected<SaveData, LoadError> save_manager::LoadLatestSave() {
     return std::unexpected<LoadError>(LoadError::kFileNotFound);
   }
 
-  return LoadGame("saves/" + latest_save);
+  return LoadGame(savedata_directory + latest_save);
 }

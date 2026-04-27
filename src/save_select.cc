@@ -4,6 +4,7 @@
 
 #include "core/camera.h"
 #include "core/input.h"
+#include "core/path_resolve.h"
 #include "core/resource_manager.h"
 #include "game/game.h"
 #include "game/intro.h"
@@ -19,9 +20,9 @@ void SaveSelect::Init() {
   text_shader->SetUniform("character", 0);
 
   std::vector<std::filesystem::path> saves;
-  if (std::filesystem::exists("saves")) {
+  if (std::filesystem::exists(core::path::GetTempPath() / "saves")) {
     for (const auto& save_iterator :
-         std::filesystem::directory_iterator("saves")) {
+         std::filesystem::directory_iterator(core::path::GetTempPath() / "saves")) {
       if (save_iterator.is_regular_file()) {
         auto save = std::filesystem::path(save_iterator);
         if (save.extension() == ".save") {

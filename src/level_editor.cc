@@ -18,6 +18,7 @@
 #include "core/component.h"
 #include "core/input.h"
 #include "core/light.h"
+#include "core/path_resolve.h"
 #include "core/physics.h"
 #include "core/rect.h"
 #include "core/render.h"
@@ -148,16 +149,22 @@ std::once_flag register_components_flag;
 }  // namespace
 
 void LevelEditor::Init() {
-  if (std::filesystem::exists("level.txt")) {
-    current_scene_path = "level.txt";
-    registry = LoadLevel(current_scene_path);
-  } else {
-    auto* level_path =
-        tinyfd_openFileDialog("Open Scene", "", 0, nullptr, nullptr, 0);
-    if (level_path) {
-      current_scene_path = level_path;
+  try {
+    if (std::filesystem::exists("level.txt")) {
+      current_scene_path = "level.txt";
       registry = LoadLevel(current_scene_path);
+    } else {
+      auto* level_path =
+        tinyfd_openFileDialog("Open Scene", "", 0, nullptr, nullptr, 0);
+      if (level_path) {
+        current_scene_path = level_path;
+        registry = LoadLevel(current_scene_path);
+      }
     }
+  }
+  catch (...) {
+    core::Log("Failed to load level.");
+    scene_manager_.PopScene();
   }
 
   GetGameWindow().SetWindowSizeType(WindowSizeType::kFramebufferSize);
@@ -182,7 +189,7 @@ void LevelEditor::Quit() {
   glfwSetScrollCallback(GetGameWindow().window, nullptr);
   if (current_scene_path.empty()) {
     auto* level =
-        tinyfd_saveFileDialog("Save Scene", "level.txt", 0, nullptr, nullptr);
+        tinyfd_saveFileDialog("Save Scene", (core::path::GetAssetPath() / "level.txt").c_str(), 0, nullptr, nullptr);
     if (level) {
       current_scene_path = level;
       SaveLevel(current_scene_path, registry);
@@ -421,8 +428,8 @@ void LevelEditor::Render(GameWindow& window) {
         }
         editor::SetTooltip("menu_bar.file.save");
         if (ImGui::MenuItem("Play This Scene")) {
-          current_scene_path = "level.txt";
-          SaveLevel("level.txt", registry);
+          current_scene_path = core::path::GetAssetPath() / "level.txt";
+          SaveLevel(current_scene_path, registry);
           scene_manager_.PopScene();
           scene_manager_.PushScene(
               std::make_unique<GameScene>(scene_manager_, ""));
